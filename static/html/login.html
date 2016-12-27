@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/demo/demo.css">
+
+    <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
+</head>
+<body>
+<div id="win" class="easyui-window" title="登陆" collapsible="false" minimizable="false" maximizable="false"
+     closable="false" resizable="false">
+    <form id="ff" method="post">
+        <table cellpadding="5">
+            <tr>
+                <td>用户名:</td>
+                <td><input class="easyui-textbox" type="text" name="username" data-options="required:true"/></td>
+            </tr>
+            <tr>
+                <td>密码:</td>
+                <td><input class="easyui-textbox" type="password" name="password" data-options="required:true"/></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add'"
+                       onclick="submitForm();">登陆</a>
+                    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">Remove</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+
+<script>
+    function submitForm() {
+        $('#ff').form('submit', {
+            url: "/login",
+            onSubmit: function () {
+                if ($(this).form('enableValidation').form('validate')) {
+                    $('#win').window('close');
+                    $.messager.progress();
+                    return true;
+                }
+                return false;
+            },
+            success: function (r) {
+                $.messager.progress('close');
+                if (r) {
+                    var d = eval('(' + r + ')');
+                    if (d.Success) {
+                        $.messager.alert('系统提示', '登陆成功');
+                        location.href = '/static/html/main.html';
+                    } else {
+                        $.messager.alert('系统提示', d.Message, 'info', function () {
+                            $('#win').window('open');
+                        });
+                    }
+                }
+            }
+        });
+    }
+</script>
+</html>
