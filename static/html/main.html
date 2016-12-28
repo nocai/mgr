@@ -16,8 +16,15 @@
 <!--<div data-options="region:'north',title:'North Title',split:true" style="height:100px;"></div>-->
 <!--<div data-options="region:'south',title:'South Title',split:true" style="height:100px;"></div>-->
 <!--<div data-options="region:'east',title:'East',split:true" style="width:100px;"></div>-->
-<div data-options="region:'west',title:'West',split:true" style="width:100px;"></div>
-<div data-options="region:'center',title:'center title',href:'/static/html/center.html'"
-     style="padding:5px;background:#eee;"></div>
+<div data-options="region:'west',title:'West',split:true, href:'/static/html/nav.html'" style="width:200px;"></div>
+<div data-options="region:'center'"
+     style="padding:5px;background:#eee;">
+    <div id="tabs" class="easyui-tabs" data-options="fit:true">
+        <div title="Tab1"  data-options="fit:true,href:'/static/html/center.html'">
+
+        </div>
+    </div>
+
+</div>
 </body>
 </html>

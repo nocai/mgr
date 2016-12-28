@@ -1,0 +1,39 @@
+<ul id="tt" class="easyui-tree">
+    <li>
+        <span>Folder</span>
+        <ul>
+            <li>
+                <span>Sub Folder 1</span>
+                <ul>
+                    <li><span><a href="#" onclick="c();">File 11</a></span></li>
+                    <li><span>File 12</span></li>
+                    <li><span>File 13</span></li>
+                </ul>
+            </li>
+            <li><span>File 2</span></li>
+            <li><span>File 3</span></li>
+        </ul>
+    </li>
+    <li><span>File21</span></li>
+</ul>
+
+<script>
+    function c() {
+        if ($('#tabs').tabs('exists', '资源管理')) {
+            $('#tabs').tabs('select', '资源管理');
+        } else {
+            $('#tabs').tabs('add',{
+                title:'资源管理',
+                // 添加一个iframe是防止多个tabs打开时,页面之间id冲突
+                content : '<iframe src="/static/html/res/home.html" scrolling="no" frameborder="0" style="width:100%;height:100%"></iframe>',
+                tools:[{
+                    iconCls:'icon-mini-refresh',
+                    handler:function(){
+                        alert('refresh');
+                    }
+                }]
+            });
+        }
+    }
+
+</script>

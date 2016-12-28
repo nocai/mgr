@@ -1,5 +1,19 @@
-<table id="dg"></table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/demo/demo.css">
 
+    <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/static/js/common.js"></script>
+</head>
+
+<body>
+<table id="dg"></table>
 <div id="toolbar">
     角色名称: <input id="toolbar_rolename" class="easyui-textbox" style="width:110px">
     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
@@ -12,6 +26,10 @@
 </div>
 
 <script>
+    $(function () {
+
+    });
+
     $('#dg').datagrid({
         url: '/roles',
         pagination: true,
@@ -135,3 +153,4 @@
         }
     }
 </script>
+</body>
