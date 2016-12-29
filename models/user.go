@@ -8,8 +8,12 @@ import (
 )
 
 func InsertUser(user *User) error {
-	ormer := orm.NewOrm()
+	if existOfUsername(user.Username) {
+		beego.Debug(fmt.Sprintf("用户名存在：%v", user.Username))
+		return errors.New("用户名存在")
+	}
 
+	ormer := orm.NewOrm()
 	_, err := ormer.Insert(user)
 	return err
 }
@@ -26,12 +30,24 @@ func GetUserById(id int64) (*User, error) {
 	return user, nil
 }
 
+func existOfUsername(username string) bool {
+	_, err := GetUserByUsername(username)
+	if err == nil {
+		return true
+	}
+	return false
+}
+
 func GetUserByUsername(username string) (*User, error) {
 	ormer := orm.NewOrm()
 
 	user := &User{Username:username}
 	err := ormer.Read(user, "Username")
-	return user, err;
+	if err != nil {
+		beego.Debug(err)
+		return nil, ErrQuery
+	}
+	return user, nil;
 }
 
 func DeleteUserById(id int64) error {

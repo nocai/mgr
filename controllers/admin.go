@@ -34,7 +34,7 @@ func (ctr *AdminController) Get() {
 func (ctr *AdminController) Post() {
 	beego.Debug(ctr.Input())
 
-	adminName := ctr.GetString("adminName")
+	adminName := ctr.GetString("admin_name")
 	password := ctr.GetString("password")
 
 	admin := &models.Admin{AdminName:adminName, User:models.User{Username:adminName, Password:password}}

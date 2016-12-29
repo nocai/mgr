@@ -90,6 +90,14 @@ func AddAdmin(admin *Admin) error {
 		return ErrArgument
 	}
 
+	admin.User.CreateTime = time.Now()
+	admin.User.UpdateTime = time.Now()
+	err := InsertUser(&admin.User)
+	if err != nil {
+		return err
+	}
+	admin.UserId = admin.User.Id
+
 	admin.CreateTime = time.Now()
 	admin.UpdateTime = time.Now()
 
@@ -100,12 +108,6 @@ func AddAdmin(admin *Admin) error {
 		return ErrInsert
 	}
 
-	admin.User.CreateTime = time.Now()
-	admin.User.UpdateTime = time.Now()
-	err = InsertUser(&admin.User)
-	if err != nil {
-		return err
-	}
 
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
 	return nil
