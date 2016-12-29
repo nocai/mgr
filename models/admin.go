@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"mgr/util"
 	"fmt"
+	"time"
 )
 
 var (
@@ -57,7 +58,7 @@ func GetAdminByUserId(userId int64, selectRole bool) (*Admin, error) {
 }
 
 func PageAdmin(key *util.PagerKey) *util.Pager {
-	sqler := util.NewSqler("select * from t_mgr_admin as tma where 1 = 1")
+	sqler := util.NewSqler(`select tma.* from t_mgr_admin as tma where 1 = 1`)
 
 	if adminName, ok := key.Data["adminName"].(string); ok && adminName != "" {
 		sqler.AppendDataSql(" and tma.admin_name like ?")
@@ -66,9 +67,9 @@ func PageAdmin(key *util.PagerKey) *util.Pager {
 
 	o := orm.NewOrm()
 
-	var totol int64
+	var total int64
 	var admins []Admin
-	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&totol)
+	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&total)
 	if err != nil {
 		beego.Error(err)
 		return util.NewPager(key, 0, admins)
@@ -81,6 +82,71 @@ func PageAdmin(key *util.PagerKey) *util.Pager {
 	}
 
 	beego.Info(fmt.Sprintf("affected = %v", affected))
-	return util.NewPager(key, totol, admins)
+	return util.NewPager(key, total, admins)
+}
 
+func AddAdmin(admin *Admin) error {
+	if admin == nil {
+		return ErrArgument
+	}
+
+	admin.CreateTime = time.Now()
+	admin.UpdateTime = time.Now()
+
+	o := orm.NewOrm()
+	affected, err := o.Insert(admin)
+	if err != nil {
+		beego.Error(err)
+		return ErrInsert
+	}
+
+	admin.User.CreateTime = time.Now()
+	admin.User.UpdateTime = time.Now()
+	err = InsertUser(&admin.User)
+	if err != nil {
+		return err
+	}
+
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	return nil
+}
+
+func GetAdminById(id int64) (*Admin, error) {
+	if id == 0 {
+		return nil, ErrArgument
+	}
+
+	admin := &Admin{Id:id}
+	err := orm.NewOrm().Read(admin)
+	if err != nil {
+		beego.Error(err)
+		return nil, ErrQuery
+	}
+
+	return admin, nil
+}
+
+func DeleteAdminById(id int64) error {
+	if id == 0 {
+		return ErrArgument
+	}
+
+	admin, err := GetAdminById(id)
+	if err != nil {
+		return ErrDelete
+	}
+	err = DeleteUserById(admin.UserId)
+	if err != nil {
+		return ErrDelete
+	}
+
+	o := orm.NewOrm()
+	affected, err := o.Delete(admin)
+	if err != nil {
+		beego.Error(err)
+		return ErrDelete
+	}
+
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	return nil
 }

@@ -9,15 +9,23 @@ import (
 
 var (
 	ErrQuery = errors.New("查询失败")
+	ErrInsert = errors.New("添加失败")
+	ErrUpdate = errors.New("更新失败")
+	ErrDelete = errors.New("删除失败")
+
 	ErrArgument = errors.New("无效参数")
 )
 
 type Admin struct {
-	Id        int64
-	AdminName string
-	UserId    int64 `orm:"unique"`
+	Id         int64 `json:"id"`
+	AdminName  string `json:"admin_name"`
+	UserId     int64 `orm:"unique" json:"user_id"`
 
-	Roles     []Role `orm:"-"`
+	CreateTime time.Time `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+
+	User       User `orm:"-" json:"user"`
+	Roles      []Role `orm:"-" json:"roles"`
 }
 
 func (Admin *Admin) TableName() string {

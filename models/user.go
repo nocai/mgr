@@ -3,6 +3,8 @@ package models
 import (
 	"github.com/astaxie/beego/orm"
 	"errors"
+	"github.com/astaxie/beego"
+	"fmt"
 )
 
 func InsertUser(user *User) error {
@@ -30,4 +32,20 @@ func GetUserByUsername(username string) (*User, error) {
 	user := &User{Username:username}
 	err := ormer.Read(user, "Username")
 	return user, err;
+}
+
+func DeleteUserById(id int64) error {
+	if id == 0 {
+		beego.Debug("id = %v", id)
+		return ErrArgument
+	}
+
+	affected, err := orm.NewOrm().Delete(&User{Id:id})
+	if err != nil {
+		beego.Error(err)
+		return ErrDelete
+	}
+
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	return nil
 }

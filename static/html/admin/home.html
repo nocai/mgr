@@ -15,7 +15,7 @@
 <body>
 <table id="dg"></table>
 <div id="toolbar">
-    角色名称: <input id="toolbar_rolename" class="easyui-textbox" style="width:110px">
+    管理员名: <input id="toolbar_rolename" class="easyui-textbox" style="width:110px">
     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
 
     <div style="float:right">
@@ -26,10 +26,6 @@
 </div>
 
 <script>
-    $(function () {
-
-    });
-
     $('#dg').datagrid({
         url: '/admins',
         pagination: true,
@@ -41,7 +37,7 @@
         singleSelect:true,
         columns: [[
             {field: 'id', title: 'Id', sortable: true},
-            {field: 'role_name', title: '角色名', width: 100, sortable: true},
+            {field: 'admin_name', title: '用户名', width: 100, sortable: true},
             {
                 field: 'create_time', title: '创建时间', width: 100, sortable: true,
                 formatter: function (value, row, index) {
@@ -69,9 +65,12 @@
 <div id="dlg" class="easyui-dialog" style="width:400px"
      closed="true" buttons="#dlg-buttons" data-options="modal:true">
     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">角色信息</div>
+        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">管理员信息</div>
         <div style="margin-bottom:10px">
-            <input name="role_name" class="easyui-textbox" required="true" label="角色名:" style="width:100%">
+            <input name="role_name" class="easyui-textbox" required="true" label="管理员名:" style="width:100%">
+        </div>
+        <div style="margin-bottom:10px">
+            <input name="role_name" class="easyui-textbox" required="true" label="管理员密码:" style="width:100%">
         </div>
     </form>
 </div>
@@ -86,17 +85,17 @@
 <script>
     var url;
     function add() {
-        $('#dlg').dialog('open').dialog('center').dialog('setTitle', '添加角色');
+        $('#dlg').dialog('open').dialog('center').dialog('setTitle', '添加');
         $('#fm').form('clear');
-        url = '/roles';
+        url = '/admins';
     }
 
     function edit() {
         var row = $('#dg').datagrid('getSelected');
         if (row) {
-            $('#dlg').dialog('open').dialog('center').dialog('setTitle', '编辑角色');
+            $('#dlg').dialog('open').dialog('center').dialog('setTitle', '编辑');
             $('#fm').form('load', row);
-            url = '/roles/' + row.id;
+            url = '/admins/' + row.id;
         }
     }
 
@@ -133,7 +132,7 @@
                 if (r) {
                     $.messager.progress();
                     $.ajax({
-                        url: '/roles/' + row.id,
+                        url: '/admins/' + row.id,
                         type: 'DELETE',
                         dataType : 'json',
                         success: function(result) {
