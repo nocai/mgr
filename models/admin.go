@@ -4,6 +4,8 @@ import (
 	"errors"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"mgr/util"
+	"fmt"
 )
 
 var (
@@ -42,7 +44,6 @@ func GetAdminByUserId(userId int64, selectRole bool) (*Admin, error) {
 		return nil, err
 	}
 
-
 	if selectRole {
 		roles, err := FindRolesByUserId(userId)
 		if err != nil {
@@ -53,4 +54,33 @@ func GetAdminByUserId(userId int64, selectRole bool) (*Admin, error) {
 	}
 
 	return admin, nil
+}
+
+func PageAdmin(key *util.PagerKey) *util.Pager {
+	sqler := util.NewSqler("select * from t_mgr_admin as tma where 1 = 1")
+
+	if adminName, ok := key.Data["adminName"].(string); ok && adminName != "" {
+		sqler.AppendDataSql(" and tma.admin_name like ?")
+		sqler.AppendArg("%" + adminName + "%")
+	}
+
+	o := orm.NewOrm()
+
+	var totol int64
+	var admins []Admin
+	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&totol)
+	if err != nil {
+		beego.Error(err)
+		return util.NewPager(key, 0, admins)
+	}
+
+	affected, err := o.Raw(sqler.GetDataSql(), sqler.GetArgs()).QueryRows(&admins)
+	if err != nil {
+		beego.Error(err)
+		return util.NewPager(key, 0, admins)
+	}
+
+	beego.Info(fmt.Sprintf("affected = %v", affected))
+	return util.NewPager(key, totol, admins)
+
 }

@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
+	"fmt"
 )
 
 const (
@@ -87,7 +88,7 @@ func (this *BaseController) printJson(ok bool, msg string, data interface{}) {
 }
 
 func (this *BaseController) Print(data interface{}) {
-	beego.Debug(data)
+	beego.Debug(fmt.Sprintf("%+v", data))
 	this.Data["json"] = data
 	this.ServeJSON()
 }
