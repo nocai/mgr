@@ -28,10 +28,6 @@ type Admin struct {
 	Roles      []Role `orm:"-" json:"roles"`
 }
 
-func (Admin *Admin) TableName() string {
-	return "t_mgr_admin"
-}
-
 type Role struct {
 	Id         int64  `json:"id"`
 	RoleName   string `orm:"unique" json:"role_name"`
@@ -55,19 +51,11 @@ type AdminRoleRef struct {
 	RoleId  int64
 }
 
-func (ref *AdminRoleRef) TableName() string {
-	return "t_mgr_admin_role_ref"
-}
-
 func (ref *AdminRoleRef) TableIndex() [][]string {
 	return [][] string{
 		[] string{"AdminId"},
 		[] string{"RoleId"},
 	}
-}
-
-func (user *User) TableName() string {
-	return "t_mgr_user"
 }
 
 // 多字段索引
@@ -83,14 +71,39 @@ func (user *User) TableUnique() [][]string {
 		[]string{"Username"},
 	}
 }
-func (role *Role) TableName() string {
-	return "t_mgr_role"
-}
 
 // 多字段索引
 func (role *Role) TableIndex() [][]string {
 	return [][]string{
-		[]string{"Id", "RoleName"},
+		[]string{"RoleName"},
+	}
+}
+
+type Res struct {
+	Id         int64 `json:"id"`
+	ResName    string `json:"res_name"`
+	Path       string `json:"path"`
+	Level      int `json:"level"`
+
+	Pid        int64 `json:"pid"`
+
+	CreateTime time.Time `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+
+	children []Res `orm:"-"`
+}
+
+// 多字段唯一键
+func (res *Res) TableUnique() [][]string {
+	return [][]string{
+		[]string{"ResName"},
+	}
+}
+
+// 多字段索引
+func (res *Res) TableIndex() [][]string {
+	return [][]string{
+		[]string{"ResName"},
 	}
 }
 
@@ -99,9 +112,9 @@ func init() {
 	//orm.RegisterDataBase("default", "mysql", "devel:devel@tcp(139.196.191.164:3306)/mgr?charset=utf8", 30)
 	//orm.RegisterDataBase("default", "mysql", "devel:devel@tcp(139.196.191.164:3306)/mgr?charset=utf8", 30)
 	// register model
-	orm.RegisterModel(new(User), new(Role), new(AdminRoleRef), new(Admin))
+	//orm.RegisterModel(new(User), new(Role), new(AdminRoleRef), new(Admin))
 
-	//orm.RegisterModelWithPrefix("t_mgr_", new(User), new(Role))
+	orm.RegisterModelWithPrefix("t_mgr_", new(User), new(Role), new(AdminRoleRef), new(Admin), new(Res))
 	// create table
 	orm.RunSyncdb("default", false, true)
 

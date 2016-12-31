@@ -5,13 +5,15 @@ import (
 	"errors"
 	"github.com/astaxie/beego"
 	"fmt"
+	"time"
 )
 
 func InsertUser(user *User) error {
-	if existOfUsername(user.Username) {
-		beego.Debug(fmt.Sprintf("用户名存在：%v", user.Username))
+	if existOfUsername(user) {
 		return errors.New("用户名存在")
 	}
+	user.CreateTime = time.Now()
+	user.UpdateTime = time.Now()
 
 	ormer := orm.NewOrm()
 	_, err := ormer.Insert(user)
@@ -30,10 +32,13 @@ func GetUserById(id int64) (*User, error) {
 	return user, nil
 }
 
-func existOfUsername(username string) bool {
-	_, err := GetUserByUsername(username)
+func existOfUsername(user *User) bool {
+	temp, err := GetUserByUsername(user.Username)
 	if err == nil {
-		return true
+		if temp.Id != user.Id {
+			beego.Info(fmt.Sprintf("用户名存在%v", user.Username))
+			return true
+		}
 	}
 	return false
 }

@@ -24,26 +24,45 @@ func (ctr *AdminController) Get() {
 	adminName := ctr.GetString("admin_name")
 
 	data := make(map[string]interface{})
-	data["admin_name"] = adminName
+	data["adminName"] = adminName
 
 	key := util.NewPagerKey(page, rows, data, sort, order)
-	pager := models.PageAdmin(key)
+	pager, _ := models.PageAdmin(key)
 	ctr.Print(pager.Pagination)
 }
 
 func (ctr *AdminController) Post() {
 	beego.Debug(ctr.Input())
 
+	id, _ := ctr.GetInt64(":id", 0)
+	beego.Debug(fmt.Sprintf("id = %v", id))
 	adminName := ctr.GetString("admin_name")
 	password := ctr.GetString("password")
 
-	admin := &models.Admin{AdminName:adminName, User:models.User{Username:adminName, Password:password}}
-	err := models.AddAdmin(admin)
-	if err != nil {
-		ctr.PrintErrorMsg(err.Error())
-		return
+	if id == 0 {
+		// 添加
+		admin := &models.Admin{AdminName:adminName, User:models.User{Username:adminName, Password:password}}
+		err := models.InsertAdmin(admin)
+		if err != nil {
+			ctr.PrintErrorMsg(err.Error())
+			return
+		}
+	} else {
+		// 更新
+		admin, err := models.GetAdminById(id)
+		if err != nil {
+			ctr.PrintErrorMsg(err.Error())
+			return
+		}
+		admin.AdminName = adminName
+		admin.User.Username = adminName
+		admin.User.Password = password
+		err = models.UpdateAdmin(admin)
+		if err != nil {
+			ctr.PrintErrorMsg(err.Error())
+			return
+		}
 	}
-
 	ctr.PrintOk()
 }
 

@@ -59,7 +59,7 @@ func (ctr *RoleController) Post() {
 			ctr.PrintErrorMsg(err.Error())
 			return
 		}
-		ctr.PrintOkMsg("更新成功")
+		ctr.PrintOk()
 	}
 }
 

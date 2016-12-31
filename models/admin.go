@@ -7,12 +7,15 @@ import (
 	"mgr/util"
 	"fmt"
 	"time"
+	"sync"
 )
 
 var (
 	ErrUsernameNotExist = errors.New("用户名不存在")
+	ErrUsernameExist = errors.New("用户名存在")
 	ErrPasswordNotMatched = errors.New("密码错误")
 	ErrNotSysAdmin = errors.New("对不起,您还不是系统管理员")
+	ErrAdminNotExist = errors.New("系统管理员不存在")
 )
 
 func Login(username, password string) (*Admin, error) {
@@ -36,28 +39,54 @@ func Login(username, password string) (*Admin, error) {
 }
 
 func GetAdminByUserId(userId int64, selectRole bool) (*Admin, error) {
-	ormer := orm.NewOrm()
-
-	admin := &Admin{UserId:userId}
-	err := ormer.Read(admin, "UserId")
-	if err != nil {
-		beego.Error(err)
-		return nil, err
+	wg := &sync.WaitGroup{}
+	if selectRole {
+		wg.Add(3)
+	} else {
+		wg.Add(2)
 	}
 
-	if selectRole {
-		roles, err := FindRolesByUserId(userId)
+	admin := &Admin{}
+	go func() {
+		defer wg.Done()
+
+		temp := &Admin{UserId:userId}
+		err := orm.NewOrm().Read(temp, "UserId")
 		if err != nil {
 			beego.Error(err)
-			return nil, err
 		}
-		admin.Roles = *roles
+
+		admin.Id = temp.Id
+		admin.UserId = temp.UserId
+		admin.AdminName = temp.AdminName
+		admin.CreateTime = temp.CreateTime
+		admin.UpdateTime = temp.UpdateTime
+	}()
+	go func() {
+		defer wg.Done()
+		user, err := GetUserById(userId)
+		if err != nil {
+			beego.Error(err)
+		}
+		admin.User = *user
+	}()
+	if selectRole {
+		go func() {
+			defer wg.Done()
+			roles, err := FindRolesByUserId(userId)
+			if err != nil {
+				beego.Error(err)
+			}
+			admin.Roles = *roles
+		}()
 	}
+	wg.Wait()
+	beego.Debug(admin)
 
 	return admin, nil
 }
 
-func PageAdmin(key *util.PagerKey) *util.Pager {
+func PageAdmin(key *util.PagerKey) (*util.Pager, error) {
 	sqler := util.NewSqler(`select tma.* from t_mgr_admin as tma where 1 = 1`)
 
 	if adminName, ok := key.Data["adminName"].(string); ok && adminName != "" {
@@ -72,44 +101,110 @@ func PageAdmin(key *util.PagerKey) *util.Pager {
 	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&total)
 	if err != nil {
 		beego.Error(err)
-		return util.NewPager(key, 0, admins)
+		return util.NewPager(key, 0, admins), ErrQuery
 	}
 
-	affected, err := o.Raw(sqler.GetDataSql(), sqler.GetArgs()).QueryRows(&admins)
+	affected, err := o.Raw(sqler.GetDataSql() + key.GetOrderBySql() + key.GetLimitSql(), sqler.GetArgs()).QueryRows(&admins)
 	if err != nil {
 		beego.Error(err)
-		return util.NewPager(key, 0, admins)
+		return util.NewPager(key, 0, admins), ErrQuery
+	}
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+
+	ch := make(chan error, len(admins))
+	go func() {
+		defer close(ch)
+		for _, admin := range admins {
+			user, err := GetUserById(admin.UserId)
+			if err != nil {
+				beego.Error(err)
+				ch <- err
+				return
+			}
+			admin.User = *user
+			ch <- nil
+		}
+	}()
+	for err := range ch {
+		if err != nil {
+			return util.NewPager(key, 0, admins), ErrQuery
+		}
 	}
 
-	beego.Info(fmt.Sprintf("affected = %v", affected))
-	return util.NewPager(key, total, admins)
+	return util.NewPager(key, total, admins), nil
 }
 
-func AddAdmin(admin *Admin) error {
+func InsertAdmin(admin *Admin) error {
 	if admin == nil {
 		return ErrArgument
 	}
 
+	if existOfUsername(&admin.User) {
+		return ErrUsernameExist
+	}
+
+	o := orm.NewOrm()
+	o.Begin()
+
 	admin.User.CreateTime = time.Now()
 	admin.User.UpdateTime = time.Now()
-	err := InsertUser(&admin.User)
+	id, err := o.Insert(&admin.User)
 	if err != nil {
-		return err
+		beego.Error(err)
+		o.Rollback()
+		return ErrInsert
 	}
-	admin.UserId = admin.User.Id
+	admin.UserId = id
 
 	admin.CreateTime = time.Now()
 	admin.UpdateTime = time.Now()
-
-	o := orm.NewOrm()
-	affected, err := o.Insert(admin)
+	id, err = o.Insert(admin)
 	if err != nil {
 		beego.Error(err)
+		o.Rollback()
 		return ErrInsert
 	}
 
+	o.Commit()
 
+	beego.Debug(fmt.Sprintf("id = %v", id))
+	return nil
+}
+
+func UpdateAdmin(admin *Admin) error {
+	if admin == nil {
+		return ErrArgument
+	}
+
+	admin.UpdateTime = time.Now()
+	admin.User.UpdateTime = time.Now()
+
+	user := admin.User
+	if existOfUsername(&user) {
+		return ErrUsernameExist
+	}
+
+	o := orm.NewOrm();
+	o.Begin()
+
+	user.UpdateTime = time.Now()
+	affected, err := o.Update(&user)
+	if err != nil {
+		beego.Error(err)
+		o.Rollback()
+		return ErrUpdate
+	}
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
+
+	affected, err = o.Update(admin)
+	if err != nil {
+		beego.Error(err)
+		o.Rollback()
+		return ErrUpdate
+	}
+	o.Commit()
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+
 	return nil
 }
 
@@ -125,6 +220,11 @@ func GetAdminById(id int64) (*Admin, error) {
 		return nil, ErrQuery
 	}
 
+	user, err := GetUserById(admin.UserId)
+	if err != nil {
+		beego.Error(err)
+	}
+	admin.User = *user
 	return admin, nil
 }
 
@@ -135,20 +235,26 @@ func DeleteAdminById(id int64) error {
 
 	admin, err := GetAdminById(id)
 	if err != nil {
-		return ErrDelete
-	}
-	err = DeleteUserById(admin.UserId)
-	if err != nil {
-		return ErrDelete
+		return ErrAdminNotExist
 	}
 
 	o := orm.NewOrm()
-	affected, err := o.Delete(admin)
+	o.Begin()
+
+	affected, err := o.Delete(&Admin{Id:id})
 	if err != nil {
 		beego.Error(err)
 		return ErrDelete
 	}
-
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
+
+	affected, err = o.Delete(&User{Id:admin.UserId})
+	if err != nil {
+		beego.Error(err)
+		return ErrDelete
+	}
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+
+	o.Commit()
 	return nil
 }
