@@ -30,6 +30,7 @@ func insertRes(o orm.Ormer, ch chan error, res *Res) error {
 		beego.Error(err)
 		o.Rollback()
 		ch <- err
+		close(ch)
 		return ErrInsert
 	}
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
@@ -38,28 +39,23 @@ func insertRes(o orm.Ormer, ch chan error, res *Res) error {
 }
 
 func InsertRes(res *Res) (error) {
+	children := res.children
+	children = append(children, *res)
+	fmt.Println(len(children))
 	o := orm.NewOrm()
 	o.Begin()
-
-	var ch chan error
-	if len(res.children) == 0 {
-		go insertRes(o, ch, res)
-	} else {
-		res.children = append(&res)
-		ch := make(chan error, len(res.children))
-		for _, res := range res.children {
-			go insertRes(o, ch, &res)
-		}
+	ch := make(chan error, len(children))
+	for _, child := range children {
+		go insertRes(o, ch, &child)
 	}
 
-	if len(res.children) > 0 {
-
-		for err := range ch {
-			if err != nil {
-				return ErrInsert
-			}
+	close(ch)
+	for err := range ch {
+		if err != nil {
+			return ErrInsert
 		}
 	}
+	o.Commit()
 	return nil
 }
 
