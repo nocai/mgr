@@ -6,60 +6,77 @@ import (
 	"fmt"
 	"errors"
 	"time"
+	"sync"
 )
 
 var (
 	ErrResNameExist = errors.New("资源名称存在")
 )
 
-func insertRes(o orm.Ormer, ch chan error, res *Res) error {
+func insertRes(mutex *sync.Mutex, ch chan error, o orm.Ormer, res *Res) {
+	//defer mutex.Unlock()
+	var err error = nil
+	mutex.Lock()
+	defer func() {
+		mutex.Unlock()
+		ch <- err
+	}()
+
 	if res.ResName == "" {
-		return ErrArgument
+		err = ErrArgument
+		return
 	}
+
 	if existOfResName(res.Id, res.ResName) {
-		return ErrResNameExist
+		err = ErrResNameExist
+		return
 	}
 
 	if res.Path == "" {
-		return ErrArgument
+		err = ErrArgument
+		return
 	}
 	fillTime(res)
 
-	affected, err := o.Insert(res);
+	id, err := o.Insert(res);
 	if err != nil {
 		beego.Error(err)
-		o.Rollback()
-		ch <- err
-		return ErrInsert
+		err = ErrInsert
+		return
 	}
-	beego.Debug(fmt.Sprintf("affected = %v", affected))
-	ch <- nil
-	return nil
+
+	beego.Debug(fmt.Sprintf("id = %v", id))
+	return
 }
 
 func InsertRes(res *Res) (error) {
+
 	o := orm.NewOrm()
 	o.Begin()
 
-	var ch chan error
-	if len(res.children) == 0 {
-		go insertRes(o, ch, res)
-	} else {
-		res.children = append(&res)
-		ch := make(chan error, len(res.children))
-		for _, res := range res.children {
-			go insertRes(o, ch, &res)
-		}
+	var resList []Res
+	resList = append(resList, *res)
+	if len(res.Children) > 0 {
+		resList = append(resList, res.Children...)
+	}
+	beego.Error(fmt.Sprintf("%+v", resList))
+	chs := make([]chan error, len(resList))
+	mutex := &sync.Mutex{}
+	for i, r := range resList {
+		chs[i] = make(chan error)
+		go insertRes(mutex, chs[i], o, &r)
 	}
 
-	if len(res.children) > 0 {
-
-		for err := range ch {
-			if err != nil {
-				return ErrInsert
-			}
+	for _, ch := range chs {
+		err := <-ch
+		fmt.Println(err)
+		if err != nil {
+			beego.Error(err)
+			o.Rollback()
+			return ErrInsert
 		}
 	}
+	o.Commit()
 	return nil
 }
 

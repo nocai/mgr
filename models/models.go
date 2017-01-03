@@ -90,7 +90,7 @@ type Res struct {
 	CreateTime time.Time `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
 
-	children []Res `orm:"-"`
+	Children   []Res `orm:"-"`
 }
 
 // 多字段唯一键
