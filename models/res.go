@@ -51,6 +51,7 @@ func insertRes(ch chan error, o orm.Ormer, res *Res) {
 	return
 }
 
+// res.Children的数据同样会被入库,对应的Id会被填充
 func InsertRes(res *Res) (error) {
 	o := orm.NewOrm()
 	o.Begin()
