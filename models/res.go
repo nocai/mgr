@@ -7,6 +7,7 @@ import (
 	"errors"
 	"time"
 	"sync"
+	"mgr/util"
 )
 
 var (
@@ -56,20 +57,29 @@ func InsertRes(res *Res) (error) {
 	o := orm.NewOrm()
 	o.Begin()
 
-	chs := make([]chan error, len(res.Children) + 1)
-	for i := 0; i < len(chs); i++ {
-		chs[i] = make(chan error)
-		if i == 0 {
-			go insertRes(chs[i], o, res)
-		} else {
-			go insertRes(chs[i], o, &res.Children[i])
-		}
+	ch := make(chan error)
+	go insertRes(ch, o, res)
+	if <- ch != nil {
+		o.Rollback()
+		return ErrInsert
 	}
 
-	for _, ch := range chs {
-		if <-ch != nil {
-			o.Rollback()
-			return ErrInsert
+	if len(res.Children) > 0 {
+		chs := make([]chan error, len(res.Children))
+		for i := 0; i < len(res.Children); i++ {
+			chs[i] = make(chan error)
+			child := res.Children[i]
+			if child.Pid == 0 {
+				child.Pid = res.Id
+			}
+			go insertRes(chs[i], o, &child)
+		}
+
+		for _, ch := range chs {
+			if <-ch != nil {
+				o.Rollback()
+				return ErrInsert
+			}
 		}
 	}
 
@@ -102,4 +112,16 @@ func GetResByResName(resName string) (*Res, error) {
 		return nil, ErrQuery
 	}
 	return res, nil
+}
+
+func PageRes(key *util.PagerKey) (*util.Pager, error) {
+	key.AppendDataSql("select * from t_mgr_res as tmr where 1 = 1")
+
+	if resName, ok := key.Data["resName"].(string); ok && resName != "" {
+		key.AppendDataSql(" and tmr.res_name like ?")
+		key.AppendArg("%" + resName + "%")
+	}
+
+	return nil, nil
+
 }

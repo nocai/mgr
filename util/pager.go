@@ -13,6 +13,39 @@ type PagerKey struct {
 	Data       map[string]interface{}
 	sort       string
 	order      string
+
+	dataSql    string
+	countSql   string
+	args       []interface{}
+}
+
+func (key *PagerKey) GetCountSql() string {
+	return "select count(*) from (" + key.dataSql + ") as t_t_t"
+}
+
+func (key *PagerKey) AppendDataSql(dataSql string) *PagerKey {
+	key.dataSql += dataSql
+	return key
+}
+
+func (key *PagerKey) GetDataSql() string {
+	r := key.dataSql + " limit " + strconv.FormatInt(key.startIndex, 10) + ", " + strconv.FormatInt(key.rows, 10)
+
+	if key.sort != "" && key.order != "" {
+		r += " order by " + getFieldName(key.sort) + " " + key.order
+	} else {
+		r += " order by id desc"
+	}
+	return r
+}
+
+func (key *PagerKey) AppendArg(arg interface{}) *PagerKey {
+	key.args = append(key.args, arg)
+	return key
+}
+
+func (key *PagerKey) GetArgs() []interface{} {
+	return key.args
 }
 
 func NewPagerKey(page, rows int64, data map[string]interface{}, sort, order string) *PagerKey {
@@ -35,18 +68,6 @@ func NewPagerKey(page, rows int64, data map[string]interface{}, sort, order stri
 		startIndex = (page - 1) * rows
 	}
 	return &PagerKey{page:page, rows: rows, startIndex:startIndex, Data: data, sort:sort, order:order}
-}
-
-func (key *PagerKey) GetLimitSql() string {
-	return " limit " + strconv.FormatInt(key.startIndex, 10) + ", " + strconv.FormatInt(key.rows, 10)
-}
-
-// 取排序SQL语句
-func (key *PagerKey) GetOrderBySql() string {
-	if key.sort != "" && key.order != "" {
-		return " order by " + getFieldName(key.sort) + " " + key.order
-	}
-	return " order by id desc"
 }
 
 type Pagination struct {

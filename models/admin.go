@@ -87,24 +87,24 @@ func GetAdminByUserId(userId int64, selectRole bool) (*Admin, error) {
 }
 
 func PageAdmin(key *util.PagerKey) (*util.Pager, error) {
-	sqler := util.NewSqler(`select tma.* from t_mgr_admin as tma where 1 = 1`)
+	key.AppendDataSql(`select tma.* from t_mgr_admin as tma where 1 = 1`)
 
 	if adminName, ok := key.Data["adminName"].(string); ok && adminName != "" {
-		sqler.AppendDataSql(" and tma.admin_name like ?")
-		sqler.AppendArg("%" + adminName + "%")
+		key.AppendDataSql(" and tma.admin_name like ?")
+		key.AppendArg("%" + adminName + "%")
 	}
 
 	o := orm.NewOrm()
 
 	var total int64
 	var admins []Admin
-	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&total)
+	err := o.Raw(key.GetCountSql(), key.GetArgs()).QueryRow(&total)
 	if err != nil {
 		beego.Error(err)
 		return util.NewPager(key, 0, admins), ErrQuery
 	}
 
-	affected, err := o.Raw(sqler.GetDataSql() + key.GetOrderBySql() + key.GetLimitSql(), sqler.GetArgs()).QueryRows(&admins)
+	affected, err := o.Raw(key.GetDataSql(), key.GetArgs()).QueryRows(&admins)
 	if err != nil {
 		beego.Error(err)
 		return util.NewPager(key, 0, admins), ErrQuery

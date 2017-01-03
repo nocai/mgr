@@ -15,33 +15,31 @@
 <body>
 <table id="dg"></table>
 <div id="toolbar">
-    角色名称: <input id="toolbar_rolename" class="easyui-textbox" style="width:110px">
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
-
+    <form id="queryForm">
+        资源名称: <input id="resName" class="easyui-textbox" style="width:110px">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
+    </form>
     <div style="float:right">
         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">编辑</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroy()">删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true"
+           onclick="destroy()">删除</a>
     </div>
 </div>
 
 <script>
-    $(function () {
-
-    });
-
     $('#dg').datagrid({
-        url: '/roles',
+        url: '/res',
         pagination: true,
         fitColumns: true,
-        rownumbers:true,
+        rownumbers: true,
         fit: true,
         toolbar: '#toolbar',
-        method:'get',
-        singleSelect:true,
+        method: 'get',
+        singleSelect: true,
         columns: [[
             {field: 'id', title: 'Id', sortable: true},
-            {field: 'role_name', title: '角色名', width: 100, sortable: true},
+            {field: 'res_name', title: '角色名', width: 100, sortable: true},
             {
                 field: 'create_time', title: '创建时间', width: 100, sortable: true,
                 formatter: function (value, row, index) {
@@ -59,8 +57,8 @@
 
     function query() {
         $('#dg').datagrid({
-            queryParams : {
-                role_name : $('#toolbar_rolename').val()
+            queryParams: {
+                resName: $('#resName').val()
             }
         });
     }
@@ -135,8 +133,8 @@
                     $.ajax({
                         url: '/roles/' + row.id,
                         type: 'DELETE',
-                        dataType : 'json',
-                        success: function(result) {
+                        dataType: 'json',
+                        success: function (result) {
                             $.messager.progress('close');
                             if (result.ok) {
                                 $('#dg').datagrid('reload');    // reload the user data
