@@ -58,7 +58,7 @@ func InsertRes(res *Res) (error) {
 	chs := make([]chan error, len(res.Children) + 1)
 	for i := 0; i < len(chs); i++ {
 		chs[i] = make(chan error)
-		if i == 1 {
+		if i == 0 {
 			go insertRes(chs[i], o, res)
 		} else {
 			go insertRes(chs[i], o, &res.Children[i])
