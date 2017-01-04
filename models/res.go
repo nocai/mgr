@@ -120,7 +120,49 @@ func PageRes(key *util.PagerKey) (*util.Pager, error) {
 		key.AppendDataSql(" and tmr.res_name like ?")
 		key.AppendArg("%" + resName + "%")
 	}
+	if path, ok := key.Data["path"].(string); ok && path != "" {
+		key.AppendDataSql(" and tmr.path like = ?")
+		key.AppendArg("%" + path + "%")
+	}
 
-	return nil, nil
+	o:= orm.NewOrm()
 
+	var total int64
+	err := o.Raw(key.GetCountSql(), key.GetArgs()).QueryRow(&total)
+	if err != nil {
+		beego.Error(err)
+		return util.NewPager(key, 0, make([]Res, 0)), ErrQuery
+	}
+	if total == 0 {
+		return util.NewPager(key, 0, make([]Res, 0)), nil
+	}
+
+	var res []Res
+	affected, err := o.Raw(key.GetDataSql(), key.GetArgs()).QueryRows(&res)
+	if err != nil {
+		beego.Error(err)
+		return util.NewPager(key, total, make([]Res, 0)), ErrQuery
+	}
+
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	return util.NewPager(key, total, res), nil
+}
+
+type ResSelect struct {
+	Id int64 `json:"id"`
+	ResName string `json:"res_name"`
+}
+
+func FindResSelectByPid(pid int64) ([]ResSelect, error) {
+	o := orm.NewOrm()
+
+	var resSelects []ResSelect
+	affected, err := o.Raw("select * from t_mgr_res where pid = ?", pid).QueryRows(&resSelects)
+	if err != nil {
+		beego.Error(err)
+		return make([]ResSelect, 0), ErrQuery
+	}
+
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	return resSelects, nil
 }

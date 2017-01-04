@@ -15,10 +15,8 @@
 <body>
 <table id="dg"></table>
 <div id="toolbar">
-    <form id="queryForm">
-        资源名称: <input id="resName" class="easyui-textbox" style="width:110px">
-        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
-    </form>
+    资源名称: <input id="resName" class="easyui-textbox" style="width:110px">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
     <div style="float:right">
         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">编辑</a>
@@ -40,6 +38,7 @@
         columns: [[
             {field: 'id', title: 'Id', sortable: true},
             {field: 'res_name', title: '角色名', width: 100, sortable: true},
+            {field: 'path', title: '路径', width: 100, sortable: true},
             {
                 field: 'create_time', title: '创建时间', width: 100, sortable: true,
                 formatter: function (value, row, index) {
@@ -67,9 +66,17 @@
 <div id="dlg" class="easyui-dialog" style="width:400px"
      closed="true" buttons="#dlg-buttons" data-options="modal:true">
     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">角色信息</div>
+        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">详情信息</div>
         <div style="margin-bottom:10px">
-            <input name="role_name" class="easyui-textbox" required="true" label="角色名:" style="width:100%">
+            <input id="cc" name="pid" class="easyui-combobox" label="上级资源:"
+                   data-options="valueField:'id',textField:'res_name',url:'/resSelects',method:'get'"
+                   style="width:100%;">
+        </div>
+        <div style="margin-bottom:10px">
+            <input name="resName" class="easyui-textbox" required="true" label="资源名称:" style="width:100%">
+        </div>
+        <div style="margin-bottom:10px">
+            <input name="path" class="easyui-textbox" required="true" label="资源路径:" style="width:100%">
         </div>
     </form>
 </div>
@@ -82,19 +89,19 @@
 
 
 <script>
-    var url;
+    var url = '/res/';
     function add() {
-        $('#dlg').dialog('open').dialog('center').dialog('setTitle', '添加角色');
+        $('#dlg').dialog('open').dialog('center').dialog('setTitle', '添加');
         $('#fm').form('clear');
-        url = '/roles';
     }
 
     function edit() {
         var row = $('#dg').datagrid('getSelected');
         if (row) {
-            $('#dlg').dialog('open').dialog('center').dialog('setTitle', '编辑角色');
+            $('#dlg').dialog('open').dialog('center').dialog('setTitle', '编辑');
             $('#fm').form('load', row);
-            url = '/roles/' + row.id;
+            url += row.id;
+            alert(url)
         }
     }
 
@@ -112,6 +119,7 @@
                 $.messager.progress('close');
                 var result = eval('(' + result + ')');
                 if (result.ok) {
+                    $('#cc').combobox('reload');
                     $('#dlg').dialog('close');        // close the dialog
                     $('#dg').datagrid('reload');    // reload the user data
                 } else {
@@ -131,7 +139,7 @@
                 if (r) {
                     $.messager.progress();
                     $.ajax({
-                        url: '/roles/' + row.id,
+                        url: url + row.id,
                         type: 'DELETE',
                         dataType: 'json',
                         success: function (result) {

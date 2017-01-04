@@ -3,6 +3,7 @@ package util
 import (
 	"strconv"
 	"mgr/conf"
+	"bytes"
 )
 
 type PagerKey struct {
@@ -29,14 +30,23 @@ func (key *PagerKey) AppendDataSql(dataSql string) *PagerKey {
 }
 
 func (key *PagerKey) GetDataSql() string {
-	r := key.dataSql + " limit " + strconv.FormatInt(key.startIndex, 10) + ", " + strconv.FormatInt(key.rows, 10)
+	var buffer bytes.Buffer
+	buffer.WriteString(key.dataSql)
 
+	buffer.WriteString(" order by ")
 	if key.sort != "" && key.order != "" {
-		r += " order by " + getFieldName(key.sort) + " " + key.order
+		buffer.WriteString(key.sort)
+		buffer.WriteString(" ")
+		buffer.WriteString(key.order)
 	} else {
-		r += " order by id desc"
+		buffer.WriteString("id desc")
 	}
-	return r
+
+	buffer.WriteString(" limit ")
+	buffer.WriteString(strconv.FormatInt(key.startIndex, 10))
+	buffer.WriteString(", ")
+	buffer.WriteString(strconv.FormatInt(key.rows, 10))
+	return buffer.String()
 }
 
 func (key *PagerKey) AppendArg(arg interface{}) *PagerKey {
