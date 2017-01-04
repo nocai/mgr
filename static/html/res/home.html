@@ -28,7 +28,7 @@
 </div>
 
 <script>
-    $('#dg').datagrid({
+    var dg = $('#dg').datagrid({
         url: '/res?pid=0',
         pagination: true,
         fitColumns: true,
@@ -54,19 +54,24 @@
                 }
             }
         ]],
+        onSelect: function (rowIndex, rowData) {
+            $('table.ddv.datagrid-f').each(function (index, ddv) {
+                $(ddv).datagrid('unselectAll');
+            });
+        },
         view: detailview,
-        detailFormatter:function(index,row){
+        detailFormatter: function (index, row) {
             return '<div style="padding:2px"><table class="ddv"></table></div>';
         },
-        onExpandRow: function(index,row){
-            var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
+        onExpandRow: function (index, row) {
+            var ddv = $(this).datagrid('getRowDetail', index).find('table.ddv');
             ddv.datagrid({
-                method:'get',
-                url:'/res?pid='+row.id,
-                fitColumns:true,
-                singleSelect:true,
-                loadMsg:'',
-                height:'auto',
+                method: 'get',
+                url: '/res?pid=' + row.id,
+                fitColumns: true,
+                singleSelect: true,
+                loadMsg: '',
+                height: 'auto',
                 columns: [[
                     {field: 'id', title: 'Id', sortable: true},
                     {field: 'res_name', title: '角色名', width: 100, sortable: true},
@@ -84,16 +89,25 @@
                         }
                     }
                 ]],
-                onResize:function(){
-                    $('#dg').datagrid('fixDetailRowHeight',index);
+                onResize: function () {
+                    $('#dg').datagrid('fixDetailRowHeight', index);
                 },
-                onLoadSuccess:function(){
-                    setTimeout(function(){
-                        $('#dg').datagrid('fixDetailRowHeight',index);
-                    },0);
-                }
+                onLoadSuccess: function () {
+                    setTimeout(function () {
+                        $('#dg').datagrid('fixDetailRowHeight', index);
+                    }, 0);
+                },
+                onSelect: function (rowIndex, rowData) {
+                    var cur = this;
+                    $('table.ddv.datagrid-f').each(function (index, item) {
+                        if (cur != item) {
+                            $(item).datagrid('unselectAll');
+                        }
+                    });
+                    dg.datagrid('unselectAll');
+                },
             });
-            $('#dg').datagrid('fixDetailRowHeight',index);
+            $('#dg').datagrid('fixDetailRowHeight', index);
         }
     });
 
@@ -142,12 +156,17 @@
 
     function edit() {
         var row = $('#dg').datagrid('getSelected');
+        if (row == null) {
+            $('table.ddv.datagrid-f').each(function (index, item) {
+                row = $(item).datagrid('getSelected');
+            });
+        }
         if (row) {
             $('#dlg').dialog('open').dialog('center').dialog('setTitle', '编辑');
             if (row.pid == 0) {
                 $('#fm').form('load', {
-                    res_name : row.res_name,
-                    path : row.path
+                    res_name: row.res_name,
+                    path: row.path
                 })
             } else {
                 $('#fm').form('load', row);
