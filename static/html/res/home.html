@@ -9,6 +9,8 @@
 
     <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.min.js"></script>
     <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/static/jquery-easyui-1.5.1/plugins/datagrid-detailview.js"></script>
+
     <script type="text/javascript" src="/static/js/common.js"></script>
 </head>
 
@@ -27,7 +29,7 @@
 
 <script>
     $('#dg').datagrid({
-        url: '/res',
+        url: '/res?pid=0',
         pagination: true,
         fitColumns: true,
         rownumbers: true,
@@ -51,7 +53,48 @@
                     return new Date(value).format("yyyy-MM-dd hh:mm:ss");
                 }
             }
-        ]]
+        ]],
+        view: detailview,
+        detailFormatter:function(index,row){
+            return '<div style="padding:2px"><table class="ddv"></table></div>';
+        },
+        onExpandRow: function(index,row){
+            var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
+            ddv.datagrid({
+                method:'get',
+                url:'/res?pid='+row.id,
+                fitColumns:true,
+                singleSelect:true,
+                loadMsg:'',
+                height:'auto',
+                columns: [[
+                    {field: 'id', title: 'Id', sortable: true},
+                    {field: 'res_name', title: '角色名', width: 100, sortable: true},
+                    {field: 'path', title: '路径', width: 100, sortable: true},
+                    {
+                        field: 'create_time', title: '创建时间', width: 100, sortable: true,
+                        formatter: function (value, row, index) {
+                            return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+                        }
+                    },
+                    {
+                        field: 'update_time', title: '最后一次更新时间', width: 100, sortable: true,
+                        formatter: function (value, row, index) {
+                            return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+                        }
+                    }
+                ]],
+                onResize:function(){
+                    $('#dg').datagrid('fixDetailRowHeight',index);
+                },
+                onLoadSuccess:function(){
+                    setTimeout(function(){
+                        $('#dg').datagrid('fixDetailRowHeight',index);
+                    },0);
+                }
+            });
+            $('#dg').datagrid('fixDetailRowHeight',index);
+        }
     });
 
     function query() {
@@ -69,11 +112,11 @@
         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">详情信息</div>
         <div style="margin-bottom:10px">
             <input id="cc" name="pid" class="easyui-combobox" label="上级资源:"
-                   data-options="valueField:'id',textField:'res_name',url:'/resSelects',method:'get'"
+                   data-options="valueField:'id',textField:'text',url:'/resSelects',method:'get'"
                    style="width:100%;">
         </div>
         <div style="margin-bottom:10px">
-            <input name="resName" class="easyui-textbox" required="true" label="资源名称:" style="width:100%">
+            <input name="res_name" class="easyui-textbox" required="true" label="资源名称:" style="width:100%">
         </div>
         <div style="margin-bottom:10px">
             <input name="path" class="easyui-textbox" required="true" label="资源路径:" style="width:100%">
@@ -89,19 +132,27 @@
 
 
 <script>
-    var url = '/res/';
+    var base = '/res/';
+    var url;
     function add() {
         $('#dlg').dialog('open').dialog('center').dialog('setTitle', '添加');
         $('#fm').form('clear');
+        url = base;
     }
 
     function edit() {
         var row = $('#dg').datagrid('getSelected');
         if (row) {
             $('#dlg').dialog('open').dialog('center').dialog('setTitle', '编辑');
-            $('#fm').form('load', row);
-            url += row.id;
-            alert(url)
+            if (row.pid == 0) {
+                $('#fm').form('load', {
+                    res_name : row.res_name,
+                    path : row.path
+                })
+            } else {
+                $('#fm').form('load', row);
+            }
+            url = base + row.id;
         }
     }
 
@@ -139,7 +190,7 @@
                 if (r) {
                     $.messager.progress();
                     $.ajax({
-                        url: url + row.id,
+                        url: base + row.id,
                         type: 'DELETE',
                         dataType: 'json',
                         success: function (result) {

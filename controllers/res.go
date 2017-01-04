@@ -20,6 +20,7 @@ func (ctr *ResController) Get() {
 
 	resName := ctr.GetString("resName")
 	path := ctr.GetString("path")
+	pid, _ := ctr.GetInt64("pid", 0)
 
 	sort := ctr.GetString("sort")
 	order := ctr.GetString("order")
@@ -27,6 +28,7 @@ func (ctr *ResController) Get() {
 	data := map[string]interface{}{
 		"resName" : resName,
 		"path" : path,
+		"pid" : pid,
 	}
 	key := util.NewPagerKey(page, rows, data, sort, order)
 	pager, err := models.PageRes(key)
@@ -43,21 +45,35 @@ func (ctr *ResController) Post() {
 	beego.Debug(fmt.Sprintf("id = %+v", id))
 
 	pid, _ := ctr.GetInt64("pid", 0)
-	resName := ctr.GetString("resName")
+	resName := ctr.GetString("res_name")
 	path := ctr.GetString("path")
 
 	res := models.Res{Id:id, ResName:resName, Path:path, Pid:pid}
-	if id == 0 {
-		err := models.InsertRes(&res)
-		if err != nil {
-			beego.Error(err)
-			ctr.PrintErrorMsg(err.Error())
-		}
-		ctr.PrintOk()
-	} else {
 
+	var err error
+	if id == 0 {
+		// 添加
+		err = models.InsertRes(&res)
+	} else {
+		// 修改
+		err = models.UpdateRes(&res)
 	}
 
+	if err != nil {
+		ctr.PrintErrorMsg(err.Error())
+		return
+	}
+	ctr.PrintOk()
+}
 
+func (ctr *ResController) Delete() {
+	id, _ :=ctr.GetInt64(":id", 0)
+	beego.Debug("id = %v", id)
 
+	err := models.DeleteResById(id)
+	if err != nil {
+		ctr.PrintErrorMsg(err.Error())
+		return
+	}
+	ctr.PrintOk()
 }

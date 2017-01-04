@@ -59,7 +59,7 @@ func InsertRes(res *Res) (error) {
 
 	ch := make(chan error)
 	go insertRes(ch, o, res)
-	if <- ch != nil {
+	if <-ch != nil {
 		o.Rollback()
 		return ErrInsert
 	}
@@ -86,6 +86,24 @@ func InsertRes(res *Res) (error) {
 	return nil
 }
 
+func UpdateRes(res *Res) error {
+	if existOfResName(res.Id, res.ResName) {
+		return ErrResNameExist
+	}
+	res.UpdateTime = time.Now()
+
+	o := orm.NewOrm()
+
+	affected, err := o.Update(res)
+	if err != nil {
+		beego.Error(err)
+		return ErrUpdate
+	}
+
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	return nil
+}
+
 func fillResTime(res *Res) {
 	now := time.Now()
 	res.CreateTime = now
@@ -94,6 +112,7 @@ func fillResTime(res *Res) {
 
 func existOfResName(id int64, resName string) bool {
 	res, err := GetResByResName(resName)
+	beego.Info(fmt.Sprintf("%+v", res))
 	if err == nil {
 		if res.Id != id {
 			beego.Debug(fmt.Sprintf("资源名称[%v]存在", resName))
@@ -124,8 +143,12 @@ func PageRes(key *util.PagerKey) (*util.Pager, error) {
 		key.AppendDataSql(" and tmr.path like = ?")
 		key.AppendArg("%" + path + "%")
 	}
+	if pid, ok := key.Data["pid"].(int64); ok {
+		key.AppendDataSql(" and tmr.pid = ?")
+		key.AppendArg(pid)
+	}
 
-	o:= orm.NewOrm()
+	o := orm.NewOrm()
 
 	var total int64
 	err := o.Raw(key.GetCountSql(), key.GetArgs()).QueryRow(&total)
@@ -148,21 +171,32 @@ func PageRes(key *util.PagerKey) (*util.Pager, error) {
 	return util.NewPager(key, total, res), nil
 }
 
-type ResSelect struct {
-	Id int64 `json:"id"`
-	ResName string `json:"res_name"`
-}
 
-func FindResSelectByPid(pid int64) ([]ResSelect, error) {
+func FindResByPid(pid int64) ([]Res, error) {
 	o := orm.NewOrm()
 
-	var resSelects []ResSelect
-	affected, err := o.Raw("select * from t_mgr_res where pid = ?", pid).QueryRows(&resSelects)
+	var ress []Res
+	affected, err := o.Raw("select * from t_mgr_res where pid = ?", pid).QueryRows(&ress)
 	if err != nil {
 		beego.Error(err)
-		return make([]ResSelect, 0), ErrQuery
+		return make([]Res, 0), ErrQuery
 	}
 
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
-	return resSelects, nil
+	return ress, nil
+}
+
+func DeleteResById(id int64) error {
+	if id == 0 {
+		return nil
+	}
+
+	affected, err := orm.NewOrm().Delete(&Res{Id:id})
+	if err != nil {
+		beego.Error(err)
+		return ErrDelete
+	}
+
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	return nil
 }
