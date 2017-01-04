@@ -68,11 +68,10 @@ func InsertRes(res *Res) (error) {
 		chs := make([]chan error, len(res.Children))
 		for i := 0; i < len(res.Children); i++ {
 			chs[i] = make(chan error)
-			child := res.Children[i]
-			if child.Pid == 0 {
-				child.Pid = res.Id
+			if res.Children[i].Pid == 0 {
+				res.Children[i].Pid = res.Id
 			}
-			go insertRes(chs[i], o, &child)
+			go insertRes(chs[i], o, &res.Children[i])
 		}
 
 		for _, ch := range chs {
