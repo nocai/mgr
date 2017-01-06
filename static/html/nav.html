@@ -1,26 +1,12 @@
 <ul id="tt"></ul>
-
-<ul class="easyui-tree">
-    <li>
-        <span>Folder</span>
-        <ul>
-            <li>
-                <span>Sub Folder 1</span>
-                <ul>
-                    <li><span><a href="#" onclick="addTab('用户管理', '/static/html/admin/home.html');">用户管理</a></span></li>
-                    <li><span><a href="#" onclick="addTab('资源管理', '/static/html/res/home.html');">资源管理</a></span></li>
-                    <li><span><a href="#" onclick="addTab('角色管理', '/static/html/role/home.html');">角色管理</a></span></li>
-                </ul>
-            </li>
-            <li><span>File 2</span></li>
-            <li><span>File 3</span></li>
-        </ul>
-    </li>
-    <li><span>File21</span></li>
-</ul>
-
 <script>
-    $('#tt').tree({
-        url:'tree_data.json'
+    var tt = $('#tt').tree({
+        method : 'get',
+        url:'/nav',
+        onClick: function(node){
+            if (tt.tree('isLeaf',node.target)) {
+                addTab(node.text, node.attributes);
+            }
+        }
     });
 </script>

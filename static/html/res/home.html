@@ -29,7 +29,7 @@
 
 <script>
     var dg = $('#dg').datagrid({
-        url: '/res?pid=0',
+        url: '/res?pid=-1',
         pagination: true,
         fitColumns: true,
         rownumbers: true,
@@ -164,7 +164,7 @@
         if (row) {
             $('#fm').form('clear');
             $('#dlg').dialog('open').dialog('center').dialog('setTitle', '编辑');
-            if (row.pid == 0) {
+            if (row.pid == -1) {
                 $('#fm').form('load', {
                     res_name: row.res_name,
                     path: row.path

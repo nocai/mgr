@@ -20,8 +20,7 @@
 <div data-options="region:'center'"
      style="padding:5px;background:#eee;">
     <div id="tabs" class="easyui-tabs" data-options="fit:true">
-        <div title="Tab1"  data-options="fit:true,href:'/static/html/center.html'">
-
+        <div title="欢迎页"  data-options="fit:true,href:'/static/html/center.html'" style="padding:5px;">
         </div>
     </div>
 
@@ -31,10 +30,12 @@
                 $('#tabs').tabs('select', title);
             } else {
                 $('#tabs').tabs('add',{
+                    fit:true,
                     closable:true,
                     title:title,
+                    style :{padding:5},
                     // 添加一个iframe是防止多个tabs打开时,页面之间id冲突
-                    content : '<iframe id="iframe_main" src="'+url+'" scrolling="no" frameborder="0" style="width:100%;height:100%"></iframe>',
+                    content : '<iframe id="iframe_main" src="'+url+'" scrolling="no"  frameborder="0" style="width: 100%;height: 99%" ></iframe>',
                     tools:[{
                         iconCls:'icon-mini-refresh',
                         handler:function(){

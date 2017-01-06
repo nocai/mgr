@@ -44,19 +44,18 @@ func (ctr *ResController) Post() {
 	id, _ := ctr.GetInt64(":id", 0)
 	beego.Debug(fmt.Sprintf("id = %+v", id))
 
-	pid, _ := ctr.GetInt64("pid", 0)
+	pid, _ := ctr.GetInt64("pid", -1)
 	resName := ctr.GetString("res_name")
 	path := ctr.GetString("path")
 
-	res := models.Res{Id:id, ResName:resName, Path:path, Pid:pid}
-
+	res:= &models.Res{Id:id, ResName:resName, Path:path, Pid:pid}
 	var err error
 	if id == 0 {
 		// 添加
-		err = models.InsertRes(&res)
+		err = models.InsertRes(&models.ResVo{Res:*res})
 	} else {
 		// 修改
-		err = models.UpdateRes(&res)
+		err = models.UpdateRes(res)
 	}
 
 	if err != nil {
@@ -83,7 +82,7 @@ type ResSelectController struct {
 }
 
 func (ctr *ResSelectController) Get() {
-	key := &models.ResKey{Pid:0}
+	key := &models.ResKey{Res:models.Res{Pid:-1}}
 	resSelects, err := models.FindResByKey(key)
 	if err != nil {
 		beego.Error(err)

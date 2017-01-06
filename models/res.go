@@ -25,7 +25,7 @@ type Res struct {
 	CreateTime time.Time `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
 
-	Children   []Res `orm:"-"`
+	//Children   []Res `orm:"-"`
 }
 
 // 多字段唯一键
@@ -77,25 +77,25 @@ func insertRes(ch chan error, o orm.Ormer, res *Res) {
 }
 
 // res.Children的数据同样会被入库,对应的Id会被填充
-func InsertRes(res *Res) (error) {
+func InsertRes(resVo *ResVo) (error) {
 	o := orm.NewOrm()
 	o.Begin()
 
 	ch := make(chan error)
-	go insertRes(ch, o, res)
+	go insertRes(ch, o, &resVo.Res)
 	if <-ch != nil {
 		o.Rollback()
 		return ErrInsert
 	}
 
-	if len(res.Children) > 0 {
-		chs := make([]chan error, len(res.Children))
-		for i := 0; i < len(res.Children); i++ {
+	if len(resVo.Children) > 0 {
+		chs := make([]chan error, len(resVo.Children))
+		for i := 0; i < len(resVo.Children); i++ {
 			chs[i] = make(chan error)
-			if res.Children[i].Pid == 0 {
-				res.Children[i].Pid = res.Id
+			if resVo.Children[i].Pid == 0 {
+				resVo.Children[i].Pid = resVo.Id
 			}
-			go insertRes(chs[i], o, &res.Children[i])
+			go insertRes(chs[i], o, &resVo.Children[i].Res)
 		}
 
 		for _, ch := range chs {
@@ -197,16 +197,7 @@ func PageRes(key *util.PagerKey) (*util.Pager, error) {
 
 type ResKey struct {
 	util.Key
-
-	Id              int64
-	ResName         string
-	Path            string
-	Level           int
-
-	Pid             int64
-
-	CreateTime      time.Time
-	UpdateTime      time.Time
+	Res
 
 	CreateTimeStart time.Time
 	CreateTimeEnd   time.Time
@@ -280,7 +271,7 @@ func DeleteResById(id int64) error {
 		return nil
 	}
 
-	key := &ResKey{Pid:id}
+	key := &ResKey{Res:Res{Pid:id}}
 	ress, err := FindResByKey(key)
 	if err == nil && len(ress) > 0 {
 		return errors.New("请先删除子资源")
@@ -294,4 +285,43 @@ func DeleteResById(id int64) error {
 
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
 	return nil
+}
+
+type ResVo struct {
+	Res
+	Children []ResVo
+}
+
+func FindResVoByKey(key *ResKey, cascade bool) ([]ResVo, error) {
+	ress, err := FindResByKey(key)
+	beego.Info(fmt.Sprintf("ress:%+v", ress))
+	if err != nil || len(ress) == 0 {
+		return make([]ResVo, 0), err
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(ress))
+
+	var resVos []ResVo
+	for _, res := range ress {
+		go func(res Res) {
+			defer wg.Done()
+
+			resVo := ResVo{Res:res}
+			if cascade {
+				children, err := FindResVoByKey(&ResKey{Res:Res{Pid:res.Id}}, false)
+				if err != nil {
+					resVo.Children = make([]ResVo, 0)
+				} else {
+					resVo.Children = children
+				}
+			} else {
+				resVo.Children =  make([]ResVo,0)
+			}
+			resVos = append(resVos, resVo)
+		}(res)
+	}
+	wg.Wait()
+
+	return resVos, nil
 }
