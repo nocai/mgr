@@ -14,6 +14,34 @@ var (
 	ErrResNameExist = errors.New("资源名称存在")
 )
 
+type Res struct {
+	Id         int64 `json:"id"`
+	ResName    string `json:"res_name"`
+	Path       string `json:"path"`
+	Level      int `json:"level"`
+
+	Pid        int64 `json:"pid"`
+
+	CreateTime time.Time `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+
+	Children   []Res `orm:"-"`
+}
+
+// 多字段唯一键
+func (res *Res) TableUnique() [][]string {
+	return [][]string{
+		[]string{"ResName"},
+	}
+}
+
+// 多字段索引
+func (res *Res) TableIndex() [][]string {
+	return [][]string{
+		[]string{"ResName"},
+	}
+}
+
 func insertRes(ch chan error, o orm.Ormer, res *Res) {
 	//defer mutex.Unlock()
 	var err error = nil
@@ -26,17 +54,13 @@ func insertRes(ch chan error, o orm.Ormer, res *Res) {
 	}()
 
 	if res.ResName == "" {
+		beego.Error("参数无效")
 		err = ErrArgument
 		return
 	}
 
 	if existOfResName(res.Id, res.ResName) {
 		err = ErrResNameExist
-		return
-	}
-
-	if res.Path == "" {
-		err = ErrArgument
 		return
 	}
 	fillResTime(res)
@@ -133,18 +157,18 @@ func GetResByResName(resName string) (*Res, error) {
 }
 
 func PageRes(key *util.PagerKey) (*util.Pager, error) {
-	key.AppendDataSql("select * from t_mgr_res as tmr where 1 = 1")
+	key.AppendSql("select * from t_mgr_res as tmr where 1 = 1")
 
 	if resName, ok := key.Data["resName"].(string); ok && resName != "" {
-		key.AppendDataSql(" and tmr.res_name like ?")
+		key.AppendSql(" and tmr.res_name like ?")
 		key.AppendArg("%" + resName + "%")
 	}
 	if path, ok := key.Data["path"].(string); ok && path != "" {
-		key.AppendDataSql(" and tmr.path like = ?")
+		key.AppendSql(" and tmr.path like = ?")
 		key.AppendArg("%" + path + "%")
 	}
 	if pid, ok := key.Data["pid"].(int64); ok {
-		key.AppendDataSql(" and tmr.pid = ?")
+		key.AppendSql(" and tmr.pid = ?")
 		key.AppendArg(pid)
 	}
 
@@ -161,7 +185,7 @@ func PageRes(key *util.PagerKey) (*util.Pager, error) {
 	}
 
 	var res []Res
-	affected, err := o.Raw(key.GetDataSql(), key.GetArgs()).QueryRows(&res)
+	affected, err := o.Raw(key.GetSql(), key.GetArgs()).QueryRows(&res)
 	if err != nil {
 		beego.Error(err)
 		return util.NewPager(key, total, make([]Res, 0)), ErrQuery
@@ -171,17 +195,82 @@ func PageRes(key *util.PagerKey) (*util.Pager, error) {
 	return util.NewPager(key, total, res), nil
 }
 
+type ResKey struct {
+	util.Key
 
-func FindResByPid(pid int64) ([]Res, error) {
+	Id              int64
+	ResName         string
+	Path            string
+	Level           int
+
+	Pid             int64
+
+	CreateTime      time.Time
+	UpdateTime      time.Time
+
+	CreateTimeStart time.Time
+	CreateTimeEnd   time.Time
+
+	UpdateTimeStart time.Time
+	UpdateTimeEnd   time.Time
+}
+
+func FindResByKey(key *ResKey) ([]Res, error) {
+	key.AppendSql(`select * from t_mgr_res as tmr where 1 = 1`)
+
+	if key.Id != 0 {
+		key.AppendSql(" and tmr.id = ?")
+		key.AppendArg(key.Id)
+	}
+	if key.ResName != "" {
+		key.AppendSql(" and tmr.res_name = ?")
+		key.AppendArg(key.ResName)
+	}
+	if key.Path != "" {
+		key.AppendSql(" and tmr.path = ?")
+		key.AppendArg(key.Path)
+	}
+	if level := key.Level; level != 0 {
+		key.AppendSql(" and tmr.level = ?")
+		key.AppendArg(level)
+	}
+	if pid := key.Pid; pid != 0 {
+		key.AppendSql(" and tmr.pid = ?")
+		key.AppendArg(pid)
+	}
+	if createTime := key.CreateTime; !createTime.IsZero() {
+		key.AppendSql(" and tmr.create_time = ?")
+		key.AppendArg(createTime)
+	}
+	if updateTime := key.UpdateTime; !updateTime.IsZero() {
+		key.AppendSql(" and tmr.update_time = ?")
+		key.AppendArg(updateTime)
+	}
+	if createTimeStart := key.CreateTimeStart; !createTimeStart.IsZero() {
+		key.AppendSql(" and tmr.create_time >= ?")
+		key.AppendArg(createTimeStart)
+	}
+	if createTimeEnd := key.CreateTimeEnd; !createTimeEnd.IsZero() {
+		key.AppendSql(" and tmr.create_time <= ?")
+		key.AppendArg(createTimeEnd)
+	}
+	if updateTimeStart := key.UpdateTimeStart; !updateTimeStart.IsZero() {
+		key.AppendSql(" and tmr.update_time >= ?")
+		key.AppendArg(updateTimeStart)
+	}
+	if updateTimeEnd := key.UpdateTimeStart; !updateTimeEnd.IsZero() {
+		key.AppendSql(" and tmr.update_time <= ?")
+		key.AppendArg(updateTimeEnd)
+	}
+
 	o := orm.NewOrm()
 
 	var ress []Res
-	affected, err := o.Raw("select * from t_mgr_res where pid = ?", pid).QueryRows(&ress)
+	affected, err := o.Raw(key.GetSql(), key.GetArgs()).QueryRows(&ress)
 	if err != nil {
-		beego.Error(err)
+		beego.Debug(err)
 		return make([]Res, 0), ErrQuery
 	}
-
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
 	return ress, nil
 }
@@ -189,6 +278,12 @@ func FindResByPid(pid int64) ([]Res, error) {
 func DeleteResById(id int64) error {
 	if id == 0 {
 		return nil
+	}
+
+	key := &ResKey{Pid:id}
+	ress, err := FindResByKey(key)
+	if err == nil && len(ress) > 0 {
+		return errors.New("请先删除子资源")
 	}
 
 	affected, err := orm.NewOrm().Delete(&Res{Id:id})

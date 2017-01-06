@@ -77,3 +77,21 @@ func (ctr *ResController) Delete() {
 	}
 	ctr.PrintOk()
 }
+
+type ResSelectController struct {
+	BaseController
+}
+
+func (ctr *ResSelectController) Get() {
+	key := &models.ResKey{Pid:0}
+	resSelects, err := models.FindResByKey(key)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	var cb []util.Combobox
+	for _, res := range resSelects {
+		cb = append(cb, util.Combobox{Id:res.Id, Text:res.ResName})
+	}
+	ctr.Print(cb)
+}

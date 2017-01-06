@@ -79,34 +79,6 @@ func (role *Role) TableIndex() [][]string {
 	}
 }
 
-type Res struct {
-	Id         int64 `json:"id"`
-	ResName    string `json:"res_name"`
-	Path       string `json:"path"`
-	Level      int `json:"level"`
-
-	Pid        int64 `json:"pid"`
-
-	CreateTime time.Time `json:"create_time"`
-	UpdateTime time.Time `json:"update_time"`
-
-	Children   []Res `orm:"-"`
-}
-
-// 多字段唯一键
-func (res *Res) TableUnique() [][]string {
-	return [][]string{
-		[]string{"ResName"},
-	}
-}
-
-// 多字段索引
-func (res *Res) TableIndex() [][]string {
-	return [][]string{
-		[]string{"ResName"},
-	}
-}
-
 func init() {
 	orm.RegisterDataBase("default", "mysql", "root:wWXdjF9r0iGgwSKY@tcp(139.196.152.74:3306)/test?charset=utf8", 30)
 	//orm.RegisterDataBase("default", "mysql", "devel:devel@tcp(139.196.191.164:3306)/mgr?charset=utf8", 30)

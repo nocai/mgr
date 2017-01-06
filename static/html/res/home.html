@@ -133,7 +133,7 @@
             <input name="res_name" class="easyui-textbox" required="true" label="资源名称:" style="width:100%">
         </div>
         <div style="margin-bottom:10px">
-            <input name="path" class="easyui-textbox" required="true" label="资源路径:" style="width:100%">
+            <input name="path" class="easyui-textbox" label="资源路径:" style="width:100%">
         </div>
     </form>
 </div>
@@ -162,6 +162,7 @@
             });
         }
         if (row) {
+            $('#fm').form('clear');
             $('#dlg').dialog('open').dialog('center').dialog('setTitle', '编辑');
             if (row.pid == 0) {
                 $('#fm').form('load', {
@@ -204,6 +205,11 @@
 
     function destroy() {
         var row = $('#dg').datagrid('getSelected');
+        if (row == null) {
+            $('table.ddv.datagrid-f').each(function (index, item) {
+                row = $(item).datagrid('getSelected');
+            });
+        }
         if (row) {
             $.messager.confirm('系统提醒', '您确定删除这条数据吗?', function (r) {
                 if (r) {
@@ -218,7 +224,7 @@
                                 $('#dg').datagrid('reload');    // reload the user data
                             } else {
                                 $.messager.show({    // show error message
-                                    title: 'Error',
+                                    title: '系统提示',
                                     msg: result.msg
                                 });
                             }

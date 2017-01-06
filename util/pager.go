@@ -3,7 +3,6 @@ package util
 import (
 	"strconv"
 	"mgr/conf"
-	"bytes"
 )
 
 type PagerKey struct {
@@ -15,47 +14,24 @@ type PagerKey struct {
 	sort       string
 	order      string
 
-	dataSql    string
-	countSql   string
-	args       []interface{}
+	Key
 }
 
-func (key *PagerKey) GetCountSql() string {
-	return "select count(*) from (" + key.dataSql + ") as t_t_t"
-}
-
-func (key *PagerKey) AppendDataSql(dataSql string) *PagerKey {
-	key.dataSql += dataSql
-	return key
-}
-
-func (key *PagerKey) GetDataSql() string {
-	var buffer bytes.Buffer
-	buffer.WriteString(key.dataSql)
-
-	buffer.WriteString(" order by ")
+func (key *PagerKey) GetSql() string {
+	key.sql.WriteString(" order by ")
 	if key.sort != "" && key.order != "" {
-		buffer.WriteString(key.sort)
-		buffer.WriteString(" ")
-		buffer.WriteString(key.order)
+		key.sql.WriteString(key.sort)
+		key.sql.WriteString(" ")
+		key.sql.WriteString(key.order)
 	} else {
-		buffer.WriteString("id desc")
+		key.sql.WriteString("id desc")
 	}
 
-	buffer.WriteString(" limit ")
-	buffer.WriteString(strconv.FormatInt(key.startIndex, 10))
-	buffer.WriteString(", ")
-	buffer.WriteString(strconv.FormatInt(key.rows, 10))
-	return buffer.String()
-}
-
-func (key *PagerKey) AppendArg(arg interface{}) *PagerKey {
-	key.args = append(key.args, arg)
-	return key
-}
-
-func (key *PagerKey) GetArgs() []interface{} {
-	return key.args
+	key.sql.WriteString(" limit ")
+	key.sql.WriteString(strconv.FormatInt(key.startIndex, 10))
+	key.sql.WriteString(", ")
+	key.sql.WriteString(strconv.FormatInt(key.rows, 10))
+	return key.sql.String()
 }
 
 func NewPagerKey(page, rows int64, data map[string]interface{}, sort, order string) *PagerKey {

@@ -87,10 +87,10 @@ func GetAdminByUserId(userId int64, selectRole bool) (*Admin, error) {
 }
 
 func PageAdmin(key *util.PagerKey) (*util.Pager, error) {
-	key.AppendDataSql(`select tma.* from t_mgr_admin as tma where 1 = 1`)
+	key.AppendSql(`select tma.* from t_mgr_admin as tma where 1 = 1`)
 
 	if adminName, ok := key.Data["adminName"].(string); ok && adminName != "" {
-		key.AppendDataSql(" and tma.admin_name like ?")
+		key.AppendSql(" and tma.admin_name like ?")
 		key.AppendArg("%" + adminName + "%")
 	}
 
@@ -104,7 +104,7 @@ func PageAdmin(key *util.PagerKey) (*util.Pager, error) {
 		return util.NewPager(key, 0, admins), ErrQuery
 	}
 
-	affected, err := o.Raw(key.GetDataSql(), key.GetArgs()).QueryRows(&admins)
+	affected, err := o.Raw(key.GetSql(), key.GetArgs()).QueryRows(&admins)
 	if err != nil {
 		beego.Error(err)
 		return util.NewPager(key, 0, admins), ErrQuery

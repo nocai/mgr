@@ -1,4 +1,6 @@
-<ul id="tt" class="easyui-tree">
+<ul id="tt"></ul>
+
+<ul class="easyui-tree">
     <li>
         <span>Folder</span>
         <ul>
@@ -18,6 +20,7 @@
 </ul>
 
 <script>
-
-
+    $('#tt').tree({
+        url:'tree_data.json'
+    });
 </script>
