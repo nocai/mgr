@@ -6,27 +6,27 @@ import (
 	"bytes"
 )
 
-type PagerKey struct {
-	page       int64
-	rows       int64
-	startIndex int64
 
-	Data       map[string]interface{}
-	sort       string
-	order      string
-
+type Key struct {
 	dataSql    string
 	countSql   string
 	args       []interface{}
 }
 
-func (key *PagerKey) GetCountSql() string {
+
+
+func (key *Key) GetCountSql() string {
 	return "select count(*) from (" + key.dataSql + ") as t_t_t"
 }
 
-func (key *PagerKey) AppendDataSql(dataSql string) *PagerKey {
+func (key *Key) AppendDataSql(dataSql string) *PagerKey {
 	key.dataSql += dataSql
 	return key
+}
+
+
+func (key *Key) GetDataSql() string {
+	return key.dataSql
 }
 
 func (key *PagerKey) GetDataSql() string {
@@ -57,6 +57,21 @@ func (key *PagerKey) AppendArg(arg interface{}) *PagerKey {
 func (key *PagerKey) GetArgs() []interface{} {
 	return key.args
 }
+
+type PagerKey struct {
+	page       int64
+	rows       int64
+	startIndex int64
+
+	Data       map[string]interface{}
+	sort       string
+	order      string
+
+	dataSql    string
+	countSql   string
+	args       []interface{}
+}
+
 
 func NewPagerKey(page, rows int64, data map[string]interface{}, sort, order string) *PagerKey {
 	if page <= 0 {

@@ -49,7 +49,6 @@ func (ctr *ResController) Post() {
 	path := ctr.GetString("path")
 
 	res := models.Res{Id:id, ResName:resName, Path:path, Pid:pid}
-
 	var err error
 	if id == 0 {
 		// 添加
