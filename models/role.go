@@ -107,10 +107,10 @@ func InsertRole(role *Role) error {
 
 // 分页
 func PageRole(key *util.PagerKey) (*util.Pager, error) {
-	key.AppendDataSql("select * from t_mgr_role as tmr where 1 = 1")
+	key.AppendSql("select * from t_mgr_role as tmr where 1 = 1")
 
 	if roleName, ok := key.Data["roleName"].(string); ok && roleName != "" {
-		key.AppendDataSql(" and tmr.role_name like ?")
+		key.AppendSql(" and tmr.role_name like ?")
 		key.AppendArg("%" + roleName + "%")
 	}
 
@@ -124,7 +124,7 @@ func PageRole(key *util.PagerKey) (*util.Pager, error) {
 	}
 
 	var roles []Role
-	affected, err := ormer.Raw(key.GetDataSql(), key.GetArgs()).QueryRows(&roles)
+	affected, err := ormer.Raw(key.GetSql(), key.GetArgs()).QueryRows(&roles)
 	if err != nil {
 		beego.Error(err)
 		return nil, errors.New("分页失败")
