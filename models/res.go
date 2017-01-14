@@ -294,7 +294,7 @@ type ResVo struct {
 
 func FindResVoByKey(key *ResKey, cascade bool) ([]ResVo, error) {
 	ress, err := FindResByKey(key)
-	beego.Info(fmt.Sprintf("ress:%+v", ress))
+
 	if err != nil || len(ress) == 0 {
 		return make([]ResVo, 0), err
 	}
