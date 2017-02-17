@@ -6,6 +6,18 @@ import (
 	"fmt"
 )
 
+type AdminRoleRef struct {
+	Id      int64
+	AdminId int64
+	RoleId  int64
+}
+
+func (ref *AdminRoleRef) TableIndex() [][]string {
+	return [][] string{
+		[] string{"AdminId"},
+		[] string{"RoleId"},
+	}
+}
 func FindAdminRoleRefByAdminId(adminId int64) (*[]AdminRoleRef, error) {
 	if adminId == 0 {
 		return nil, ErrArgument

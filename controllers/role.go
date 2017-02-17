@@ -12,6 +12,7 @@ type RoleController struct {
 	BaseController
 }
 
+// 删除
 func (ctr *RoleController) Delete() {
 	beego.Debug(ctr.Input())
 
@@ -27,44 +28,48 @@ func (ctr *RoleController) Delete() {
 	ctr.PrintOk()
 }
 
+// 添加 修改
 func (ctr *RoleController) Post() {
 	beego.Debug(ctr.Input())
 
 	id, _ := ctr.GetInt64(":id", 0)
 	roleName := ctr.GetString("role_name")
 
-	now := time.Now()
-	role := &models.Role{Id:id, RoleName:roleName, CreateTime:now, UpdateTime:now}
+	var err error
 	if id == 0 {
-		err := models.InsertRole(role)
-		if err != nil {
-			beego.Error(err)
-			ctr.PrintErrorMsg(err.Error())
-			return
-		}
-		ctr.PrintOk()
+		err = addRole(roleName)
 	} else {
-		r, err := models.GetRoleById(role.Id)
-		if err != nil {
-			beego.Error(err)
-			ctr.PrintErrorMsg(err.Error())
-			return
-		}
-
-		r.RoleName = role.RoleName
-		r.UpdateTime = time.Now()
-		err = models.UpdateRole(r)
-		if err != nil {
-			beego.Error(err)
-			ctr.PrintErrorMsg(err.Error())
-			return
-		}
-		ctr.PrintOk()
+		err = updateRole(id, roleName)
 	}
+
+	if err != nil {
+		beego.Error(err)
+		ctr.PrintErrorMsg(err.Error())
+		return
+	}
+	ctr.PrintOk()
+}
+
+func updateRole(id int64, roleName string) error {
+	role, err := models.GetRoleById(id)
+	if err != nil {
+		return err
+	}
+
+	role.RoleName = roleName
+	role.UpdateTime = time.Now()
+	err = models.UpdateRole(role)
+	return err
+}
+
+func addRole(roleName string) error {
+	now := time.Now()
+	role := &models.Role{RoleName:roleName, CreateTime:now, UpdateTime:now}
+	return models.InsertRole(role);
 }
 
 func (ctr *RoleController) Get() {
-	beego.Debug(ctr.Input())
+	ctr.debugInput()
 
 	page, _ := ctr.GetInt64("page", conf.Page)
 	rows, _ := ctr.GetInt64("rows", conf.Rows)

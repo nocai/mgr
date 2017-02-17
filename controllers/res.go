@@ -48,14 +48,23 @@ func (ctr *ResController) Post() {
 	resName := ctr.GetString("res_name")
 	path := ctr.GetString("path")
 
-	res:= &models.Res{Id:id, ResName:resName, Path:path, Pid:pid}
 	var err error
 	if id == 0 {
 		// 添加
-		err = models.InsertRes(&models.ResVo{Res:*res})
+		res := models.Res{Id:id, ResName:resName, Path:path, Pid:pid}
+		err = models.InsertRes(&models.ResVo{Res:res})
 	} else {
 		// 修改
-		err = models.UpdateRes(res)
+		key := &models.ResKey{Res:models.Res{Id:id}}
+		var ress []models.Res
+		ress, err = models.FindResByKey(key)
+		if err == nil && len(ress) > 0 {
+			res := ress[0]
+			res.ResName = resName
+			res.Path = path
+			res.Pid = pid
+			err = models.UpdateRes(&res)
+		}
 	}
 
 	if err != nil {
@@ -66,7 +75,7 @@ func (ctr *ResController) Post() {
 }
 
 func (ctr *ResController) Delete() {
-	id, _ :=ctr.GetInt64(":id", 0)
+	id, _ := ctr.GetInt64(":id", 0)
 	beego.Debug("id = %v", id)
 
 	err := models.DeleteResById(id)

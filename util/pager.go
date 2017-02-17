@@ -10,28 +10,41 @@ type PagerKey struct {
 	rows       int64
 	startIndex int64
 
+	// 过期了，不要使用
 	Data       map[string]interface{}
 	sort       string
 	order      string
 
-	Key
+	KeyWord    string
+
+	Sqler
 }
 
 func (key *PagerKey) GetSql() string {
-	key.sql.WriteString(" order by ")
-	if key.sort != "" && key.order != "" {
-		key.sql.WriteString(key.sort)
-		key.sql.WriteString(" ")
-		key.sql.WriteString(key.order)
-	} else {
-		key.sql.WriteString("id desc")
+	if key.IsEmptySql() {
+		return ""
 	}
+	key.appendOrderBy()
+	key.appendLimit()
+	return key.Sqler.GetSql()
+}
 
-	key.sql.WriteString(" limit ")
-	key.sql.WriteString(strconv.FormatInt(key.startIndex, 10))
-	key.sql.WriteString(", ")
-	key.sql.WriteString(strconv.FormatInt(key.rows, 10))
-	return key.sql.String()
+func (key *PagerKey) appendOrderBy() {
+	if key.sort != "" && key.order != "" {
+		key.Sqler.AppendSql(" order by ")
+		key.Sqler.AppendSql(key.sort)
+		key.Sqler.AppendSql(" ")
+		key.Sqler.AppendSql(key.order)
+	}
+}
+
+func (key *PagerKey) appendLimit() {
+	if key.startIndex >= 0 && key.rows > 0 {
+		key.Sqler.AppendSql(" limit ")
+		key.Sqler.AppendSql(strconv.FormatInt(key.startIndex, 10))
+		key.Sqler.AppendSql(", ")
+		key.Sqler.AppendSql(strconv.FormatInt(key.rows, 10))
+	}
 }
 
 func NewPagerKey(page, rows int64, data map[string]interface{}, sort, order string) *PagerKey {
@@ -57,8 +70,8 @@ func NewPagerKey(page, rows int64, data map[string]interface{}, sort, order stri
 }
 
 type Pagination struct {
-	Total int64 `json:"total"`
-	Rows  interface{} `json:"rows"`
+	Total    int64 `json:"total"`
+	PageList interface{} `json:"rows"`
 }
 
 type Pager struct {
@@ -69,7 +82,7 @@ type Pager struct {
 }
 
 // New
-func NewPager(key *PagerKey, total int64, pageData interface{}) *Pager {
+func NewPager(key *PagerKey, total int64, pageList interface{}) *Pager {
 	var pageCount int64
 	if total % key.rows == 0 {
 		pageCount = total / key.rows
@@ -77,5 +90,5 @@ func NewPager(key *PagerKey, total int64, pageData interface{}) *Pager {
 		pageCount = total / key.rows + 1
 	}
 
-	return &Pager{Page:key.page, Rows:key.rows, PageCount:pageCount, Pagination:Pagination{Total:total, Rows:pageData}}
+	return &Pager{Page:key.page, Rows:key.rows, PageCount:pageCount, Pagination:Pagination{Total:total, PageList:pageList}}
 }

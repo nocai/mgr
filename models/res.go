@@ -8,42 +8,7 @@ import (
 	"time"
 	"sync"
 	"mgr/util"
-	"bytes"
 )
-
-
-type Res struct {
-	Id         int64 `json:"id"`
-	ResName    string `json:"res_name"`
-	Path       string `json:"path"`
-	Level      int `json:"level"`
-
-	Pid        int64 `json:"pid"`
-
-	CreateTime time.Time `json:"create_time"`
-	UpdateTime time.Time `json:"update_time"`
-
-	Children   []Res `orm:"-"`
-}
-
-// 多字段唯一键
-func (res *Res) TableUnique() [][]string {
-	return [][]string{
-		[]string{"ResName"},
-	}
-}
-
-// 多字段索引
-func (res *Res) TableIndex() [][]string {
-	return [][]string{
-		[]string{"ResName"},
-	}
-}
-
-type ResKey struct {
-	Res
-}
-
 
 var (
 	ErrResNameExist = errors.New("资源名称存在")
@@ -60,7 +25,7 @@ type Res struct {
 	CreateTime time.Time `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
 
-	//Children   []Res `orm:"-"`
+	Children   []Res `orm:"-"`
 }
 
 // 多字段唯一键
@@ -231,7 +196,7 @@ func PageRes(key *util.PagerKey) (*util.Pager, error) {
 }
 
 type ResKey struct {
-	util.Key
+	util.Sqler
 	Res
 
 	CreateTimeStart time.Time
@@ -301,22 +266,6 @@ func FindResByKey(key *ResKey) ([]Res, error) {
 	return ress, nil
 }
 
-func FindResByKey(key *ResKey) ([]Res , error) {
-	o := orm.NewOrm()
-
-	var buf bytes.Buffer
-	buf.WriteString(`select * from t_mgr_res as tmr where 1 = 1`)
-	if key.Id != 0 {
-		buf.WriteString(` and tmr.id = ?`)
-	}
-
-	sql := `select * from t_mgr_res where 1 = 1`
-	bytes.Buffer{}
-
-	var ress []Res
-
-}
-
 func DeleteResById(id int64) error {
 	if id == 0 {
 		return nil
@@ -367,7 +316,7 @@ func FindResVoByKey(key *ResKey, cascade bool) ([]ResVo, error) {
 					resVo.Children = children
 				}
 			} else {
-				resVo.Children =  make([]ResVo,0)
+				resVo.Children = make([]ResVo, 0)
 			}
 			resVos = append(resVos, resVo)
 		}(res)

@@ -21,6 +21,10 @@ const (
 type BaseController struct {
 	beego.Controller
 }
+
+func (controller *BaseController) debugInput() {
+	beego.Debug("输入参数:", controller.Input())
+}
 // 将用户信息放到Session里
 //func (controller *BaseController) SetSesseionAdmin(admin models.Admin) {
 //	controller.SetSession(ADMIN_ID, admin.Id)

@@ -7,8 +7,25 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 )
 
+type Role struct {
+	Id         int64  `json:"id"`
+	RoleName   string `orm:"unique" json:"role_name"`
+
+	CreateTime time.Time `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+}
+
+
+
+// 多字段索引
+func (role *Role) TableIndex() [][]string {
+	return [][]string{
+		[]string{"RoleName"},
+	}
+}
 // 删除
 func DeleteRoleById(id int64) error {
 	if id <= 0 {
