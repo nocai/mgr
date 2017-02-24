@@ -102,68 +102,66 @@ func GetAdminByUserId(userId int64, selectRole bool) (*AdminVo, error) {
 }
 
 type AdminKey struct {
-	util.PagerKey
+	*util.Key
 	Admin
 
 	CreateTimeStart time.Time
 	CreateTimeEnd   time.Time
 	UpdateTimeStart time.Time
 	UpdateTimeEnd   time.Time
+	KeyWord         string
 }
 
-func (this *AdminKey) generateSql() {
-	if this.IsEmptySql() {
-		this.AppendSql(`select * from t_mgr_admin as tma where 1 = 1`)
+func (this *AdminKey) getSqler() *util.Sqler {
+	sqler := &util.Sqler{Key:this.Key}
 
-		if id := this.Id; id != 0 {
-			this.AppendSql(" and tma.id = ?")
-			this.AppendArg(id)
-		}
-		if adminName := this.AdminName; adminName != "" {
-			this.AppendSql(" and tma.admin_name = ?")
-			this.AppendArg(adminName)
-		}
-		if userId := this.UserId; userId != 0 {
-			this.AppendSql(" and tma.user_id = ?")
-			this.AppendArg(userId)
-		}
-
-		if createTimeStart := this.CreateTimeStart; !createTimeStart.IsZero() {
-			this.AppendSql(" and tma.create_time >= ?")
-			this.AppendArg(createTimeStart)
-		}
-		if createTimeEnd := this.CreateTimeEnd; !createTimeEnd.IsZero() {
-			this.AppendSql(" and tma.create_time < ?")
-			this.AppendArg(createTimeEnd)
-		}
-
-		if updateTimeStart := this.UpdateTimeStart; !updateTimeStart.IsZero() {
-			this.AppendSql(" and tma.update_time >= ?")
-			this.AppendArg(updateTimeStart)
-		}
-		if updateTimeEnd := this.UpdateTimeEnd; !updateTimeEnd.IsZero() {
-			this.AppendSql(" and tma.update_time < ?")
-			this.AppendArg(updateTimeEnd)
-		}
-		if keyWord := this.KeyWord; keyWord != "" {
-			this.AppendSql(" and tma.admin_name like ?")
-			this.AppendArg("%" + keyWord + "%")
-		}
-
-		this.AppendSql(" and tma.invalid = ?")
-		this.AppendArg(this.Invalid)
+	sqler.AppendSql(`select * from t_mgr_admin as tma where 1 = 1`)
+	if id := this.Id; id != 0 {
+		sqler.AppendSql(" and tma.id = ?")
+		sqler.AppendArg(id)
 	}
+	if adminName := this.AdminName; adminName != "" {
+		sqler.AppendSql(" and tma.admin_name = ?")
+		sqler.AppendArg(adminName)
+	}
+	if userId := this.UserId; userId != 0 {
+		sqler.AppendSql(" and tma.user_id = ?")
+		sqler.AppendArg(userId)
+	}
+
+	if createTimeStart := this.CreateTimeStart; !createTimeStart.IsZero() {
+		sqler.AppendSql(" and tma.create_time >= ?")
+		sqler.AppendArg(createTimeStart)
+	}
+	if createTimeEnd := this.CreateTimeEnd; !createTimeEnd.IsZero() {
+		sqler.AppendSql(" and tma.create_time < ?")
+		sqler.AppendArg(createTimeEnd)
+	}
+
+	if updateTimeStart := this.UpdateTimeStart; !updateTimeStart.IsZero() {
+		sqler.AppendSql(" and tma.update_time >= ?")
+		sqler.AppendArg(updateTimeStart)
+	}
+	if updateTimeEnd := this.UpdateTimeEnd; !updateTimeEnd.IsZero() {
+		sqler.AppendSql(" and tma.update_time < ?")
+		sqler.AppendArg(updateTimeEnd)
+	}
+	if keyWord := this.KeyWord; keyWord != "" {
+		sqler.AppendSql(" and tma.admin_name like ?")
+		sqler.AppendArg("%" + keyWord + "%")
+	}
+
+	sqler.AppendSql(" and tma.invalid = ?")
+	sqler.AppendArg(this.Invalid)
+	return sqler
 }
 
 func CountAdminByKey(key *AdminKey) (int64, error) {
-	if key.IsEmptySql() {
-		key.generateSql()
-	}
-
 	o := orm.NewOrm()
+	sqler := key.getSqler()
 
 	var total int64
-	err := o.Raw(key.GetCountSql(), key.GetArgs()).QueryRow(&total)
+	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&total)
 	if err != nil {
 		beego.Error(err)
 		return 0, ErrQuery
@@ -172,14 +170,11 @@ func CountAdminByKey(key *AdminKey) (int64, error) {
 }
 
 func ListAdminByKey(key *AdminKey) ([]Admin, error) {
-	if key.IsEmptySql() {
-		key.generateSql()
-	}
-
 	o := orm.NewOrm()
+	sqler := key.getSqler()
 
 	var admins []Admin
-	affected, err := o.Raw(key.GetSql(), key.GetArgs()).QueryRows(&admins)
+	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&admins)
 	if err != nil {
 		beego.Error(err)
 		return admins, err
@@ -192,22 +187,22 @@ func PageAdmin(key *AdminKey) (*util.Pager, error) {
 	total, err := CountAdminByKey(key)
 	if err != nil {
 		var admins []Admin
-		return util.NewPager(&key.PagerKey, 0, admins), ErrQuery
+		return util.NewPager(key.Key, 0, admins), ErrQuery
 	}
 
 	admins, err := ListAdminByKey(key)
 	if err != nil {
-		return util.NewPager(&key.PagerKey, 0, admins), ErrQuery
+		return util.NewPager(key.Key, 0, admins), ErrQuery
 	}
 
-	return util.NewPager(&key.PagerKey, total, admins), nil
+	return util.NewPager(key.Key, total, admins), nil
 }
 
 func PageAdminVo(key *AdminKey, selectUser bool) (*util.Pager, error) {
 	pager, err := PageAdmin(key)
 	if err != nil {
 		var admins []AdminVo
-		return util.NewPager(&key.PagerKey, 0, admins), ErrQuery
+		return util.NewPager(key.Key, 0, admins), ErrQuery
 	}
 
 	var adminVos []AdminVo
@@ -225,7 +220,7 @@ func PageAdminVo(key *AdminKey, selectUser bool) (*util.Pager, error) {
 			//append(adminVos, adminVo)
 		}
 	}
-	return util.NewPager(&key.PagerKey, pager.Total, adminVos), nil
+	return util.NewPager(key.Key, pager.Total, adminVos), nil
 }
 
 func InsertAdmin(admin *Admin) error {

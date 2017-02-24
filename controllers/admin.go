@@ -26,9 +26,11 @@ func (ctr *AdminController) Get() {
 	data := make(map[string]interface{})
 	data["adminName"] = adminName
 
-	key := util.NewPagerKey(page, rows, data, sort, order)
-	admineKey := &models.AdminKey{PagerKey:*key}
-	pager, _ := models.PageAdmin(admineKey)
+	key := util.NewKey(page, rows, []string{sort}, []string{order}, true)
+	pager, err := models.PageAdmin(&models.AdminKey{Key:key})
+	if err != nil {
+		beego.Error(err)
+	}
 	ctr.Print(pager.Pagination)
 }
 
@@ -44,7 +46,6 @@ func (ctr *AdminController) Post() {
 	beego.Debug(ctr.Input())
 
 	id, _ := ctr.GetInt64(":id", 0)
-	beego.Debug(fmt.Sprintf("id = %v", id))
 	adminName := ctr.GetString("admin_name")
 	password := ctr.GetString("password")
 

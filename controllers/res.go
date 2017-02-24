@@ -25,12 +25,7 @@ func (ctr *ResController) Get() {
 	sort := ctr.GetString("sort")
 	order := ctr.GetString("order")
 
-	data := map[string]interface{}{
-		"resName" : resName,
-		"path" : path,
-		"pid" : pid,
-	}
-	key := util.NewPagerKey(page, rows, data, sort, order)
+	key := &models.ResKey{Key:util.NewKey(page, rows, []string{sort}, []string{order}, true), Res:models.Res{ResName:resName,Path:path, Pid:pid}}
 	pager, err := models.PageRes(key)
 	if err != nil {
 		beego.Error(err)

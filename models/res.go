@@ -156,47 +156,34 @@ func GetResByResName(resName string) (*Res, error) {
 	return res, nil
 }
 
-func PageRes(key *util.PagerKey) (*util.Pager, error) {
-	key.AppendSql("select * from t_mgr_res as tmr where 1 = 1")
-
-	if resName, ok := key.Data["resName"].(string); ok && resName != "" {
-		key.AppendSql(" and tmr.res_name like ?")
-		key.AppendArg("%" + resName + "%")
-	}
-	if path, ok := key.Data["path"].(string); ok && path != "" {
-		key.AppendSql(" and tmr.path like = ?")
-		key.AppendArg("%" + path + "%")
-	}
-	if pid, ok := key.Data["pid"].(int64); ok {
-		key.AppendSql(" and tmr.pid = ?")
-		key.AppendArg(pid)
-	}
-
+func PageRes(key *ResKey) (*util.Pager, error) {
 	o := orm.NewOrm()
+	sqler := key.getSqler()
 
 	var total int64
-	err := o.Raw(key.GetCountSql(), key.GetArgs()).QueryRow(&total)
+	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&total)
 	if err != nil {
 		beego.Error(err)
-		return util.NewPager(key, 0, make([]Res, 0)), ErrQuery
+		return util.NewPager(key.Key, 0, make([]Res, 0)), ErrQuery
 	}
 	if total == 0 {
-		return util.NewPager(key, 0, make([]Res, 0)), nil
+		return util.NewPager(key.Key, 0, make([]Res, 0)), nil
 	}
 
 	var res []Res
-	affected, err := o.Raw(key.GetSql(), key.GetArgs()).QueryRows(&res)
+	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&res)
 	if err != nil {
 		beego.Error(err)
-		return util.NewPager(key, total, make([]Res, 0)), ErrQuery
+		return util.NewPager(key.Key, total, make([]Res, 0)), ErrQuery
 	}
 
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
-	return util.NewPager(key, total, res), nil
+	return util.NewPager(key.Key, total, res), nil
 }
 
 type ResKey struct {
-	util.Sqler
+	*util.Key
+
 	Res
 
 	CreateTimeStart time.Time
@@ -206,58 +193,64 @@ type ResKey struct {
 	UpdateTimeEnd   time.Time
 }
 
+func (this *ResKey) getSqler() *util.Sqler {
+	sqler := &util.Sqler{Key:this.Key}
+
+	sqler.AppendSql(`select * from t_mgr_res as tmr where 1 = 1`)
+	if this.Id != 0 {
+		sqler.AppendSql(" and tmr.id = ?")
+		sqler.AppendArg(this.Id)
+	}
+	if this.ResName != "" {
+		sqler.AppendSql(" and tmr.res_name = ?")
+		sqler.AppendArg(this.ResName)
+	}
+	if this.Path != "" {
+		sqler.AppendSql(" and tmr.path = ?")
+		sqler.AppendArg(this.Path)
+	}
+	if level := this.Level; level != 0 {
+		sqler.AppendSql(" and tmr.level = ?")
+		sqler.AppendArg(level)
+	}
+	if pid := this.Pid; pid != 0 {
+		sqler.AppendSql(" and tmr.pid = ?")
+		sqler.AppendArg(pid)
+	}
+	if createTime := this.CreateTime; !createTime.IsZero() {
+		sqler.AppendSql(" and tmr.create_time = ?")
+		sqler.AppendArg(createTime)
+	}
+	if updateTime := this.UpdateTime; !updateTime.IsZero() {
+		sqler.AppendSql(" and tmr.update_time = ?")
+		sqler.AppendArg(updateTime)
+	}
+	if createTimeStart := this.CreateTimeStart; !createTimeStart.IsZero() {
+		sqler.AppendSql(" and tmr.create_time >= ?")
+		sqler.AppendArg(createTimeStart)
+	}
+	if createTimeEnd := this.CreateTimeEnd; !createTimeEnd.IsZero() {
+		sqler.AppendSql(" and tmr.create_time <= ?")
+		sqler.AppendArg(createTimeEnd)
+	}
+	if updateTimeStart := this.UpdateTimeStart; !updateTimeStart.IsZero() {
+		sqler.AppendSql(" and tmr.update_time >= ?")
+		sqler.AppendArg(updateTimeStart)
+	}
+	if updateTimeEnd := this.UpdateTimeStart; !updateTimeEnd.IsZero() {
+		sqler.AppendSql(" and tmr.update_time <= ?")
+		sqler.AppendArg(updateTimeEnd)
+	}
+	return sqler
+
+}
+
 func FindResByKey(key *ResKey) ([]Res, error) {
-	key.AppendSql(`select * from t_mgr_res as tmr where 1 = 1`)
-
-	if key.Id != 0 {
-		key.AppendSql(" and tmr.id = ?")
-		key.AppendArg(key.Id)
-	}
-	if key.ResName != "" {
-		key.AppendSql(" and tmr.res_name = ?")
-		key.AppendArg(key.ResName)
-	}
-	if key.Path != "" {
-		key.AppendSql(" and tmr.path = ?")
-		key.AppendArg(key.Path)
-	}
-	if level := key.Level; level != 0 {
-		key.AppendSql(" and tmr.level = ?")
-		key.AppendArg(level)
-	}
-	if pid := key.Pid; pid != 0 {
-		key.AppendSql(" and tmr.pid = ?")
-		key.AppendArg(pid)
-	}
-	if createTime := key.CreateTime; !createTime.IsZero() {
-		key.AppendSql(" and tmr.create_time = ?")
-		key.AppendArg(createTime)
-	}
-	if updateTime := key.UpdateTime; !updateTime.IsZero() {
-		key.AppendSql(" and tmr.update_time = ?")
-		key.AppendArg(updateTime)
-	}
-	if createTimeStart := key.CreateTimeStart; !createTimeStart.IsZero() {
-		key.AppendSql(" and tmr.create_time >= ?")
-		key.AppendArg(createTimeStart)
-	}
-	if createTimeEnd := key.CreateTimeEnd; !createTimeEnd.IsZero() {
-		key.AppendSql(" and tmr.create_time <= ?")
-		key.AppendArg(createTimeEnd)
-	}
-	if updateTimeStart := key.UpdateTimeStart; !updateTimeStart.IsZero() {
-		key.AppendSql(" and tmr.update_time >= ?")
-		key.AppendArg(updateTimeStart)
-	}
-	if updateTimeEnd := key.UpdateTimeStart; !updateTimeEnd.IsZero() {
-		key.AppendSql(" and tmr.update_time <= ?")
-		key.AppendArg(updateTimeEnd)
-	}
-
 	o := orm.NewOrm()
+	sqler := key.getSqler()
 
 	var ress []Res
-	affected, err := o.Raw(key.GetSql(), key.GetArgs()).QueryRows(&ress)
+	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&ress)
 	if err != nil {
 		beego.Debug(err)
 		return make([]Res, 0), ErrQuery

@@ -11,14 +11,11 @@ import (
 )
 
 type Role struct {
+	ModelBase
+
 	Id         int64  `json:"id"`
 	RoleName   string `orm:"unique" json:"role_name"`
-
-	CreateTime time.Time `json:"create_time"`
-	UpdateTime time.Time `json:"update_time"`
 }
-
-
 
 // 多字段索引
 func (role *Role) TableIndex() [][]string {
@@ -26,6 +23,33 @@ func (role *Role) TableIndex() [][]string {
 		[]string{"RoleName"},
 	}
 }
+
+type RoleKey struct {
+	*util.Key
+
+	Role
+	CreateTimeStart time.Time
+	CreateTimeEnd   time.Time
+	UpdateTimeStart time.Time
+	UpdateTimeEnd   time.Time
+	KeyWord         string
+}
+
+func (this *RoleKey) getSqler() *util.Sqler {
+	sqler := &util.Sqler{Key:this.Key}
+
+	sqler.AppendSql("select * from t_mgr_role as tmr where 1 = 1")
+	if id := this.Id; id != 0 {
+		sqler.AppendSql(" and tmr.id = ?")
+		sqler.AppendArg(id)
+	}
+	if roleName := this.RoleName; roleName != "" {
+		sqler.AppendSql(" and tmr.role_name like ?")
+		sqler.AppendArg("%" + roleName + "%")
+	}
+	return sqler
+}
+
 // 删除
 func DeleteRoleById(id int64) error {
 	if id <= 0 {
@@ -123,32 +147,45 @@ func InsertRole(role *Role) error {
 }
 
 // 分页
-func PageRole(key *util.PagerKey) (*util.Pager, error) {
-	key.AppendSql("select * from t_mgr_role as tmr where 1 = 1")
-
-	if roleName, ok := key.Data["roleName"].(string); ok && roleName != "" {
-		key.AppendSql(" and tmr.role_name like ?")
-		key.AppendArg("%" + roleName + "%")
+func PageRole(key *RoleKey) (*util.Pager, error) {
+	total, err := countRoleByKey(key)
+	if err != nil {
+		return util.NewPager(key.Key, 0, []Role{}), err
 	}
 
-	ormer := orm.NewOrm()
+	roles, err := FindRoleByKey(key)
+	if err != nil {
+		return util.NewPager(key.Key, 0, []Role{}), err
+	}
+
+	return util.NewPager(key.Key, total, roles), nil
+}
+
+func countRoleByKey(key *RoleKey) (int64, error) {
+	o := orm.NewOrm()
+	sqler := key.getSqler()
 
 	var total int64
-	err := ormer.Raw(key.GetCountSql(), key.GetArgs()).QueryRow(&total)
+	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&total)
 	if err != nil {
 		beego.Error(err)
-		return nil, errors.New("分页失败")
+		return 0, ErrQuery
 	}
+	return total, nil
+}
+
+func FindRoleByKey(key *RoleKey) ([]Role, error) {
+	o := orm.NewOrm()
+	sqler := key.getSqler()
 
 	var roles []Role
-	affected, err := ormer.Raw(key.GetSql(), key.GetArgs()).QueryRows(&roles)
+	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&roles)
 	if err != nil {
 		beego.Error(err)
-		return nil, errors.New("分页失败")
+		return roles, ErrQuery
 	}
-
-	beego.Debug("affected = %d", affected)
-	return util.NewPager(key, total, roles), nil
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	return roles, nil
 }
 
 func FindRolesByUserId(userId int64) (*[]Role, error) {

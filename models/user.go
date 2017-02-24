@@ -123,65 +123,66 @@ func GetUserByUsername(username string) (*User, error) {
 }
 
 type UserKey struct {
-	util.PagerKey
+	*util.Key
 	User
 
 	CreateTimeStart time.Time
 	CreateTimeEnd   time.Time
 	UpdateTimeStart time.Time
 	UpdateTimeEnd   time.Time
+	KeyWord         string
 }
 
-func (key *UserKey) generateSql() {
-	if key.IsEmptySql() {
-		key.AppendSql(`select * from t_mgr_user as tmu where 1 = 1`)
+func (this *UserKey) getSqler() *util.Sqler {
+	sqler := &util.Sqler{Key:this.Key}
+	sqler.AppendSql(`select * from t_mgr_user as tmu where 1 = 1`)
 
-		if id := key.Id; id != 0 {
-			key.AppendSql(" and tmu.id = ?")
-			key.AppendArg(id)
-		}
-		if username := key.Username; username != "" {
-			key.AppendSql(" and tmu.username = ?")
-			key.AppendArg(key.Username)
-		}
-		if password := key.Password; password != "" {
-			key.AppendSql(" and tmu.password = ?")
-			key.AppendArg(password)
-		}
-		if createTime := key.CreateTime; !createTime.IsZero() {
-			key.AppendSql(" and tmu.create_time = ?")
-			key.AppendArg(createTime)
-		}
-		if updateTime := key.UpdateTime; !updateTime.IsZero() {
-			key.AppendSql(" and tmu.update_time = ?")
-			key.AppendArg(updateTime)
-		}
-
-		if createTimeStart := key.CreateTimeStart; !createTimeStart.IsZero() {
-			key.AppendSql(" and tmu.create_time >= ?")
-			key.AppendArg(createTimeStart)
-		}
-		if createTimeEnd := key.CreateTimeEnd; !createTimeEnd.IsZero() {
-			key.AppendSql(" and tmu.create_time < ?")
-			key.AppendArg(createTimeEnd)
-		}
-
-		if updateTimeStart := key.UpdateTimeStart; !updateTimeStart.IsZero() {
-			key.AppendSql(" and tmu.update_time >= ?")
-			key.AppendArg(updateTimeStart)
-		}
-		if updateTimeEnd := key.UpdateTimeEnd; !updateTimeEnd.IsZero() {
-			key.AppendSql(" and tmu.update_time < ?")
-			key.AppendArg(updateTimeEnd)
-		}
-		if keyWord := key.KeyWord; keyWord != "" {
-			key.AppendSql(" and tmu.username like ?")
-			key.AppendArg("%" + key.KeyWord + "%")
-		}
-
-		key.AppendSql(" and tmu.invalid = ?")
-		key.AppendArg(key.Invalid)
+	if id := this.Id; id != 0 {
+		sqler.AppendSql(" and tmu.id = ?")
+		sqler.AppendArg(id)
 	}
+	if username := this.Username; username != "" {
+		sqler.AppendSql(" and tmu.username = ?")
+		sqler.AppendArg(this.Username)
+	}
+	if password := this.Password; password != "" {
+		sqler.AppendSql(" and tmu.password = ?")
+		sqler.AppendArg(password)
+	}
+	if createTime := this.CreateTime; !createTime.IsZero() {
+		sqler.AppendSql(" and tmu.create_time = ?")
+		sqler.AppendArg(createTime)
+	}
+	if updateTime := this.UpdateTime; !updateTime.IsZero() {
+		sqler.AppendSql(" and tmu.update_time = ?")
+		sqler.AppendArg(updateTime)
+	}
+
+	if createTimeStart := this.CreateTimeStart; !createTimeStart.IsZero() {
+		sqler.AppendSql(" and tmu.create_time >= ?")
+		sqler.AppendArg(createTimeStart)
+	}
+	if createTimeEnd := this.CreateTimeEnd; !createTimeEnd.IsZero() {
+		sqler.AppendSql(" and tmu.create_time < ?")
+		sqler.AppendArg(createTimeEnd)
+	}
+
+	if updateTimeStart := this.UpdateTimeStart; !updateTimeStart.IsZero() {
+		sqler.AppendSql(" and tmu.update_time >= ?")
+		sqler.AppendArg(updateTimeStart)
+	}
+	if updateTimeEnd := this.UpdateTimeEnd; !updateTimeEnd.IsZero() {
+		sqler.AppendSql(" and tmu.update_time < ?")
+		sqler.AppendArg(updateTimeEnd)
+	}
+	if keyWord := this.KeyWord; keyWord != "" {
+		sqler.AppendSql(" and tmu.username like ?")
+		sqler.AppendArg("%" + this.KeyWord + "%")
+	}
+
+	sqler.AppendSql(" and tmu.invalid = ?")
+	sqler.AppendArg(this.Invalid)
+	return sqler;
 }
 
 func PageUser(key *UserKey) (*util.Pager, error) {
@@ -193,18 +194,15 @@ func PageUser(key *UserKey) (*util.Pager, error) {
 	if err != nil {
 		return nil, err
 	}
-	return util.NewPager(&key.PagerKey, total, users), nil
+	return util.NewPager(key.Key, total, users), nil
 }
 
 func CountUserByKey(key *UserKey) (int64, error) {
-	if key.IsEmptySql() {
-		key.generateSql()
-	}
-
 	o := orm.NewOrm()
+	sqler := key.getSqler()
 
 	var total int64
-	err := o.Raw(key.GetCountSql(), key.GetArgs()).QueryRow(&total)
+	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&total)
 	if err != nil {
 		beego.Error(err)
 		return 0, ErrQuery
@@ -213,15 +211,11 @@ func CountUserByKey(key *UserKey) (int64, error) {
 }
 
 func ListUserByKey(key *UserKey) ([]User, error) {
-	beego.Error(fmt.Sprintf("%+v", key))
-	if key.IsEmptySql() {
-		key.generateSql()
-	}
-
 	o := orm.NewOrm()
+	sqler := key.getSqler()
 
 	var users []User
-	affected, err := o.Raw(key.GetSql(), key.GetArgs()).QueryRows(&users)
+	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&users)
 	if err != nil {
 		beego.Error(err)
 		return users, ErrQuery

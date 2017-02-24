@@ -1,21 +1,19 @@
 package util
 
-import (
-	"bytes"
-)
+import "bytes"
 
 type Sqler struct {
+	*Key
+
 	sql  bytes.Buffer
 	args []interface{}
 }
 
-func NewKey(sql string) *Sqler {
-	key := &Sqler{}
-	key.sql.WriteString(sql)
-	return key
-}
 
 func (sqler *Sqler) GetCountSql() string {
+	if sqler.isEmptySql() {
+		return ""
+	}
 	return "select count(*) from (" + sqler.sql.String() + ") as t_t_t"
 }
 
@@ -25,7 +23,14 @@ func (sqler *Sqler) AppendSql(sql string) *Sqler {
 }
 
 func (sqler *Sqler) GetSql() string {
-	return sqler.sql.String()
+	if sqler.isEmptySql() {
+		return ""
+	}
+	sql := sqler.sql.String()
+	if sqler.Key != nil {
+		sql += sqler.Key.getOrderBySql() + sqler.Key.getLimitSql()
+	}
+	return sql
 }
 
 func (sqler *Sqler) AppendArg(arg interface{}) *Sqler {
@@ -37,6 +42,6 @@ func (sqler *Sqler) GetArgs() []interface{} {
 	return sqler.args
 }
 
-func (sqler *Sqler) IsEmptySql() bool {
+func (sqler *Sqler) isEmptySql() bool {
 	return sqler.sql.Len() == 0
 }

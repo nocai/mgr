@@ -63,8 +63,7 @@ func updateRole(id int64, roleName string) error {
 }
 
 func addRole(roleName string) error {
-	now := time.Now()
-	role := &models.Role{RoleName:roleName, CreateTime:now, UpdateTime:now}
+	role := &models.Role{RoleName:roleName}
 	return models.InsertRole(role);
 }
 
@@ -80,13 +79,10 @@ func (ctr *RoleController) Get() {
 	data := make(map[string]interface{}, 1)
 	data["roleName"] = roleName
 
-	pagerKey := util.NewPagerKey(page, rows, data, sort, order)
-	pager, err := models.PageRole(pagerKey)
+	key := util.NewKey(page, rows, []string{sort}, []string{order}, true)
+	pager, err := models.PageRole(&models.RoleKey{Key:key})
 	if err != nil {
 		beego.Error(err)
-		ctr.Print(util.NewPager(pagerKey, 0, make([]interface{}, 0)))
-		return
 	}
-
 	ctr.Print(pager.Pagination)
 }
