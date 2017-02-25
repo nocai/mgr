@@ -15,17 +15,13 @@ var (
 )
 
 type Res struct {
-	Id         int64 `json:"id"`
-	ResName    string `json:"res_name"`
-	Path       string `json:"path"`
-	Level      int `json:"level"`
+	ModelBase
+	Id      int64 `json:"id"`
+	ResName string `json:"res_name"`
+	Path    string `json:"path"`
+	Level   int `json:"level"`
 
-	Pid        int64 `json:"pid"`
-
-	CreateTime time.Time `json:"create_time"`
-	UpdateTime time.Time `json:"update_time"`
-
-	Children   []Res `orm:"-"`
+	Pid     int64 `json:"pid"`
 }
 
 // 多字段唯一键
@@ -58,8 +54,12 @@ func insertRes(ch chan error, o orm.Ormer, res *Res) {
 		err = ErrArgument
 		return
 	}
-
-	if existOfResName(res.Id, res.ResName) {
+	exist, err := existOfResName(res.Id, res.ResName)
+	if err != nil {
+		beego.Error(err)
+		return
+	}
+	if exist {
 		err = ErrResNameExist
 		return
 	}
@@ -111,7 +111,12 @@ func InsertRes(resVo *ResVo) (error) {
 }
 
 func UpdateRes(res *Res) error {
-	if existOfResName(res.Id, res.ResName) {
+	exist, err := existOfResName(res.Id, res.ResName)
+	if err != nil {
+		beego.Error(err)
+		return ErrUpdate
+	}
+	if exist {
 		return ErrResNameExist
 	}
 	res.UpdateTime = time.Now()
@@ -134,26 +139,17 @@ func fillResTime(res *Res) {
 	res.UpdateTime = now
 }
 
-func existOfResName(id int64, resName string) bool {
+func existOfResName(id int64, resName string) (bool, error) {
 	res, err := GetResByResName(resName)
-	beego.Info(fmt.Sprintf("%+v", res))
-	if err == nil {
-		if res.Id != id {
-			beego.Debug(fmt.Sprintf("资源名称[%v]存在", resName))
-			return true
-		}
-	}
-	return false
-}
-
-func GetResByResName(resName string) (*Res, error) {
-	res := &Res{ResName:resName}
-
-	if err := orm.NewOrm().Read(res, "ResName"); err != nil {
+	if err != nil {
 		beego.Error(err)
-		return nil, ErrQuery
+		return false, err
 	}
-	return res, nil
+	if res != nil && res.Id != id {
+		beego.Debug(fmt.Sprintf("资源名称[%v]存在", resName))
+		return true, nil
+	}
+	return false, nil
 }
 
 func PageRes(key *ResKey) (*util.Pager, error) {
@@ -242,7 +238,40 @@ func (this *ResKey) getSqler() *util.Sqler {
 		sqler.AppendArg(updateTimeEnd)
 	}
 	return sqler
+}
 
+func GetResByResId(id int64) (*Res, error) {
+	key := &ResKey{Res:Res{Id:id}}
+	ress, err := FindResByKey(key)
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+	if len(ress) == 0 {
+		beego.Debug(orm.ErrNoRows)
+		return nil, nil
+	}
+	if len(ress) > 1 {
+		beego.Error(ErrDataDuplication, "id = ", id)
+	}
+	return &ress[0], nil
+}
+
+func GetResByResName(resName string) (*Res, error) {
+	key := &ResKey{Res:Res{ResName:resName}}
+	ress, err := FindResByKey(key)
+	if err != nil {
+		beego.Error(err)
+		return nil, ErrQuery
+	}
+	if len(ress) == 0 {
+		beego.Debug(orm.ErrNoRows)
+		return nil, nil
+	}
+	if len(ress) > 1 {
+		beego.Error(ErrDataDuplication, "resName = ", resName)
+	}
+	return &ress[0], nil
 }
 
 func FindResByKey(key *ResKey) ([]Res, error) {
@@ -252,10 +281,14 @@ func FindResByKey(key *ResKey) ([]Res, error) {
 	var ress []Res
 	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&ress)
 	if err != nil {
-		beego.Debug(err)
-		return make([]Res, 0), ErrQuery
+		beego.Error(err)
+		return nil, ErrQuery
 	}
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	if affected == 0 {
+		beego.Debug(orm.ErrNoRows)
+		return []Res{}, nil
+	}
 	return ress, nil
 }
 

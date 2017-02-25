@@ -14,6 +14,7 @@ var (
 	ErrDelete = errors.New("删除失败")
 
 	ErrArgument = errors.New("无效参数")
+	ErrDataDuplication = errors.New("数据重复")
 )
 
 // 所有模型共同的属性

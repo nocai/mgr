@@ -16,6 +16,6 @@ func (c *MainController) Get() {
 
 func (c *MainController) T() {
 	beego.Info("tttttttttttt")
-	c.PrintOkMsgData("操作成功", "this is t method")
+	//c.PrintOkMsgData("操作成功", "this is t method")
 
 }

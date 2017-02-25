@@ -178,7 +178,7 @@ func FindRoleByKey(key *RoleKey) ([]Role, error) {
 	o := orm.NewOrm()
 	sqler := key.getSqler()
 
-	var roles []Role
+	roles := []Role{}
 	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&roles)
 	if err != nil {
 		beego.Error(err)

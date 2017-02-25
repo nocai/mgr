@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/validation"
 	"fmt"
 )
 
@@ -63,27 +62,12 @@ type JsonMsg struct {
 }
 
 func (this *BaseController) PrintOk() {
-	this.PrintOkMsg("操作成功")
+	this.printJson(true, "操作成功", nil)
 }
 
-func (this *BaseController) PrintOkMsg(msg string) {
-	this.PrintOkMsgData(msg, nil)
-}
 
-func (this *BaseController) PrintOkMsgData(msg string, data interface{}) {
-	this.printJson(true, msg, data)
-}
-
-func (this *BaseController) PrintError() {
-	this.PrintErrorMsg("系统异常")
-}
-
-func (this *BaseController) PrintErrorMsg(msg string) {
-	this.PrintErrorMsgData(msg, nil)
-}
-
-func (this *BaseController) PrintErrorMsgData(msg string, data interface{}) {
-	this.printJson(false, msg, data)
+func (this *BaseController) PrintFail() {
+	this.printJson(false, "系统异常", nil)
 }
 
 func (this *BaseController) printJson(ok bool, msg string, data interface{}) {
@@ -97,6 +81,12 @@ func (this *BaseController) Print(data interface{}) {
 	this.ServeJSON()
 }
 
-func (this *BaseController) PrintErrorMsgValid(r *validation.Result) {
-	this.PrintErrorMsg(r.Error.Key + ", " + r.Error.Message)
+func (this *BaseController) PrintError(err error) {
+	if err != nil {
+		beego.Error(err)
+		this.printJson(false, err.Error(), nil)
+	} else {
+		this.PrintOk()
+	}
 }
+

@@ -22,15 +22,27 @@ func (ctr *ResController) Get() {
 	path := ctr.GetString("path")
 	pid, _ := ctr.GetInt64("pid", 0)
 
-	sort := ctr.GetString("sort")
-	order := ctr.GetString("order")
+	sort := ctr.GetString("sort", "id")
+	order := ctr.GetString("order", "desc")
 
-	key := &models.ResKey{Key:util.NewKey(page, rows, []string{sort}, []string{order}, true), Res:models.Res{ResName:resName,Path:path, Pid:pid}}
+	key := &models.ResKey{Key:util.NewKey(page, rows, []string{sort}, []string{order}, true), Res:models.Res{ResName:resName, Path:path, Pid:pid}}
 	pager, err := models.PageRes(key)
 	if err != nil {
 		beego.Error(err)
 	}
 	ctr.Print(pager.Pagination)
+}
+
+func updateRes(id, pid int64, resName, path string) error {
+	res, err := models.GetResByResId(id)
+	if err != nil {
+		beego.Error(err)
+		return err
+	}
+	res.Pid = pid
+	res.ResName = resName
+	res.Path = path
+	return models.UpdateRes(res)
 }
 
 func (ctr *ResController) Post() {
@@ -43,30 +55,14 @@ func (ctr *ResController) Post() {
 	resName := ctr.GetString("res_name")
 	path := ctr.GetString("path")
 
-	var err error
 	if id == 0 {
 		// 添加
 		res := models.Res{Id:id, ResName:resName, Path:path, Pid:pid}
-		err = models.InsertRes(&models.ResVo{Res:res})
+		ctr.PrintError(models.InsertRes(&models.ResVo{Res:res}))
 	} else {
 		// 修改
-		key := &models.ResKey{Res:models.Res{Id:id}}
-		var ress []models.Res
-		ress, err = models.FindResByKey(key)
-		if err == nil && len(ress) > 0 {
-			res := ress[0]
-			res.ResName = resName
-			res.Path = path
-			res.Pid = pid
-			err = models.UpdateRes(&res)
-		}
+		ctr.PrintError(updateRes(id, pid, resName, path))
 	}
-
-	if err != nil {
-		ctr.PrintErrorMsg(err.Error())
-		return
-	}
-	ctr.PrintOk()
 }
 
 func (ctr *ResController) Delete() {
@@ -75,7 +71,7 @@ func (ctr *ResController) Delete() {
 
 	err := models.DeleteResById(id)
 	if err != nil {
-		ctr.PrintErrorMsg(err.Error())
+		ctr.PrintError(err)
 		return
 	}
 	ctr.PrintOk()

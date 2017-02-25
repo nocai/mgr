@@ -22,7 +22,7 @@ func (ctr *LoginController) Post() {
 	admin, err := models.Login(username, password)
 	if err != nil {
 		beego.Debug(err.Error())
-		ctr.PrintErrorMsg(err.Error())
+		ctr.PrintError(err)
 		return
 	}
 	fmt.Println(admin)

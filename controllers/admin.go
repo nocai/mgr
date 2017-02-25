@@ -54,14 +54,14 @@ func (ctr *AdminController) Post() {
 		// 添加
 		err = addAdmin(adminName, password)
 		if err != nil {
-			ctr.PrintErrorMsg(err.Error())
+			ctr.PrintError(err)
 			return
 		}
 	} else {
 		// 更新
 		admin, err := models.GetAdminById(id)
 		if err != nil {
-			ctr.PrintErrorMsg(err.Error())
+			ctr.PrintError(err)
 			return
 		}
 		admin.AdminName = adminName
@@ -69,7 +69,7 @@ func (ctr *AdminController) Post() {
 		admin.User.Password = password
 		err = models.UpdateAdmin(admin)
 		if err != nil {
-			ctr.PrintErrorMsg(err.Error())
+			ctr.PrintError(err)
 			return
 		}
 	}
@@ -84,7 +84,7 @@ func (ctr *AdminController) Delete() {
 
 	err := models.DeleteAdminById(id)
 	if err != nil {
-		ctr.PrintError()
+		ctr.PrintError(err)
 		return
 	}
 	ctr.PrintOk()

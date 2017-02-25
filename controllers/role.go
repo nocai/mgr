@@ -22,7 +22,7 @@ func (ctr *RoleController) Delete() {
 	err := models.DeleteRoleById(id)
 	if err != nil {
 		beego.Error(err)
-		ctr.PrintErrorMsg(err.Error())
+		ctr.PrintError(err)
 		return
 	}
 	ctr.PrintOk()
@@ -44,7 +44,7 @@ func (ctr *RoleController) Post() {
 
 	if err != nil {
 		beego.Error(err)
-		ctr.PrintErrorMsg(err.Error())
+		ctr.PrintError(err)
 		return
 	}
 	ctr.PrintOk()
@@ -76,11 +76,9 @@ func (ctr *RoleController) Get() {
 	order := ctr.GetString("order")
 
 	roleName := ctr.GetString("role_name")
-	data := make(map[string]interface{}, 1)
-	data["roleName"] = roleName
 
 	key := util.NewKey(page, rows, []string{sort}, []string{order}, true)
-	pager, err := models.PageRole(&models.RoleKey{Key:key})
+	pager, err := models.PageRole(&models.RoleKey{Key:key, Role:models.Role{RoleName:roleName}})
 	if err != nil {
 		beego.Error(err)
 	}
