@@ -36,7 +36,7 @@ func TestAdmin(t *testing.T) {
 	}
 	t.Logf("%+v",admin)
 
-	admin, err = models.GetAdminByUserId(admin.UserId, false)
+	admin, err = models.GetAdminVoByUserId(admin.UserId, false)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

@@ -23,22 +23,31 @@ func (ctr *AdminController) Get() {
 
 	adminName := ctr.GetString("admin_name")
 
-	data := make(map[string]interface{})
-	data["adminName"] = adminName
-
 	key := util.NewKey(page, rows, []string{sort}, []string{order}, true)
-	pager, err := models.PageAdmin(&models.AdminKey{Key:key})
+	pager, err := models.PageAdmin(&models.AdminKey{Key:key, Admin:models.Admin{AdminName:adminName}})
 	if err != nil {
 		beego.Error(err)
 	}
 	ctr.Print(pager.Pagination)
 }
 
-func addAdmin(adminName, password string) error{
+func addAdmin(adminName, password string) error {
 	user := models.User{Username:adminName, Password:password}
 	admin := models.Admin{AdminName:adminName}
 	adminVo := &models.AdminVo{Admin:admin, User:user}
 	return models.InsertAdminVo(adminVo)
+}
+
+func updateAdmin(id int64, adminName, password string) error {
+	admin, err := models.GetAdminById(id)
+	if err != nil {
+		beego.Error(err)
+		return err
+	}
+	admin.AdminName = adminName
+	admin.User.Username = adminName
+	admin.User.Password = password
+	return models.UpdateAdmin(admin)
 }
 
 // 添加 修改
@@ -49,31 +58,11 @@ func (ctr *AdminController) Post() {
 	adminName := ctr.GetString("admin_name")
 	password := ctr.GetString("password")
 
-	var err error
-	if id == 0 {
-		// 添加
-		err = addAdmin(adminName, password)
-		if err != nil {
-			ctr.PrintError(err)
-			return
-		}
-	} else {
-		// 更新
-		admin, err := models.GetAdminById(id)
-		if err != nil {
-			ctr.PrintError(err)
-			return
-		}
-		admin.AdminName = adminName
-		admin.User.Username = adminName
-		admin.User.Password = password
-		err = models.UpdateAdmin(admin)
-		if err != nil {
-			ctr.PrintError(err)
-			return
-		}
+	if id == 0 {// 添加
+		ctr.PrintError(addAdmin(adminName, password))
+	} else {// 更新
+		ctr.PrintError(updateAdmin(id, adminName, password))
 	}
-	ctr.PrintOk()
 }
 
 func (ctr *AdminController) Delete() {
@@ -83,9 +72,5 @@ func (ctr *AdminController) Delete() {
 	beego.Debug(fmt.Sprintf("id = %v", id))
 
 	err := models.DeleteAdminById(id)
-	if err != nil {
-		ctr.PrintError(err)
-		return
-	}
-	ctr.PrintOk()
+	ctr.PrintError(err)
 }

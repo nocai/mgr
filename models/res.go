@@ -8,6 +8,7 @@ import (
 	"time"
 	"sync"
 	"mgr/util"
+	"sort"
 )
 
 var (
@@ -20,6 +21,7 @@ type Res struct {
 	ResName string `json:"res_name"`
 	Path    string `json:"path"`
 	Level   int `json:"level"`
+	Seq     int `seq`
 
 	Pid     int64 `json:"pid"`
 }
@@ -349,5 +351,40 @@ func FindResVoByKey(key *ResKey, cascade bool) ([]ResVo, error) {
 	}
 	wg.Wait()
 
-	return resVos, nil
+	rs := NewResSorter(resVos)
+	sort.Sort(rs)
+	return rs.getResVos(), nil
 }
+
+type ResSorter []ResVo
+
+func NewResSorter(ress []ResVo) ResSorter {
+	rs := make(ResSorter, 0, len(ress))
+
+	for _, v := range ress {
+		rs = append(rs, v)
+	}
+
+	return rs
+}
+
+func (rs ResSorter) getResVos() []ResVo {
+	ress := []ResVo{}
+	for _, res := range rs {
+		ress = append(ress, res)
+	}
+	return ress
+}
+
+func (rs ResSorter) Len() int {
+	return len(rs)
+}
+
+func (rs ResSorter) Less(i, j int) bool {
+	return rs[i].Seq < rs[j].Seq
+}
+
+func (rs ResSorter) Swap(i, j int) {
+	rs[i], rs[j] = rs[j], rs[i]
+}
+

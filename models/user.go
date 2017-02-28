@@ -70,7 +70,7 @@ func checkUser(user *User) error {
 		beego.Error("user.Username is nil")
 		return ErrArgument
 	}
-	if existOfUsername(user) {
+	if isExistOfUser(user) {
 		return ErrArgument
 	}
 
@@ -98,7 +98,7 @@ func GetUserById(id int64) (*User, error) {
 	return user, nil
 }
 
-func existOfUsername(user *User) bool {
+func isExistOfUser(user *User) bool {
 	if temp, err := GetUserByUsername(user.Username); err == nil {
 		if temp.Id != user.Id {
 			beego.Info(fmt.Sprintf("用户名存在%v", user.Username))
@@ -111,7 +111,7 @@ func existOfUsername(user *User) bool {
 func GetUserByUsername(username string) (*User, error) {
 	user := User{Username:username}
 	key := &UserKey{User:user}
-	users, err := ListUserByKey(key)
+	users, err := FindUserByKey(key)
 	if err != nil {
 		if len(users) > 1 {
 			beego.Error(fmt.Sprintf("useranme重复：username = %v, 重复数据 = %v", username, users))
@@ -190,7 +190,7 @@ func PageUser(key *UserKey) (*util.Pager, error) {
 	if err != nil {
 		return nil, err
 	}
-	users, err := ListUserByKey(key)
+	users, err := FindUserByKey(key)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func CountUserByKey(key *UserKey) (int64, error) {
 	return total, nil
 }
 
-func ListUserByKey(key *UserKey) ([]User, error) {
+func FindUserByKey(key *UserKey) ([]User, error) {
 	o := orm.NewOrm()
 	sqler := key.getSqler()
 
@@ -221,6 +221,10 @@ func ListUserByKey(key *UserKey) ([]User, error) {
 		return users, ErrQuery
 	}
 	beego.Debug("affected = %v", affected)
+	if affected == 0 {
+		beego.Debug(orm.ErrNoRows)
+		return []User{}, nil
+	}
 	return users, nil
 
 }

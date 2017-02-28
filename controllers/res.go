@@ -55,12 +55,10 @@ func (ctr *ResController) Post() {
 	resName := ctr.GetString("res_name")
 	path := ctr.GetString("path")
 
-	if id == 0 {
-		// 添加
+	if id == 0 {// 添加
 		res := models.Res{Id:id, ResName:resName, Path:path, Pid:pid}
 		ctr.PrintError(models.InsertRes(&models.ResVo{Res:res}))
-	} else {
-		// 修改
+	} else {// 修改
 		ctr.PrintError(updateRes(id, pid, resName, path))
 	}
 }
@@ -70,11 +68,7 @@ func (ctr *ResController) Delete() {
 	beego.Debug("id = %v", id)
 
 	err := models.DeleteResById(id)
-	if err != nil {
-		ctr.PrintError(err)
-		return
-	}
-	ctr.PrintOk()
+	ctr.PrintError(err)
 }
 
 type ResSelectController struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego"
 	"time"
 	"mgr/conf"
+	"fmt"
 )
 
 type RoleController struct {
@@ -20,34 +21,21 @@ func (ctr *RoleController) Delete() {
 	beego.Error(id)
 
 	err := models.DeleteRoleById(id)
-	if err != nil {
-		beego.Error(err)
-		ctr.PrintError(err)
-		return
-	}
-	ctr.PrintOk()
+	ctr.PrintError(err)
 }
 
 // 添加 修改
 func (ctr *RoleController) Post() {
+	id, _ := ctr.GetInt64(":id", 0)
+	beego.Debug(fmt.Sprintf("id = %v", id))
 	beego.Debug(ctr.Input())
 
-	id, _ := ctr.GetInt64(":id", 0)
 	roleName := ctr.GetString("role_name")
-
-	var err error
 	if id == 0 {
-		err = addRole(roleName)
+		ctr.PrintError(addRole(roleName))
 	} else {
-		err = updateRole(id, roleName)
+		ctr.PrintError(updateRole(id, roleName))
 	}
-
-	if err != nil {
-		beego.Error(err)
-		ctr.PrintError(err)
-		return
-	}
-	ctr.PrintOk()
 }
 
 func updateRole(id int64, roleName string) error {
@@ -55,7 +43,6 @@ func updateRole(id int64, roleName string) error {
 	if err != nil {
 		return err
 	}
-
 	role.RoleName = roleName
 	role.UpdateTime = time.Now()
 	err = models.UpdateRole(role)

@@ -7,7 +7,6 @@ import (
 	"mgr/util"
 	"fmt"
 	"time"
-	"sync"
 )
 
 var (
@@ -45,60 +44,52 @@ func Login(username, password string) (*AdminVo, error) {
 		return nil, ErrPasswordNotMatched
 	}
 
-	admin, err := GetAdminByUserId(user.Id, false)
+	key := &AdminKey{Admin:Admin{UserId:user.Id}}
+	admins, err := FindAdminVoByKey(key, false, true)
 	if err != nil {
-		beego.Debug(err)
-		return admin, ErrNotSysAdmin
+		beego.Error(err)
+		return nil, ErrQuery
 	}
-	return admin, nil
+	if len(admins) == 0 {
+		beego.Error(ErrNotSysAdmin)
+		return nil, ErrNotSysAdmin
+	}
+	return &admins[0], nil
 }
 
-func GetAdminByUserId(userId int64, selectRole bool) (*AdminVo, error) {
-	wg := &sync.WaitGroup{}
-	if selectRole {
-		wg.Add(3)
-	} else {
-		wg.Add(2)
+func FindAdminVoByKey(key *AdminKey, selectUser, selectRole bool) ([]AdminVo, error) {
+	admins, err := FindAdminByKey(key)
+	if err != nil {
+		beego.Error(err)
+		return []AdminVo{}, ErrQuery
 	}
 
-	admin := &AdminVo{}
-	go func() {
-		defer wg.Done()
+	var result []AdminVo
+	for _, admin := range admins {
+		adminVo := AdminVo{Admin:admin}
 
-		temp := &Admin{UserId:userId}
-		err := orm.NewOrm().Read(temp, "UserId")
-		if err != nil {
-			beego.Error(err)
-		}
-
-		admin.Id = temp.Id
-		admin.UserId = temp.UserId
-		admin.AdminName = temp.AdminName
-		admin.CreateTime = temp.CreateTime
-		admin.UpdateTime = temp.UpdateTime
-	}()
-	go func() {
-		defer wg.Done()
-		user, err := GetUserById(userId)
-		if err != nil {
-			beego.Error(err)
-		}
-		admin.User = *user
-	}()
-	if selectRole {
-		go func() {
-			defer wg.Done()
-			roles, err := FindRolesByUserId(userId)
+		if selectUser {
+			userKey := &UserKey{User:User{Id:admin.UserId}}
+			users, err := FindUserByKey(userKey)
 			if err != nil {
 				beego.Error(err)
+			} else {
+				adminVo.User = users[0]
 			}
-			admin.Roles = *roles
-		}()
-	}
-	wg.Wait()
-	beego.Debug(admin)
+		}
 
-	return admin, nil
+		if selectRole {
+			roles, err := FindRoleByAdminId(admin.Id)
+			if err != nil {
+				beego.Error(err)
+			} else {
+				adminVo.Roles = roles
+			}
+		}
+
+		result = append(result, adminVo)
+	}
+	return result, nil
 }
 
 type AdminKey struct {
@@ -169,7 +160,7 @@ func CountAdminByKey(key *AdminKey) (int64, error) {
 	return total, nil
 }
 
-func ListAdminByKey(key *AdminKey) ([]Admin, error) {
+func FindAdminByKey(key *AdminKey) ([]Admin, error) {
 	o := orm.NewOrm()
 	sqler := key.getSqler()
 
@@ -180,21 +171,24 @@ func ListAdminByKey(key *AdminKey) ([]Admin, error) {
 		return admins, err
 	}
 	beego.Debug(fmt.Sprintf("affected = %v, %+v", affected, admins))
+	if affected == 0 {
+		return []Admin{}, nil
+	}
 	return admins, nil
 }
 
 func PageAdmin(key *AdminKey) (*util.Pager, error) {
 	total, err := CountAdminByKey(key)
 	if err != nil {
-		var admins []Admin
-		return util.NewPager(key.Key, 0, admins), ErrQuery
+		beego.Error(err)
+		return util.NewPager(key.Key, 0, []Admin{}), ErrQuery
 	}
 
-	admins, err := ListAdminByKey(key)
+	admins, err := FindAdminByKey(key)
 	if err != nil {
-		return util.NewPager(key.Key, 0, admins), ErrQuery
+		beego.Error(err)
+		return util.NewPager(key.Key, 0, []Admin{}), ErrQuery
 	}
-
 	return util.NewPager(key.Key, total, admins), nil
 }
 
@@ -259,7 +253,7 @@ func InsertAdminVo(admin *AdminVo) error {
 		return ErrArgument
 	}
 
-	if existOfUsername(&admin.User) {
+	if isExistOfUser(&admin.User) {
 		return ErrUsernameExist
 	}
 
@@ -301,7 +295,7 @@ func UpdateAdmin(admin *AdminVo) error {
 	admin.User.UpdateTime = time.Now()
 
 	user := admin.User
-	if existOfUsername(&user) {
+	if isExistOfUser(&user) {
 		return ErrUsernameExist
 	}
 

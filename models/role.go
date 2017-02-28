@@ -6,15 +6,18 @@ import (
 	"github.com/astaxie/beego"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
+)
+
+var (
+	ErrRoleNameExist = errors.New("角色名称存在")
 )
 
 type Role struct {
 	ModelBase
 
-	Id         int64  `json:"id"`
-	RoleName   string `orm:"unique" json:"role_name"`
+	Id       int64  `json:"id"`
+	RoleName string `orm:"unique" json:"role_name"`
 }
 
 // 多字段索引
@@ -70,60 +73,57 @@ func DeleteRoleById(id int64) error {
 
 // 取Role By Id
 func GetRoleById(id int64) (*Role, error) {
-	ormer := orm.NewOrm()
-
-	role := &Role{Id:id}
-	err := ormer.Read(role)
+	key := &RoleKey{Role:Role{Id:id}}
+	roles, err := FindRoleByKey(key)
 	if err != nil {
-		beego.Error(fmt.Sprintf("查询失败.Id = %v", id), err)
-		return nil, errors.New("查询失败")
+		beego.Error(err)
+		return nil, err
 	}
-	return role, nil
+	if len(roles) == 0 {
+		return nil, nil
+	}
+	if len(roles) > 1 {
+		beego.Error(ErrDataDuplication)
+	}
+	return &roles[0], nil
 }
 
 // 角色名存在
-func IsExist(role *Role) bool {
-	if roleName := role.RoleName; roleName != "" {
-		r, err := GetRoleByRoleName(roleName)
-		if err == nil {
-			if r.Id != role.Id {
-				beego.Info("角色名存在:" + roleName)
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// 取角色 By RoleName
-func GetRoleByRoleName(roleName string) (*Role, error) {
-	o := orm.NewOrm()
-
-	role := &Role{RoleName:roleName}
-	err := o.Read(role, "RoleName")
-
+func isExistOfRole(role *Role) (bool, error) {
+	r, err := GetRoleByRoleName(role.RoleName)
 	if err != nil {
 		beego.Error(err)
-		return nil, errors.New("查询失败")
+		return false, err
 	}
-	return role, nil
+
+	if r == nil {
+		return false, nil
+	}
+	if r.Id != role.Id {
+		beego.Debug(fmt.Sprintf("角色名存在。id = %v, roleName = %v", r.Id, r.RoleName))
+		return true, nil
+	}
+	return false, nil
 }
+
+
 
 // 更新
 func UpdateRole(role *Role) error {
 	ormer := orm.NewOrm()
-
-	if role.Id == 0 {
-		panic(fmt.Errorf("role.Id = %d", role.Id))
+	exist, err := isExistOfRole(role);
+	if err != nil {
+		beego.Error(err)
+		return err
 	}
-	if IsExist(role) {
-		return errors.New("角色名称存在")
+	if exist {
+		return ErrRoleNameExist
 	}
 
 	affected, err := ormer.Update(role)
 	if err != nil {
 		beego.Error(err)
-		return errors.New("更新失败")
+		return ErrUpdate
 	}
 	beego.Debug("<UpdateRole> affected = %v", affected)
 	return nil
@@ -133,14 +133,19 @@ func UpdateRole(role *Role) error {
 func InsertRole(role *Role) error {
 	ormer := orm.NewOrm()
 
-	if IsExist(role) {
-		return errors.New("角色名称存在")
+	exist, err := isExistOfRole(role)
+	if err != nil {
+		beego.Error(err)
+		return err
+	}
+	if exist {
+		return ErrRoleNameExist
 	}
 
 	id, err := ormer.Insert(role)
 	if err != nil {
 		beego.Error(err)
-		return errors.New("添加失败")
+		return ErrInsert
 	}
 	beego.Debug("Id = %d", id)
 	return nil
@@ -150,11 +155,13 @@ func InsertRole(role *Role) error {
 func PageRole(key *RoleKey) (*util.Pager, error) {
 	total, err := countRoleByKey(key)
 	if err != nil {
+		beego.Error(err)
 		return util.NewPager(key.Key, 0, []Role{}), err
 	}
 
 	roles, err := FindRoleByKey(key)
 	if err != nil {
+		beego.Error(err)
 		return util.NewPager(key.Key, 0, []Role{}), err
 	}
 
@@ -185,35 +192,27 @@ func FindRoleByKey(key *RoleKey) ([]Role, error) {
 		return roles, ErrQuery
 	}
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	if affected == 0 {
+		beego.Debug(orm.ErrNoRows)
+		return []Role{}, nil
+	}
 	return roles, nil
 }
 
-func FindRolesByUserId(userId int64) (*[]Role, error) {
-	refs, err := FindAdminRoleRefByAdminId(userId)
+// 取角色 By RoleName
+func GetRoleByRoleName(roleName string) (*Role, error) {
+	key := &RoleKey{Role:Role{RoleName:roleName}}
+	roles, err := FindRoleByKey(key)
 	if err != nil {
 		beego.Error(err)
-		return nil, ErrQuery
+		return nil, err
 	}
 
-	wg := sync.WaitGroup{}
-	wg.Add(len(*refs))
-
-	var roles []Role
-	for _, ref := range *refs {
-		ref := ref
-		go func() {
-			defer wg.Done()
-
-			role, err := GetRoleById(ref.RoleId)
-			if err != nil {
-				beego.Error(err)
-				return
-			}
-			roles = append(roles, *role)
-		}()
+	if len(roles) == 0 {
+		return nil, nil
 	}
-
-	wg.Wait()
-
-	return &roles, nil
+	if len(roles) > 1 {
+		beego.Error(ErrDataDuplication, "roleName = ", roleName)
+	}
+	return &roles[0], nil
 }
