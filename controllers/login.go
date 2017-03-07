@@ -16,10 +16,13 @@ type LoginController struct {
 
 // 登陆
 func (ctr *LoginController) Post() {
+	beego.Debug(ctr.Input())
+
 	username := ctr.GetString("username")
 	password := ctr.GetString("password")
 
 	admin, err := models.Login(username, password)
+	//panic("aaaaaa")
 	if err != nil {
 		beego.Debug(err.Error())
 		ctr.PrintError(err)

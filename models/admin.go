@@ -23,6 +23,8 @@ type Admin struct {
 	Id        int64 `json:"id"`
 	AdminName string `json:"admin_name"`
 	UserId    int64 `orm:"unique" json:"user_id"`
+
+	Invalid    bool `json:"invalid"`
 }
 
 type AdminVo struct {

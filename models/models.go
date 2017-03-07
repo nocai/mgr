@@ -19,7 +19,6 @@ var (
 
 // 所有模型共同的属性
 type ModelBase struct {
-	Invalid    bool `json:"invalid"`
 	CreateTime time.Time  `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
 }

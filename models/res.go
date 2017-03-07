@@ -11,6 +11,12 @@ import (
 	"sort"
 )
 
+const (
+	// 菜单
+	ResType_Menu = iota
+	// 操作
+	ResType_Button
+)
 var (
 	ErrResNameExist = errors.New("资源名称存在")
 )
@@ -20,7 +26,7 @@ type Res struct {
 	Id      int64 `json:"id"`
 	ResName string `json:"res_name"`
 	Path    string `json:"path"`
-	Level   int `json:"level"`
+	ResType   int `json:"res_type"`
 	Seq     int `seq`
 
 	Pid     int64 `json:"pid"`
@@ -207,9 +213,9 @@ func (this *ResKey) getSqler() *util.Sqler {
 		sqler.AppendSql(" and tmr.path = ?")
 		sqler.AppendArg(this.Path)
 	}
-	if level := this.Level; level != 0 {
-		sqler.AppendSql(" and tmr.level = ?")
-		sqler.AppendArg(level)
+	if resType := this.ResType; resType != 0 {
+		sqler.AppendSql(" and tmr.res_type = ?")
+		sqler.AppendArg(resType)
 	}
 	if pid := this.Pid; pid != 0 {
 		sqler.AppendSql(" and tmr.pid = ?")

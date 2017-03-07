@@ -14,6 +14,7 @@ type User struct {
 	Id       int64
 	Username string `orm:"unique"`
 	Password string
+	Invalid    bool `json:"invalid"`
 }
 
 // 多字段索引
