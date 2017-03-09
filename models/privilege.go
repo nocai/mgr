@@ -99,20 +99,33 @@ func FindPrivilegeByKey(key *PrivilegeKey) ([]Privilege, error) {
 }
 
 func FindResByAdminId(adminId int64) ([]Res, error) {
-	var result []Res
 	ress, err := findResBelongRole(adminId)
 	if err != nil {
 		beego.Error(err)
 		return []Res{}, ErrQuery
 	}
-	result = append(result, ress...)
 
-	ress, err = findResBelongAdmin(adminId)
+	ress2, err := findResBelongAdmin(adminId)
 	if err != nil {
 		beego.Error(err)
 		return []Res{}, ErrQuery
 	}
-	result = append(result, ress...)
+	ress = append(ress, ress2...)
+
+	// 去重复数据
+	var result []Res
+	for _, res := range ress {
+		if !func() bool {
+			for _, v := range result {
+				if v.Id == res.Id {
+					return true
+				}
+			}
+			return false
+		}() {
+			result = append(result, res)
+		}
+	}
 	return result, nil
 }
 

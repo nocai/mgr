@@ -51,7 +51,7 @@ func (ctr *ResController) Post() {
 	id, _ := ctr.GetInt64(":id", 0)
 	beego.Debug(fmt.Sprintf("id = %+v", id))
 
-	pid, _ := ctr.GetInt64("pid", -1)
+	pid, _ := ctr.GetInt64("pid", models.Pid_Default)
 	resName := ctr.GetString("res_name")
 	path := ctr.GetString("path")
 

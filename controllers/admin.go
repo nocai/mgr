@@ -27,7 +27,7 @@ func (ctr *AdminController) Get() {
 	if err != nil {
 		beego.Error(err)
 	}
-	ctr.Print(pager.Pagination)
+	ctr.Print(pager)
 }
 
 func addAdmin(adminName, username, password string) error {

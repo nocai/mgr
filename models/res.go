@@ -17,6 +17,9 @@ const (
 	// 操作
 	ResType_Button
 )
+
+const Pid_Default = -1
+
 var (
 	ErrResNameExist = errors.New("资源名称存在")
 )
@@ -26,7 +29,7 @@ type Res struct {
 	Id      int64 `json:"id"`
 	ResName string `json:"res_name"`
 	Path    string `json:"path"`
-	ResType   int `json:"res_type"`
+	ResType int `json:"res_type"`
 	Seq     int `seq`
 
 	Pid     int64 `json:"pid"`
@@ -247,6 +250,7 @@ func (this *ResKey) getSqler() *util.Sqler {
 	}
 	return sqler
 }
+
 
 func GetResByResId(id int64) (*Res, error) {
 	key := &ResKey{Res:Res{Id:id}}
