@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -120,20 +119,61 @@
     }
 </script>
 
-<div id="dlg" class="easyui-dialog" style="width:400px"
-     closed="true" buttons="#dlg-buttons" data-options="modal:true">
+<div id="dlg" class="easyui-dialog" style="width:400px" closed="true" buttons="#dlg-buttons" data-options="modal:true">
     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">详情信息</div>
         <div style="margin-bottom:10px">
-            <input id="cc" name="pid" class="easyui-combobox" label="上级资源:"
-                   data-options="valueField:'id',textField:'text',url:'/resSelects',method:'get'"
-                   style="width:100%;">
+            <input id="cc" name="pid" class="easyui-combobox" style="width:100%;"
+                   data-options="
+                   label:'上级资源',
+                   valueField:'id',
+                   textField:'text',
+                   url:'/resSelects',
+                   method:'get',
+                   panelHeight:'auto'">
         </div>
         <div style="margin-bottom:10px">
-            <input name="res_name" class="easyui-textbox" required="true" label="资源名称:" style="width:100%">
+            <input name="res_name" class="easyui-textbox" style="width:100%"
+                   data-options="label:'资源名称:', required:true">
+        </div>
+        <div id="div_res_type" style="margin-bottom: 10px">
+            <input name="res_type" class="easyui-combobox" style="width: 100%"
+                   data-options="
+                    label:'资源类型',
+                    valueField:'value',
+                    textField:'text',
+                    value:0,
+                    required:true,
+                    panelHeight:'auto',
+                    data: [{
+                        value: '0',
+                        text: '菜单'
+                    },{
+                        value: '1',
+                        text: '操作'
+                    }],
+                    onChange:function(newValue, oldValue) {
+                        if (newValue == '0') {
+                            $('#path').textbox({disabled:false});
+                        } else {
+                            $('#path').textbox({value:'',disabled:true});
+                        }
+                    }">
         </div>
         <div style="margin-bottom:10px">
-            <input name="path" class="easyui-textbox" label="资源路径:" style="width:100%">
+            <input id="path" name="path" class="easyui-textbox" style="width:100%"
+                   data-options="
+                   label:'资源路径'">
+        </div>
+        <div style="margin-bottom:10px">
+            <input name="seq" class="easyui-numberspinner" style="width:100%;"
+                   data-options="
+                   label:'资源顺序:',
+                   value:0,
+                   min:0,
+                   increment:1,
+                   editable:false,
+                   required:true">
         </div>
     </form>
 </div>
@@ -150,7 +190,7 @@
     var url;
     function add() {
         $('#dlg').dialog('open').dialog('center').dialog('setTitle', '添加');
-        $('#fm').form('clear');
+//        $('#fm').form('clear');
         url = base;
     }
 

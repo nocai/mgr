@@ -21,16 +21,16 @@ func (ctr *ResController) Get() {
 	resName := ctr.GetString("resName")
 	path := ctr.GetString("path")
 	pid, _ := ctr.GetInt64("pid", 0)
+	seq, _ := ctr.GetInt("seq", 0)
 
 	sort := ctr.GetString("sort", "id")
 	order := ctr.GetString("order", "desc")
 
-	key := &models.ResKey{Key:util.NewKey(page, rows, []string{sort}, []string{order}, true), Res:models.Res{ResName:resName, Path:path, Pid:pid}}
-	pager, err := models.PageRes(key)
-	if err != nil {
-		beego.Error(err)
-	}
-	ctr.Print(pager.Pagination)
+	key := &models.ResKey{}
+	key.Key = util.NewKey(page, rows, []string{sort}, []string{order}, true)
+	key.Res = models.Res{ResName:resName, Path:path, Pid:pid, Seq:seq}
+	pager := models.PageRes(key)
+	ctr.Print(pager)
 }
 
 func updateRes(id, pid int64, resName, path string) error {
@@ -55,10 +55,12 @@ func (ctr *ResController) Post() {
 	resName := ctr.GetString("res_name")
 	path := ctr.GetString("path")
 
-	if id == 0 {// 添加
+	if id == 0 {
+		// 添加
 		res := models.Res{Id:id, ResName:resName, Path:path, Pid:pid}
 		ctr.PrintError(models.InsertRes(&models.ResVo{Res:res}))
-	} else {// 修改
+	} else {
+		// 修改
 		ctr.PrintError(updateRes(id, pid, resName, path))
 	}
 }

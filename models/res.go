@@ -163,7 +163,7 @@ func existOfResName(id int64, resName string) (bool, error) {
 	return false, nil
 }
 
-func PageRes(key *ResKey) (*util.Pager, error) {
+func PageRes(key *ResKey) (*util.Pager) {
 	o := orm.NewOrm()
 	sqler := key.getSqler()
 
@@ -171,21 +171,19 @@ func PageRes(key *ResKey) (*util.Pager, error) {
 	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&total)
 	if err != nil {
 		beego.Error(err)
-		return util.NewPager(key.Key, 0, make([]Res, 0)), ErrQuery
+		return util.NewPager(key.Key, 0, make([]Res, 0))
 	}
-	if total == 0 {
-		return util.NewPager(key.Key, 0, make([]Res, 0)), nil
-	}
+	//if total == 0 {
+	//	beego.Info("aaaaa")
+	//	return util.NewPager(key.Key, 0, make([]Res, 0))
+	//}
 
-	var res []Res
-	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&res)
+	ress, err := FindResByKey(key)
 	if err != nil {
 		beego.Error(err)
-		return util.NewPager(key.Key, total, make([]Res, 0)), ErrQuery
+		return util.NewPager(key.Key, total, make([]Res, 0))
 	}
-
-	beego.Debug(fmt.Sprintf("affected = %v", affected))
-	return util.NewPager(key.Key, total, res), nil
+	return util.NewPager(key.Key, total, ress)
 }
 
 type ResKey struct {
