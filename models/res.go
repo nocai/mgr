@@ -173,10 +173,6 @@ func PageRes(key *ResKey) (*util.Pager) {
 		beego.Error(err)
 		return util.NewPager(key.Key, 0, make([]Res, 0))
 	}
-	//if total == 0 {
-	//	beego.Info("aaaaa")
-	//	return util.NewPager(key.Key, 0, make([]Res, 0))
-	//}
 
 	ress, err := FindResByKey(key)
 	if err != nil {
@@ -248,7 +244,6 @@ func (this *ResKey) getSqler() *util.Sqler {
 	}
 	return sqler
 }
-
 
 func GetResByResId(id int64) (*Res, error) {
 	key := &ResKey{Res:Res{Id:id}}
@@ -325,7 +320,9 @@ func DeleteResById(id int64) error {
 
 type ResVo struct {
 	Res
-	Children []ResVo
+	ResTypeDesc string
+
+	Children    []ResVo
 }
 
 func FindResVoByKey(key *ResKey, cascade bool) ([]ResVo, error) {

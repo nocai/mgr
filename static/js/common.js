@@ -26,8 +26,11 @@ Date.prototype.format = function (fmt) {
 
 //弹框
 $.extend({
-    show_alert: function (strTitle, strMsg) {
-        $.messager.alert(strTitle, strMsg);
+    alertMsg: function (msg) {
+        $.messager.show({
+            title: '系统提示',
+            msg: msg
+        });
     }
 });
 

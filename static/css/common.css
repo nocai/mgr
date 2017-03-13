@@ -1,0 +1,14 @@
+.easyui-dialog form {
+    margin: 0;
+    padding: 20px 50px;
+}
+
+.easyui-dialog form div {
+    margin-bottom: 10px;
+}
+
+.easyui-dialog form div:first-child {
+    margin-bottom: 20px;
+    font-size: 14px;
+    border-bottom: 1px solid #ccc;
+}

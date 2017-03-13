@@ -1,144 +1,62 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
     <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/themes/icon.css">
     <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/demo/demo.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/common.css">
 
     <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.min.js"></script>
     <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
     <script type="text/javascript" src="/static/jquery-easyui-1.5.1/plugins/datagrid-detailview.js"></script>
 
     <script type="text/javascript" src="/static/js/common.js"></script>
+    <script type="text/javascript" src="home.js"></script>
 </head>
 
 <body>
 <table id="dg"></table>
 <div id="toolbar">
-    资源名称: <input id="resName" class="easyui-textbox" style="width:110px">
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
+    资源名称: <input id="resName" class="easyui-textbox">
+    <a href="javascript:void(0)" class="easyui-linkbutton"
+       data-options="iconCls:'icon-search'"
+       onclick="query();">查询</a>
     <div style="float:right">
-        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">编辑</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true"
+        <a href="javascript:void(0)" class="easyui-linkbutton"
+           data-options="iconCls:'icon-add',plain:true"
+           onclick="add()">添加</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"
+           data-options="iconCls:'icon-edit',plain:true"
+           onclick="edit()">编辑</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"
+           data-options="iconCls:'icon-remove',plain:true"
            onclick="destroy()">删除</a>
     </div>
 </div>
 
-<script>
-    var dg = $('#dg').datagrid({
-        url: '/res?pid=-1',
-        pagination: true,
-        fitColumns: true,
-        rownumbers: true,
-        fit: true,
-        toolbar: '#toolbar',
-        method: 'get',
-        singleSelect: true,
-        columns: [[
-            {field: 'id', title: 'Id', sortable: true},
-            {field: 'res_name', title: '角色名', width: 100, sortable: true},
-            {field: 'path', title: '路径', width: 100, sortable: true},
-            {
-                field: 'create_time', title: '创建时间', width: 100, sortable: true,
-                formatter: function (value, row, index) {
-                    return new Date(value).format("yyyy-MM-dd hh:mm:ss");
-                }
-            },
-            {
-                field: 'update_time', title: '最后一次更新时间', width: 100, sortable: true,
-                formatter: function (value, row, index) {
-                    return new Date(value).format("yyyy-MM-dd hh:mm:ss");
-                }
-            }
-        ]],
-        onSelect: function (rowIndex, rowData) {
-            $('table.ddv.datagrid-f').each(function (index, ddv) {
-                $(ddv).datagrid('unselectAll');
-            });
-        },
-        view: detailview,
-        detailFormatter: function (index, row) {
-            return '<div style="padding:2px"><table class="ddv"></table></div>';
-        },
-        onExpandRow: function (index, row) {
-            var ddv = $(this).datagrid('getRowDetail', index).find('table.ddv');
-            ddv.datagrid({
-                method: 'get',
-                url: '/res?pid=' + row.id,
-                fitColumns: true,
-                singleSelect: true,
-                loadMsg: '',
-                height: 'auto',
-                columns: [[
-                    {field: 'id', title: 'Id', sortable: true},
-                    {field: 'res_name', title: '角色名', width: 100, sortable: true},
-                    {field: 'path', title: '路径', width: 100, sortable: true},
-                    {
-                        field: 'create_time', title: '创建时间', width: 100, sortable: true,
-                        formatter: function (value, row, index) {
-                            return new Date(value).format("yyyy-MM-dd hh:mm:ss");
-                        }
-                    },
-                    {
-                        field: 'update_time', title: '最后一次更新时间', width: 100, sortable: true,
-                        formatter: function (value, row, index) {
-                            return new Date(value).format("yyyy-MM-dd hh:mm:ss");
-                        }
-                    }
-                ]],
-                onResize: function () {
-                    $('#dg').datagrid('fixDetailRowHeight', index);
-                },
-                onLoadSuccess: function () {
-                    setTimeout(function () {
-                        $('#dg').datagrid('fixDetailRowHeight', index);
-                    }, 0);
-                },
-                onSelect: function (rowIndex, rowData) {
-                    var cur = this;
-                    $('table.ddv.datagrid-f').each(function (index, item) {
-                        if (cur != item) {
-                            $(item).datagrid('unselectAll');
-                        }
-                    });
-                    dg.datagrid('unselectAll');
-                },
-            });
-            $('#dg').datagrid('fixDetailRowHeight', index);
-        }
-    });
-
-    function query() {
-        $('#dg').datagrid({
-            queryParams: {
-                resName: $('#resName').val()
-            }
-        });
-    }
-</script>
-
-<div id="dlg" class="easyui-dialog" style="width:400px" closed="true" buttons="#dlg-buttons" data-options="modal:true">
-    <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">详情信息</div>
-        <div style="margin-bottom:10px">
-            <input id="cc" name="pid" class="easyui-combobox" style="width:100%;"
+<div id="dlg" class="easyui-dialog"
+     data-options="modal:true,closed:true,buttons:'#dlg-buttons',width:'400px'">
+    <form id="fm" method="post">
+        <div style="">详情信息</div>
+        <div>
+            <input id="cc" name="pid" class="easyui-combobox"
                    data-options="
+                   editable:false,
+                   width:'100%',
                    label:'上级资源',
-                   valueField:'id',
-                   textField:'text',
                    url:'/resSelects',
                    method:'get',
                    panelHeight:'auto'">
         </div>
-        <div style="margin-bottom:10px">
-            <input name="res_name" class="easyui-textbox" style="width:100%"
-                   data-options="label:'资源名称:', required:true">
+        <div>
+            <input name="res_name" class="easyui-textbox"
+                   data-options="width:'100%', label:'资源名称:', required:true">
         </div>
         <div id="div_res_type" style="margin-bottom: 10px">
-            <input name="res_type" class="easyui-combobox" style="width: 100%"
+            <input id="res_type" name="res_type" class="easyui-combobox"
                    data-options="
+                    width:'100%',
                     label:'资源类型',
                     valueField:'value',
                     textField:'text',
@@ -160,14 +78,14 @@
                         }
                     }">
         </div>
-        <div style="margin-bottom:10px">
-            <input id="path" name="path" class="easyui-textbox" style="width:100%"
-                   data-options="
-                   label:'资源路径'">
+        <div>
+            <input id="path" name="path" class="easyui-textbox"
+                   data-options="width:'100%', label:'资源路径'">
         </div>
-        <div style="margin-bottom:10px">
-            <input name="seq" class="easyui-numberspinner" style="width:100%;"
+        <div>
+            <input id="seq" name="seq" class="easyui-numberspinner"
                    data-options="
+                   width:'100%',
                    label:'资源顺序:',
                    value:0,
                    min:0,
@@ -183,96 +101,6 @@
     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"
        onclick="javascript:$('#dlg').dialog('close')" style="width:90px">取消</a>
 </div>
-
-
-<script>
-    var base = '/res/';
-    var url;
-    function add() {
-        $('#dlg').dialog('open').dialog('center').dialog('setTitle', '添加');
-//        $('#fm').form('clear');
-        url = base;
-    }
-
-    function edit() {
-        var row = $('#dg').datagrid('getSelected');
-        if (row == null) {
-            $('table.ddv.datagrid-f').each(function (index, item) {
-                row = $(item).datagrid('getSelected');
-            });
-        }
-        if (row) {
-            $('#fm').form('clear');
-            $('#dlg').dialog('open').dialog('center').dialog('setTitle', '编辑');
-            if (row.pid == -1) {
-                $('#fm').form('load', {
-                    res_name: row.res_name,
-                    path: row.path
-                })
-            } else {
-                $('#fm').form('load', row);
-            }
-            url = base + row.id;
-        }
-    }
-
-    function save() {
-        $('#fm').form('submit', {
-            url: url,
-            onSubmit: function () {
-                if ($(this).form('validate')) {
-                    $.messager.progress();
-                    return true;
-                }
-                return false;
-            },
-            success: function (result) {
-                $.messager.progress('close');
-                var result = eval('(' + result + ')');
-                if (result.ok) {
-                    $('#cc').combobox('reload');
-                    $('#dlg').dialog('close');        // close the dialog
-                    $('#dg').datagrid('reload');    // reload the user data
-                } else {
-                    $.messager.show({
-                        title: '系统提示',
-                        msg: result.msg
-                    });
-                }
-            }
-        });
-    }
-
-    function destroy() {
-        var row = $('#dg').datagrid('getSelected');
-        if (row == null) {
-            $('table.ddv.datagrid-f').each(function (index, item) {
-                row = $(item).datagrid('getSelected');
-            });
-        }
-        if (row) {
-            $.messager.confirm('系统提醒', '您确定删除这条数据吗?', function (r) {
-                if (r) {
-                    $.messager.progress();
-                    $.ajax({
-                        url: base + row.id,
-                        type: 'DELETE',
-                        dataType: 'json',
-                        success: function (result) {
-                            $.messager.progress('close');
-                            if (result.ok) {
-                                $('#dg').datagrid('reload');    // reload the user data
-                            } else {
-                                $.messager.show({    // show error message
-                                    title: '系统提示',
-                                    msg: result.msg
-                                });
-                            }
-                        }
-                    });
-                }
-            });
-        }
-    }
-</script>
 </body>
+
+</html>
