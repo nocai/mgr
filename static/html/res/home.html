@@ -21,17 +21,17 @@
     资源名称: <input id="resName" class="easyui-textbox">
     <a href="javascript:void(0)" class="easyui-linkbutton"
        data-options="iconCls:'icon-search'"
-       onclick="query();">查询</a>
+       onclick="resHomePage.query({resName: $('#resName').val()});">查询</a>
     <div style="float:right">
         <a href="javascript:void(0)" class="easyui-linkbutton"
            data-options="iconCls:'icon-add',plain:true"
-           onclick="add()">添加</a>
+           onclick="resHomePage.add()">添加</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"
            data-options="iconCls:'icon-edit',plain:true"
-           onclick="edit()">编辑</a>
+           onclick="resHomePage.edit()">编辑</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"
            data-options="iconCls:'icon-remove',plain:true"
-           onclick="destroy()">删除</a>
+           onclick="resHomePage.destroy()">删除</a>
     </div>
 </div>
 
@@ -56,6 +56,7 @@
         <div id="div_res_type" style="margin-bottom: 10px">
             <input id="res_type" name="res_type" class="easyui-combobox"
                    data-options="
+                   editable:false,
                     width:'100%',
                     label:'资源类型',
                     valueField:'value',
@@ -96,10 +97,9 @@
     </form>
 </div>
 <div id="dlg-buttons">
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()"
-       style="width:90px">保存</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"
-       onclick="javascript:$('#dlg').dialog('close')" style="width:90px">取消</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="resHomePage.save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'"
+       onclick="javascript:$('#dlg').dialog('close')">取消</a>
 </div>
 </body>
 
