@@ -8,25 +8,31 @@ import (
 	"strconv"
 )
 
+type PrivilegeOperation int
+
 const (
 	// 开启
-	PrivilegeOperation_Enable = iota
+	PrivilegeOperation_Enable PrivilegeOperation = iota
 	// 禁用
 	PrivilegeOperation_Disabled
 )
 
+type PrivilegeMaster int
+
 const (
 	// 角色
-	PrivilegeMaster_Role = iota
+	PrivilegeMaster_Role PrivilegeMaster = iota
 	// 用户
 	PrivilegeMaster_Admin
 )
 
+type PrivilegeAccess int
+
 const (
 	// 菜单
-	PrivilegeAccess_Menu = ResType_Menu
+	PrivilegeAccess_Menu PrivilegeAccess = iota
 	// 按钮
-	PrivilegeAccess_Button = ResType_Button
+	PrivilegeAccess_Button
 )
 
 // 某某主体 在 某某领域 有 某某权限
@@ -132,7 +138,7 @@ func FindResByAdminId(adminId int64) ([]Res, error) {
 // 取adminId所有权限
 func findResBelongAdmin(adminId int64) ([]Res, error) {
 
-	key := &PrivilegeKey{Privilege:Privilege{PrivilegeMaster:strconv.Itoa(PrivilegeMaster_Admin), PrivilegeMasterValue:adminId}}
+	key := &PrivilegeKey{Privilege:Privilege{PrivilegeMaster:strconv.Itoa(int(PrivilegeMaster_Admin)), PrivilegeMasterValue:adminId}}
 	privileges, err := FindPrivilegeByKey(key)
 	if err != nil {
 		beego.Error(err)
@@ -162,7 +168,7 @@ func findResBelongRole(adminId int64) ([]Res, error) {
 
 	result := []Res{}
 	for _, role := range roles {
-		key := &PrivilegeKey{Privilege:Privilege{PrivilegeMaster:strconv.Itoa(PrivilegeMaster_Role), PrivilegeAccessValue:role.Id}}
+		key := &PrivilegeKey{Privilege:Privilege{PrivilegeMaster:strconv.Itoa(int(PrivilegeMaster_Role)), PrivilegeAccessValue:role.Id}}
 		privileges, err := FindPrivilegeByKey(key)
 		if err != nil {
 			beego.Error(err)

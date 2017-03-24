@@ -11,9 +11,11 @@ import (
 	"sort"
 )
 
+type ResType int
+
 const (
 	// 菜单
-	ResType_Menu = iota
+	ResType_Menu ResType = iota
 	// 操作
 	ResType_Button
 )
@@ -29,7 +31,7 @@ type Res struct {
 	Id      int64 `json:"id"`
 	ResName string `json:"res_name"`
 	Path    string `json:"path"`
-	ResType int `json:"res_type"`
+	ResType ResType `json:"res_type"`
 	Seq     int `seq`
 
 	Pid     int64 `json:"pid"`
