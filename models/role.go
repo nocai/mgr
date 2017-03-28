@@ -142,6 +142,13 @@ func InsertRole(role *Role) error {
 		return ErrRoleNameExist
 	}
 
+	if role.CreateTime.IsZero() {
+		role.CreateTime = time.Now()
+	}
+	if role.UpdateTime.IsZero() {
+		role.UpdateTime = time.Now()
+	}
+
 	id, err := ormer.Insert(role)
 	if err != nil {
 		beego.Error(err)
