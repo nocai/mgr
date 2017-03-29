@@ -8,12 +8,17 @@ import (
 type Menu util.TreeNode
 
 type menuGenerator struct {
-	ress     []Res
+	Ress     []Res
 	menuRess []Res
 	topRess  []ResVo
 }
 
-func (this *menuGenerator) generate() []util.TreeNode {
+
+func  NewMenuGenerator(ress []Res) (*menuGenerator) {
+	return &menuGenerator{Ress:ress}
+}
+
+func (this *menuGenerator) Generate() []util.TreeNode {
 	this.findMenuRess()
 	this.assembleTrees()
 	return findMenuTrees(this.topRess)
@@ -33,11 +38,11 @@ func findMenuTrees(ress []ResVo) []util.TreeNode {
 }
 
 func (this *menuGenerator) findMenuRess() {
-	if this.ress == nil {
+	if this.Ress == nil {
 		panic("ress is nil")
 	}
 
-	for _, res := range this.ress {
+	for _, res := range this.Ress {
 		if res.ResType == ResType_Menu {
 			this.menuRess = append(this.menuRess, res)
 		}
