@@ -17,10 +17,10 @@ func (ctr *NavController) Get() {
 		beego.Error(err)
 	}
 
-	//trees := toTrees(ress)
-	//ctr.Print(trees)
+	trees := toTrees(ress)
+	ctr.Print(trees)
 
-	ctr.Print(models.NewMenuGenerator([]models.Res(ress)).Generate())
+	//ctr.Print(models.NewMenuGenerator([]models.Res(ress)).Generate())
 
 }
 
