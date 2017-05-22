@@ -6,6 +6,7 @@ import (
 	"mgr/util/key"
 )
 
+// 系统角色
 type Role struct {
 	ModelBase
 

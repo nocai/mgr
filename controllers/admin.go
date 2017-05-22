@@ -1,34 +1,34 @@
 package controllers
+
+import (
+	"mgr/conf"
+	"mgr/models"
+	"github.com/astaxie/beego"
+	"mgr/util/key"
+	"mgr/models/service/admin"
+)
+type AdminController struct {
+	BaseController
+}
 //
-//import (
-//	"github.com/astaxie/beego"
-//	"mgr/conf"
-//	"mgr/util"
-//	"mgr/models"
-//	"fmt"
-//)
-//
-//type AdminController struct {
-//	BaseController
-//}
-//
-//func (ctr *AdminController) Get() {
-//	ctr.debugInput()
-//
-//	page, _ := ctr.GetInt64("page", conf.Page)
-//	rows, _ := ctr.GetInt64("rows", conf.Rows)
-//
-//	sort := ctr.GetString("sort")
-//	order := ctr.GetString("order")
-//
-//	adminName := ctr.GetString("admin_name")
-//	key := util.NewKey(page, rows, []string{sort}, []string{order}, true)
-//	pager, err := models.PageAdmin(&models.AdminKey{Key:key, Admin:models.Admin{AdminName:adminName}})
-//	if err != nil {
-//		beego.Error(err)
-//	}
-//	ctr.Print(pager)
-//}
+func (ctr *AdminController) Get() {
+	ctr.debugInput()
+
+	page, _ := ctr.GetInt64("page", conf.Page)
+	rows, _ := ctr.GetInt64("rows", conf.Rows)
+
+	sort := ctr.GetString("sort")
+	order := ctr.GetString("order")
+
+	adminName := ctr.GetString("admin_name")
+	key := key.New(page, rows, []string{sort}, []string{order}, true)
+	_admin := &models.Admin{AdminName:adminName}
+	pager, err := admin.PageAdmin(&models.AdminKey{Key:key, Admin:_admin})
+	if err != nil {
+		beego.Error(err)
+	}
+	ctr.Print(pager)
+}
 //
 //func addAdmin(adminName, username, password string) error {
 //	user := models.User{Username:username, Password:password}
