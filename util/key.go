@@ -55,6 +55,9 @@ func (key *Key) getLimitSql() string {
 	return ""
 }
 
+func (key *Key) NewSqler() *Sqler {
+	return &Sqler{Key:key}
+}
 func NewKey(page, rows int64, sort, order []string, isPage bool) *Key {
 	if len(sort) != len(order) {
 		panic("sort 与 order 长度不相等")

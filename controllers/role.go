@@ -7,6 +7,7 @@ import (
 	"time"
 	"mgr/conf"
 	"fmt"
+	"mgr/models/service/role"
 )
 
 type RoleController struct {
@@ -20,7 +21,7 @@ func (ctr *RoleController) Delete() {
 	id, _ := ctr.GetInt64(":id", 0)
 	beego.Error(id)
 
-	err := models.DeleteRoleById(id)
+	err := role.DeleteRoleById(id)
 	ctr.PrintError(err)
 }
 
@@ -39,19 +40,19 @@ func (ctr *RoleController) Post() {
 }
 
 func updateRole(id int64, roleName string) error {
-	role, err := models.GetRoleById(id)
+	r, err := role.GetRoleById(id)
 	if err != nil {
 		return err
 	}
-	role.RoleName = roleName
-	role.UpdateTime = time.Now()
-	err = models.UpdateRole(role)
+	r.RoleName = roleName
+	r.UpdateTime = time.Now()
+	err = role.UpdateRole(r)
 	return err
 }
 
 func addRole(roleName string) error {
-	role := &models.Role{RoleName:roleName}
-	return models.InsertRole(role);
+	r := &models.Role{RoleName:roleName}
+	return role.InsertRole(r);
 }
 
 func (ctr *RoleController) Get() {
@@ -65,7 +66,7 @@ func (ctr *RoleController) Get() {
 	roleName := ctr.GetString("role_name")
 
 	key := util.NewKey(page, rows, []string{sort}, []string{order}, true)
-	pager, err := models.PageRole(&models.RoleKey{Key:key, Role:models.Role{RoleName:roleName}})
+	pager, err := role.PageRole(&models.RoleKey{Key:key, Role:models.Role{RoleName:roleName}})
 	if err != nil {
 		beego.Error(err)
 	}
