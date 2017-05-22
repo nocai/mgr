@@ -21,7 +21,7 @@ func (role *Role) TableIndex() [][]string {
 }
 
 type RoleKey struct {
-	key.Key
+	*key.Key
 	*Role
 
 	CreateTimeStart time.Time
@@ -32,7 +32,7 @@ type RoleKey struct {
 }
 
 func (this *RoleKey) NewSqler() *sqler.Sqler {
-	sqler := sqler.New(this)
+	sqler := sqler.New(this.Key)
 	sqler.AppendSql("select * from t_mgr_role as tmr where 1 = 1")
 	if id := this.Id; id != 0 {
 		sqler.AppendSql(" and tmr.id = ?")

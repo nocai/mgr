@@ -15,7 +15,7 @@ type Pager struct {
 }
 
 // New
-func New(k key.Key, total int64, pageList interface{}) *Pager {
+func New(k *key.Key, total int64, pageList interface{}) *Pager {
 	var pageCount int64
 	if total % k.GetRows() == 0 {
 		pageCount = total / k.GetRows()

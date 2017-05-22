@@ -66,7 +66,8 @@ func (ctr *RoleController) Get() {
 	roleName := ctr.GetString("role_name")
 
 	key := key.New(page, rows, []string{sort}, []string{order}, true)
-	roleKey := &models.RoleKey{Key:key, Role:&models.Role{RoleName:roleName}}
+	r := &models.Role{RoleName:roleName}
+	roleKey := &models.RoleKey{Key:key, Role:r}
 	pager, err := role.PageRole(roleKey)
 	if err != nil {
 		beego.Error(err)

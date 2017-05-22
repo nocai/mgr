@@ -6,7 +6,7 @@ import (
 )
 
 type Sqler struct {
-	key  key.Key // Has a key
+	key  *key.Key // Has a key
 
 	sql  bytes.Buffer
 	args []interface{}
@@ -60,6 +60,6 @@ func (sqler *Sqler) isEmptySql() bool {
 	return sqler.sql.Len() == 0
 }
 
-func New(key key.Key) *Sqler {
+func New(key *key.Key) *Sqler {
 	return &Sqler{key:key}
 }

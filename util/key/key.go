@@ -6,14 +6,14 @@ import (
 	"bytes"
 )
 
-type Key interface {
-	GetPage() int64
-	GetRows() int64
-	GetOrderBySql() string
-	GetLimitSql() string
-}
+//type Key interface {
+//	GetPage() int64
+//	GetRows() int64
+//	GetOrderBySql() string
+//	GetLimitSql() string
+//}
 
-type k struct {
+type Key struct {
 	page   int64
 	rows   int64
 
@@ -23,15 +23,15 @@ type k struct {
 	isPage bool
 }
 
-func (key k) GetPage() int64 {
+func (key Key) GetPage() int64 {
 	return key.page
 }
 
-func (key k) GetRows() int64 {
+func (key Key) GetRows() int64 {
 	return key.rows
 }
 
-func (key *k) GetOrderBySql() string {
+func (key *Key) GetOrderBySql() string {
 	if len(key.sort) > 0 && len(key.order) > 0 {
 		var sql bytes.Buffer
 		sql.WriteString(" order by")
@@ -56,7 +56,7 @@ func (key *k) GetOrderBySql() string {
 	return ""
 }
 
-func (key *k) GetLimitSql() string {
+func (key *Key) GetLimitSql() string {
 	if key.isPage {
 		if key.page <= 0 {
 			key.page = conf.Page
@@ -70,9 +70,9 @@ func (key *k) GetLimitSql() string {
 	return ""
 }
 
-func New(page, rows int64, sort, order []string, isPage bool) Key {
+func New(page, rows int64, sort, order []string, isPage bool) *Key {
 	if len(sort) != len(order) {
 		panic("sort 与 order 长度不相等")
 	}
-	return &k{page:page, rows:rows, sort:sort, order:order, isPage:isPage}
+	return &Key{page:page, rows:rows, sort:sort, order:order, isPage:isPage}
 }

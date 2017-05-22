@@ -135,16 +135,16 @@ func PageRole(key *models.RoleKey) (*pager.Pager, error) {
 	total, err := countRoleByKey(key)
 	if err != nil {
 		beego.Error(err)
-		return pager.New(key, 0, []models.Role{}), err
+		return pager.New(key.Key, 0, []models.Role{}), err
 	}
 
 	roles, err := FindRoleByKey(key)
 	if err != nil {
 		beego.Error(err)
-		return pager.New(key, 0, []models.Role{}), err
+		return pager.New(key.Key, 0, []models.Role{}), err
 	}
 
-	return pager.New(key, total, roles), nil
+	return pager.New(key.Key, total, roles), nil
 }
 
 func countRoleByKey(key *models.RoleKey) (int64, error) {
