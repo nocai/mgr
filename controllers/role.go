@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"mgr/util"
 	"mgr/models"
 	"github.com/astaxie/beego"
 	"time"
 	"mgr/conf"
 	"fmt"
 	"mgr/models/service/role"
+	"mgr/util/key"
 )
 
 type RoleController struct {
@@ -65,8 +65,9 @@ func (ctr *RoleController) Get() {
 
 	roleName := ctr.GetString("role_name")
 
-	key := util.NewKey(page, rows, []string{sort}, []string{order}, true)
-	pager, err := role.PageRole(&models.RoleKey{Key:key, Role:models.Role{RoleName:roleName}})
+	key := key.New(page, rows, []string{sort}, []string{order}, true)
+	roleKey := &models.RoleKey{Key:key, Role:&models.Role{RoleName:roleName}}
+	pager, err := role.PageRole(roleKey)
 	if err != nil {
 		beego.Error(err)
 	}

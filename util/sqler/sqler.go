@@ -1,14 +1,22 @@
-package util
+package sqler
 
-import "bytes"
+import (
+	"bytes"
+	"mgr/util/key"
+)
 
 type Sqler struct {
-	*Key
+	key  key.Key // Has a key
 
 	sql  bytes.Buffer
 	args []interface{}
 }
 
+func (sqler *Sqler) GetCountSqlAndArgs() (string, []interface{}) {
+	sql := sqler.GetCountSql()
+	args := sqler.GetArgs();
+	return sql, args
+}
 
 func (sqler *Sqler) GetCountSql() string {
 	if sqler.isEmptySql() {
@@ -22,13 +30,19 @@ func (sqler *Sqler) AppendSql(sql string) *Sqler {
 	return sqler
 }
 
+func (sqler *Sqler) GetSqlAndArgs() (string, []interface{}) {
+	sql := sqler.GetSql()
+	args := sqler.GetArgs()
+	return sql, args
+}
+
 func (sqler *Sqler) GetSql() string {
 	if sqler.isEmptySql() {
 		return ""
 	}
 	sql := sqler.sql.String()
-	if sqler.Key != nil {
-		sql += sqler.Key.getOrderBySql() + sqler.Key.getLimitSql()
+	if sqler.key != nil {
+		sql += sqler.key.GetOrderBySql() + sqler.key.GetLimitSql()
 	}
 	return sql
 }
@@ -44,4 +58,8 @@ func (sqler *Sqler) GetArgs() []interface{} {
 
 func (sqler *Sqler) isEmptySql() bool {
 	return sqler.sql.Len() == 0
+}
+
+func New(key key.Key) *Sqler {
+	return &Sqler{key:key}
 }
