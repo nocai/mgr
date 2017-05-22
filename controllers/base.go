@@ -65,7 +65,6 @@ func (this *BaseController) PrintOk() {
 	this.printJson(true, "操作成功", nil)
 }
 
-
 func (this *BaseController) PrintFail() {
 	this.printJson(false, "系统异常", nil)
 }
@@ -83,7 +82,6 @@ func (this *BaseController) Print(data interface{}) {
 
 func (this *BaseController) PrintError(err error) {
 	if err != nil {
-		beego.Error(err)
 		this.printJson(false, err.Error(), nil)
 	} else {
 		this.PrintOk()

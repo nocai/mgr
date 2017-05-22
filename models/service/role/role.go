@@ -164,6 +164,7 @@ func countRoleByKey(key *models.RoleKey) (int64, error) {
 // The key:see models.RoleKey
 // If no row in he database, the method will return empty slice and nil error
 func FindRoleByKey(key *models.RoleKey) ([]models.Role, error) {
+	beego.Info(key)
 	o := orm.NewOrm()
 	sqler := key.NewSqler()
 
