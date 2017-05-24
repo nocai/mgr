@@ -31,7 +31,7 @@ func (user *User) TableUnique() [][]string {
 
 type UserKey struct {
 	*key.Key
-	User
+	*User
 
 	CreateTimeStart time.Time
 	CreateTimeEnd   time.Time

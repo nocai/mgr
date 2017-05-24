@@ -11,7 +11,7 @@ func init() {
 	orm.RegisterDataBase("default", "mysql", "root:root@/mgr?charset=utf8", 30)
 	// register model
 	//orm.RegisterModelWithPrefix("t_mgr_", new(User), new(role.Role), new(AdminRoleRef), new(Admin), new(Res))
-	orm.RegisterModelWithPrefix("t_mgr_", new(Role))
+	orm.RegisterModelWithPrefix("t_mgr_", new(Role), new(User), new(Admin))
 
 	// create table
 	orm.RunSyncdb("default", false, true)

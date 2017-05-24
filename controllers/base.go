@@ -54,7 +54,10 @@ func (controller *BaseController) debugInput() {
 //	}
 //	return ""
 //}
-
+const (
+	OK_MSG = "操作成功"
+	FAIL_MSG = "系统异常"
+)
 type JsonMsg struct {
 	Ok   bool `json:"ok"`
 	Msg  string `json:"msg"`
@@ -62,11 +65,11 @@ type JsonMsg struct {
 }
 
 func (this *BaseController) PrintOk() {
-	this.printJson(true, "操作成功", nil)
+	this.printJson(true, OK_MSG, nil)
 }
 
 func (this *BaseController) PrintFail() {
-	this.printJson(false, "系统异常", nil)
+	this.printJson(false, FAIL_MSG, nil)
 }
 
 func (this *BaseController) printJson(ok bool, msg string, data interface{}) {
@@ -85,6 +88,18 @@ func (this *BaseController) PrintError(err error) {
 		this.printJson(false, err.Error(), nil)
 	} else {
 		this.PrintOk()
+	}
+}
+
+func (this *BaseController) PrintResult(data interface{}, err error) {
+	if err != nil {
+		this.printJson(false, err.Error(), nil)
+	} else {
+		if data != nil {
+			this.Print(data)
+		} else {
+			this.PrintOk()
+		}
 	}
 }
 

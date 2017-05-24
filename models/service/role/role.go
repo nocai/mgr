@@ -53,25 +53,18 @@ func GetRoleById(id int64) (*models.Role, error) {
 // isExistOfRole.
 // When the error != nil, the bool is invalid.
 func isExistOfRole(role *models.Role) (bool, error) {
-	beego.Info(fmt.Sprintf("检查角色名是否存在:role = %v", role))
-	if role.RoleName == "" {
-		beego.Debug(service.ErrArgument, fmt.Sprintf("role.RoleName = %s", role.RoleName))
-		return false, service.ErrArgument
-	}
-
-	r, err := GetRoleByRoleName(role.RoleName)
+	key := &models.RoleKey{Role:role}
+	roles, err := FindRoleByKey(key)
 	if err != nil {
-		if err == orm.ErrNoRows {
-			return false, nil
-		} else {
-			beego.Error(err)
-			return false, err
-		}
+		beego.Error(err)
+		return false, err
 	}
 
-	if r.Id != role.Id {
-		beego.Debug(fmt.Sprintf("the role name is exist. id = %v, roleName = %v", r.Id, r.RoleName))
-		return true, nil
+	for _, _role := range roles {
+		if _role.Id != role.Id {
+			beego.Debug(fmt.Sprintf("the role is exist: role = %v", role))
+			return true, nil
+		}
 	}
 	return false, nil
 }

@@ -72,8 +72,8 @@ func (this *AdminKey) NewSqler() *sqler.Sqler {
 }
 
 type AdminVo struct {
-	Admin
+	*Admin
+	*User `orm:"-" json:"user"`
 
-	User  User `orm:"-" json:"user"`
 	Roles []Role `orm:"-" json:"roles"`
 }

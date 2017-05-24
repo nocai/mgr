@@ -1,4 +1,14 @@
 package admin
+
+import (
+	"mgr/models/service"
+	"fmt"
+	"github.com/astaxie/beego"
+	"mgr/models"
+	"github.com/astaxie/beego/orm"
+	"time"
+	"mgr/models/service/user"
+)
 //
 //import (
 //	"github.com/astaxie/beego"
@@ -95,43 +105,38 @@ package admin
 //	return pager.New(key.Key, p.Total, adminVos), nil
 //}
 //
-//func InsertAdminVo(admin *models.AdminVo) error {
-//	if admin == nil {
-//		return service.ErrArgument
-//	}
-//
-//	if isExistOfUser(&admin.User) {
-//		return ErrUsernameExist
-//	}
-//
-//	o := orm.NewOrm()
-//	o.Begin()
-//
-//	now := time.Now()
-//
-//	admin.User.CreateTime = now
-//	admin.User.UpdateTime = now
-//	id, err := o.Insert(&admin.User)
-//	if err != nil {
-//		beego.Error(err)
-//		o.Rollback()
-//		return service.ErrInsert
-//	}
-//	admin.UserId = id
-//	beego.Debug(fmt.Sprintf("UserId = %v", id))
-//
-//	admin.CreateTime = now
-//	admin.UpdateTime = now
-//	err = insertAdmin(o, &admin.Admin)
-//	if err != nil {
-//		o.Rollback()
-//		return service.ErrInsert
-//	}
-//
-//	o.Commit()
-//
-//	return nil
-//}
+func InsertAdminVo(admin *models.AdminVo) error {
+	if exist, err := user.IsExistOfUser(admin.User); err != nil && exist {
+		beego.Error(ErrUsernameExist)
+	}
+
+	o := orm.NewOrm()
+	o.Begin()
+
+	now := time.Now()
+	admin.User.CreateTime = now
+	admin.User.UpdateTime = now
+	id, err := o.Insert(admin.User)
+	if err != nil {
+		beego.Error(err)
+		o.Rollback()
+		return service.ErrInsert
+	}
+	admin.UserId = id
+	beego.Debug(fmt.Sprintf("UserId = %v", id))
+
+	admin.Admin.CreateTime = now
+	admin.Admin.UpdateTime = now
+	err = insertAdmin(o, admin.Admin)
+	if err != nil {
+		o.Rollback()
+		return service.ErrInsert
+	}
+
+	o.Commit()
+
+	return nil
+}
 //
 //func UpdateAdmin(admin *models.AdminVo) error {
 //	if admin == nil {

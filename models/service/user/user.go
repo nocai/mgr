@@ -49,7 +49,7 @@ func checkUser(user *models.User) error {
 		beego.Error("user.Username is nil")
 		return service.ErrArgument
 	}
-	if isExistOfUser(user) {
+	if exist, err := IsExistOfUser(user); err != nil && exist {
 		return service.ErrArgument
 	}
 
@@ -77,28 +77,35 @@ func GetUserById(id int64) (*models.User, error) {
 	return user, nil
 }
 
-func isExistOfUser(user *models.User) bool {
-	if temp, err := GetUserByUsername(user.Username); err == nil {
-		if temp.Id != user.Id {
-			beego.Info(fmt.Sprintf("用户名存在%v", user.Username))
-			return true
+func IsExistOfUser(user *models.User) (bool, error) {
+	userSlice, err := FindUserByKey(&models.UserKey{User:user})
+	if err != nil {
+		beego.Error(err)
+		return false, err
+	}
+
+	for _, _user := range userSlice {
+		if _user.Id == user.Id {
+			beego.Info("user exist:user = ", user)
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 func GetUserByUsername(username string) (*models.User, error) {
-	user := models.User{Username:username}
-	key := &models.UserKey{User:user}
-	users, err := FindUserByKey(key)
+	users, err := FindUserByKey(&models.UserKey{User:&models.User{Username:username}})
 	if err != nil {
-		if len(users) > 1 {
-			beego.Error(fmt.Sprintf("useranme重复：username = %v, 重复数据 = %v", username, users))
-		}
-		return &users[0], nil
+		beego.Error(err)
+		return nil, err
 	}
 
-	return &user, nil;
+	if len(users) == 0 {
+		return nil, orm.ErrNoRows
+	} else if len(users) > 1 {
+		beego.Error(service.ErrDataDuplication, fmt.Sprintf("username = %v, 重复数据 = %v", username, users))
+	}
+	return &users[0], nil
 }
 
 func PageUser(key *models.UserKey) (*pager.Pager, error) {
@@ -136,7 +143,7 @@ func FindUserByKey(key *models.UserKey) ([]models.User, error) {
 		beego.Error(err)
 		return users, service.ErrQuery
 	}
-	beego.Debug("affected = %v", affected)
+	beego.Debug("affected = ", affected)
 	if affected == 0 {
 		beego.Debug(orm.ErrNoRows)
 		return []models.User{}, nil
