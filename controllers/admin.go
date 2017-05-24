@@ -49,12 +49,11 @@ func (ctr *AdminController) Post() {
 	beego.Debug("id = ", id)
 
 	adminName := ctr.GetString("admin_name")
-	username := ctr.GetString("username")
 	password := ctr.GetString("password")
 
 	if id == 0 {
 		// 添加
-		adminVo := &models.AdminVo{Admin:  &models.Admin{AdminName: adminName}, User: &models.User{Username: username, Password: password}}
+		adminVo := &models.AdminVo{Admin:  &models.Admin{AdminName: adminName}, User: &models.User{Username: adminName, Password: password}}
 		ctr.PrintError(admin.InsertAdminVo(adminVo))
 	} else {
 		// 更新

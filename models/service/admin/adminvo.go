@@ -106,8 +106,13 @@ import (
 //}
 //
 func InsertAdminVo(admin *models.AdminVo) error {
-	if exist, err := user.IsExistOfUser(admin.User); err != nil && exist {
+	exist, err := user.IsExistOfUser(admin.User)
+	if err != nil {
+		beego.Error(err)
+		return err
+	} else if (exist) {
 		beego.Error(ErrUsernameExist)
+		return ErrUsernameExist
 	}
 
 	o := orm.NewOrm()

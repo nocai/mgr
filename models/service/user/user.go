@@ -85,8 +85,8 @@ func IsExistOfUser(user *models.User) (bool, error) {
 	}
 
 	for _, _user := range userSlice {
-		if _user.Id == user.Id {
-			beego.Info("user exist:user = ", user)
+		if _user.Id != user.Id {
+			beego.Info(fmt.Sprintf("user exist:user = %#v", _user))
 			return true, nil
 		}
 	}
