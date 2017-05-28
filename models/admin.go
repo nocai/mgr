@@ -6,6 +6,7 @@ import (
 	"mgr/util/key"
 )
 
+type NilBool *bool
 type Admin struct {
 	ModelBase
 
@@ -25,6 +26,7 @@ type AdminKey struct {
 	UpdateTimeStart time.Time
 	UpdateTimeEnd   time.Time
 	KeyWord         string
+	Invalid         NilBool
 }
 
 func (this *AdminKey) NewSqler() *sqler.Sqler {
@@ -66,8 +68,10 @@ func (this *AdminKey) NewSqler() *sqler.Sqler {
 		sqler.AppendArg("%" + keyWord + "%")
 	}
 
-	sqler.AppendSql(" and tma.invalid = ?")
-	sqler.AppendArg(this.Invalid)
+	if invalid := this.Invalid; invalid != nil {
+		sqler.AppendSql(" and tma.invalid = ?")
+		sqler.AppendArg(this.Invalid)
+	}
 	return sqler
 }
 

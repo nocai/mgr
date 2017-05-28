@@ -1,4 +1,4 @@
-package admin
+package adminser
 
 import (
 	"fmt"
@@ -64,15 +64,6 @@ func PageAdmin(key *models.AdminKey) (*pager.Pager, error) {
 }
 
 func InsertAdmin(admin *models.Admin) error {
-	return insertAdmin(nil, admin)
-}
-
-func insertAdmin(o orm.Ormer, admin *models.Admin) error {
-	// 如果有传orm，说明调用处有事务控制
-	if o == nil {
-		o = orm.NewOrm()
-	}
-
 	if admin.UserId == 0 {
 		beego.Error("管理员的UserId必须填")
 		return service.ErrArgument
@@ -86,12 +77,13 @@ func insertAdmin(o orm.Ormer, admin *models.Admin) error {
 		admin.UpdateTime = now
 	}
 
+	o := orm.NewOrm()
 	id, err := o.Insert(admin)
 	if err != nil {
 		beego.Error(err)
 		return service.ErrInsert
 	}
-	beego.Debug(fmt.Sprintf("添加Admin, id = %v", id))
+	beego.Debug(fmt.Sprintf("Add Admin sucess: id = %v", id))
 	return nil
 }
 
@@ -134,4 +126,26 @@ func DeleteAdminById(id int64) error {
 
 	o.Commit()
 	return nil
+}
+
+func GetAdminById(id int64) (*models.Admin, error) {
+	adminKey := &models.AdminKey{
+		Admin:&models.Admin{
+			Id : id,
+		},
+	}
+	adminSlice, err := FindAdminByKey(adminKey)
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+	if len(adminSlice) == 0 {
+		beego.Error(orm.ErrNoRows)
+		return nil, orm.ErrNoRows
+	} else if len(adminSlice) == 1 {
+		return &adminSlice[0], nil
+	} else {
+		beego.Error(fmt.Sprintf("data duplication: id = %d", id))
+		return nil, service.ErrDataDuplication
+	}
 }

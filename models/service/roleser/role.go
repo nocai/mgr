@@ -1,4 +1,4 @@
-package role
+package roleser
 
 import (
 	"github.com/astaxie/beego/orm"

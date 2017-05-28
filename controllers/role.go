@@ -6,7 +6,7 @@ import (
 	"time"
 	"mgr/conf"
 	"fmt"
-	"mgr/models/service/role"
+	"mgr/models/service/roleser"
 	"mgr/util/key"
 )
 
@@ -21,7 +21,7 @@ func (ctr *RoleController) Delete() {
 	id, _ := ctr.GetInt64(":id", 0)
 	beego.Error(id)
 
-	err := role.DeleteRoleById(id)
+	err := roleser.DeleteRoleById(id)
 	ctr.PrintError(err)
 }
 
@@ -40,19 +40,19 @@ func (ctr *RoleController) Post() {
 }
 
 func updateRole(id int64, roleName string) error {
-	r, err := role.GetRoleById(id)
+	r, err := roleser.GetRoleById(id)
 	if err != nil {
 		return err
 	}
 	r.RoleName = roleName
 	r.UpdateTime = time.Now()
-	err = role.UpdateRole(r)
+	err = roleser.UpdateRole(r)
 	return err
 }
 
 func addRole(roleName string) error {
 	r := &models.Role{RoleName:roleName}
-	return role.InsertRole(r);
+	return roleser.InsertRole(r);
 }
 
 func (ctr *RoleController) Get() {
@@ -68,7 +68,7 @@ func (ctr *RoleController) Get() {
 	key := key.New(page, rows, []string{sort}, []string{order}, true)
 	r := &models.Role{RoleName:roleName}
 	roleKey := &models.RoleKey{Key:key, Role:r}
-	pager, err := role.PageRole(roleKey)
+	pager, err := roleser.PageRole(roleKey)
 	if err != nil {
 		beego.Error(err)
 	}

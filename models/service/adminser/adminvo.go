@@ -1,4 +1,4 @@
-package admin
+package adminser
 
 import (
 	"mgr/models/service"
@@ -7,7 +7,7 @@ import (
 	"mgr/models"
 	"github.com/astaxie/beego/orm"
 	"time"
-	"mgr/models/service/user"
+	"mgr/models/service/userser"
 )
 //
 //import (
@@ -106,7 +106,7 @@ import (
 //}
 //
 func InsertAdminVo(admin *models.AdminVo) error {
-	exist, err := user.IsExistOfUser(admin.User)
+	exist, err := userser.IsExistOfUser(&models.User{Username:admin.User.Username})
 	if err != nil {
 		beego.Error(err)
 		return err
@@ -128,74 +128,80 @@ func InsertAdminVo(admin *models.AdminVo) error {
 		return service.ErrInsert
 	}
 	admin.UserId = id
-	beego.Debug(fmt.Sprintf("UserId = %v", id))
+	beego.Debug(fmt.Sprintf("Add User success. userId = %v", id))
 
 	admin.Admin.CreateTime = now
 	admin.Admin.UpdateTime = now
-	err = insertAdmin(o, admin.Admin)
+	id, err = o.Insert(admin.Admin)
 	if err != nil {
+		beego.Error(err)
 		o.Rollback()
 		return service.ErrInsert
 	}
-
+	beego.Debug(fmt.Sprintf("Add Admin success. adminId = %v", id))
 	o.Commit()
+	return nil
+}
+
+func UpdateAdminVo(adminVo *models.AdminVo) error {
+	if adminVo == nil {
+		return service.ErrArgument
+	}
+
+	user := &models.User{
+		Id:adminVo.UserId,
+		Username:adminVo.Username,
+	}
+	exist, err := userser.IsExistOfUser(user)
+	if  err != nil {
+		beego.Error(err)
+		return err
+	} else if exist {
+		beego.Error(fmt.Sprintf("username exist: username = %s", adminVo.Username))
+		return ErrUsernameExist
+	}
+
+	o := orm.NewOrm();
+	o.Begin()
+
+	now := time.Now()
+	adminVo.User.UpdateTime = now
+	affected, err := o.Update(adminVo.User)
+	if err != nil {
+		beego.Error(err)
+		o.Rollback()
+		return service.ErrUpdate
+	}
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+
+	adminVo.Admin.UpdateTime = now
+	affected, err = o.Update(adminVo.Admin)
+	if err != nil {
+		beego.Error(err)
+		o.Rollback()
+		return service.ErrUpdate
+	}
+	o.Commit()
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
 
 	return nil
 }
-//
-//func UpdateAdmin(admin *models.AdminVo) error {
-//	if admin == nil {
-//		return service.ErrArgument
-//	}
-//
-//	admin.UpdateTime = time.Now()
-//	admin.User.UpdateTime = time.Now()
-//
-//	user := admin.User
-//	if isExistOfUser(&user) {
-//		return ErrUsernameExist
-//	}
-//
-//	o := orm.NewOrm();
-//	o.Begin()
-//
-//	user.UpdateTime = time.Now()
-//	affected, err := o.Update(&user)
-//	if err != nil {
-//		beego.Error(err)
-//		o.Rollback()
-//		return service.ErrUpdate
-//	}
-//	beego.Debug(fmt.Sprintf("affected = %v", affected))
-//
-//	affected, err = o.Update(admin)
-//	if err != nil {
-//		beego.Error(err)
-//		o.Rollback()
-//		return service.ErrUpdate
-//	}
-//	o.Commit()
-//	beego.Debug(fmt.Sprintf("affected = %v", affected))
-//
-//	return nil
-//}
-//
-//func GetAdminById(id int64) (*models.AdminVo, error) {
-//	if id == 0 {
-//		return nil, service.ErrArgument
-//	}
-//
-//	admin := &models.AdminVo{Admin:models.Admin{Id:id}}
-//	err := orm.NewOrm().Read(admin)
-//	if err != nil {
-//		beego.Error(err)
-//		return nil, service.ErrQuery
-//	}
-//
-//	user, err := GetUserById(admin.UserId)
-//	if err != nil {
-//		beego.Error(err)
-//	}
-//	admin.User = *user
-//	return admin, nil
-//}
+
+func GetAdminVoById(id int64) (*models.AdminVo, error) {
+	admin, err := GetAdminById(id)
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+
+	user, err := userser.GetUserById(admin.UserId)
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+
+	return &models.AdminVo{
+		Admin : admin,
+		User : user,
+	}, nil
+}

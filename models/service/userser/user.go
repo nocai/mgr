@@ -1,4 +1,4 @@
-package user
+package userser
 
 import (
 	"github.com/astaxie/beego/orm"
@@ -62,19 +62,25 @@ func checkUser(user *models.User) error {
 
 // By Id
 func GetUserById(id int64) (*models.User, error) {
-	if id == 0 {
-		beego.Error("id = 0")
-		return nil, service.ErrArgument
+	userKey := &models.UserKey{
+		User :&models.User{
+			Id : id,
+		},
 	}
-
-	ormer := orm.NewOrm()
-
-	user := &models.User{Id:id}
-	err := ormer.Read(user)
+	userSlice, err := FindUserByKey(userKey)
 	if err != nil {
-		return nil, service.ErrQuery
+		beego.Error(err)
+		return nil, err
 	}
-	return user, nil
+	if len(userSlice) == 0 {
+		beego.Error(orm.ErrNoRows)
+		return nil, orm.ErrNoRows
+	} else if len(userSlice) > 1 {
+		beego.Error(fmt.Sprintf("Data duplication: id = %d", id))
+		panic(service.ErrDataDuplication)
+	} else {
+		return &userSlice[0], nil
+	}
 }
 
 func IsExistOfUser(user *models.User) (bool, error) {

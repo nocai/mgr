@@ -21,7 +21,8 @@
     <div style="float:right">
         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">编辑</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroy()">删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true"
+           onclick="destroy()">删除</a>
     </div>
 </div>
 
@@ -30,11 +31,11 @@
         url: '/admins',
         pagination: true,
         fitColumns: true,
-        rownumbers:true,
+        rownumbers: true,
         fit: true,
         toolbar: '#toolbar',
-        method:'get',
-        singleSelect:true,
+        method: 'get',
+        singleSelect: true,
         columns: [[
             {field: 'id', title: 'Id', sortable: true},
             {field: 'admin_name', title: '用户名', width: 100, sortable: true},
@@ -49,14 +50,23 @@
                 formatter: function (value, row, index) {
                     return new Date(value).format("yyyy-MM-dd hh:mm:ss");
                 }
+            }, {
+                field: 'invalid',
+                title: '是否有效',
+                width:100,
+                sortable:true,
+                formatter: function(value, row, index) {
+                    console.info(value)
+                    return !value? '是' : '否';
+                }
             }
         ]]
     });
 
     function query() {
         $('#dg').datagrid({
-            queryParams : {
-                admin_name : $('#toolbar_rolename').val()
+            queryParams: {
+                admin_name: $('#toolbar_rolename').val()
             }
         });
     }
@@ -134,8 +144,8 @@
                     $.ajax({
                         url: '/admins/' + row.id,
                         type: 'DELETE',
-                        dataType : 'json',
-                        success: function(result) {
+                        dataType: 'json',
+                        success: function (result) {
                             $.messager.progress('close');
                             if (result.ok) {
                                 $('#dg').datagrid('reload');    // reload the user data

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
+	"mgr/models"
 )
 
 type MainController struct {
@@ -16,6 +17,9 @@ func (c *MainController) Get() {
 
 func (c *MainController) T() {
 	beego.Info("tttttttttttt")
+	user:= models.User{Username:"username",Password:"password"}
+	c.Data["json"] = user
+	c.ServeJSON()
 	//c.PrintOkMsgData("操作成功", "this is t method")
 
 }
