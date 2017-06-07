@@ -33,8 +33,10 @@ func (ctr *RoleController) Post() {
 
 	roleName := ctr.GetString("role_name")
 	if id == 0 {
+		beego.Error("add")
 		ctr.PrintError(addRole(roleName))
 	} else {
+		beego.Error("update")
 		ctr.PrintError(updateRole(id, roleName))
 	}
 }
