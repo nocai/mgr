@@ -13,7 +13,7 @@ type AdminController struct {
 	BaseController
 }
 
-//
+// Get method, for query
 func (ctr *AdminController) Get() {
 	ctr.debugInput()
 
@@ -22,14 +22,15 @@ func (ctr *AdminController) Get() {
 	sort := ctr.GetString("sort")
 	order := ctr.GetString("order")
 	adminName := ctr.GetString("admin_name")
+	valid, _ := ctr.GetInt("valid", 0)
 	if sort == "" {
 		sort = "id"
 		order = "asc"
 	}
 
 	key := key.New(page, rows, []string{sort}, []string{order}, true)
-	_admin := &models.Admin{AdminName: adminName}
-	pager, err := adminser.PageAdmin(&models.AdminKey{Key: key, Admin: _admin})
+	admin := &models.Admin{AdminName: "%" + adminName + "%", Invalid:models.ValidEnum(valid)}
+	pager, err := adminser.PageAdmin(&models.AdminKey{Key: key, Admin: admin})
 	ctr.PrintResult(pager, err)
 }
 

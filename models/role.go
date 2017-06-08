@@ -4,6 +4,7 @@ import (
 	"time"
 	"mgr/util/sqler"
 	"mgr/util/key"
+	"strings"
 )
 
 // 系统角色
@@ -40,8 +41,14 @@ func (this *RoleKey) NewSqler() *sqler.Sqler {
 		sqler.AppendArg(id)
 	}
 	if roleName := this.RoleName; roleName != "" {
-		sqler.AppendSql(" and tmr.role_name like ?")
-		sqler.AppendArg("%" + roleName + "%")
+		sqler.AppendSql(" and tmr.role_name ")
+		if strings.Contains(roleName, "%") {
+			sqler.AppendSql(" like ?")
+		} else {
+			sqler.AppendSql(" = ?")
+		}
+
+		sqler.AppendArg(roleName)
 	}
 	if !this.CreateTimeStart.IsZero() {
 		sqler.AppendSql(" and tmr.create_time >= ?")

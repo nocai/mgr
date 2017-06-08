@@ -29,7 +29,7 @@ func DeleteRoleById(id int64) error {
 		return service.ErrDelete
 	}
 
-	beego.Debug("affected = %d", affected)
+	beego.Debug("DeleteRoleById: affected = ", affected)
 	return nil
 }
 
@@ -53,6 +53,9 @@ func GetRoleById(id int64) (*models.Role, error) {
 // isExistOfRole.
 // When the error != nil, the bool is invalid.
 func isExistOfRole(role *models.Role) (bool, error) {
+	roleId := role.Id
+	// 设置Id = 0，方便查询
+	role.Id = 0
 	key := &models.RoleKey{Role:role}
 	roles, err := FindRoleByKey(key)
 	if err != nil {
@@ -61,18 +64,25 @@ func isExistOfRole(role *models.Role) (bool, error) {
 	}
 
 	for _, _role := range roles {
-		if _role.Id != role.Id {
+		if _role.Id != roleId {
 			beego.Debug(fmt.Sprintf("the role is exist: role = %v", role))
+			beego.Debug(fmt.Sprintf("the role in db: role = %v", _role))
 			return true, nil
 		}
 	}
+	// 将Id设置回来，不然role的数据不对
+	role.Id = roleId
+	beego.Debug(fmt.Sprintf("the role not exist: role = %v", role))
 	return false, nil
 }
 
 // 更新
 func UpdateRole(role *models.Role) error {
 	ormer := orm.NewOrm()
-	exist, err := isExistOfRole(role);
+	exist, err := isExistOfRole(&models.Role{
+		Id : role.Id,
+		RoleName:role.RoleName,
+	});
 	if err != nil {
 		beego.Error(err)
 		return err
@@ -119,7 +129,8 @@ func InsertRole(role *models.Role) error {
 		beego.Error(err)
 		return service.ErrInsert
 	}
-	beego.Debug("Id = %d", id)
+	beego.Debug("InsertRole: Id = ", id)
+	role.Id = id
 	return nil
 }
 

@@ -4,9 +4,20 @@ import (
 	"time"
 	"mgr/util/sqler"
 	"mgr/util/key"
+	"strings"
 )
 
-type NilBool *bool
+type ValidEnum int
+
+const (
+	// 所有
+	ValidEnum_All ValidEnum = iota
+	// 无效的
+	ValidEnum_Invalid
+	// 有效的
+	ValidEnum_Valid
+)
+
 type Admin struct {
 	ModelBase
 
@@ -14,7 +25,7 @@ type Admin struct {
 	AdminName string `json:"admin_name"`
 	UserId    int64 `orm:"unique" json:"user_id"`
 
-	Invalid   bool `json:"invalid"`
+	Invalid   ValidEnum `json:"invalid"`
 }
 
 type AdminKey struct {
@@ -26,7 +37,6 @@ type AdminKey struct {
 	UpdateTimeStart time.Time
 	UpdateTimeEnd   time.Time
 	KeyWord         string
-	Invalid         NilBool
 }
 
 func (this *AdminKey) NewSqler() *sqler.Sqler {
@@ -38,7 +48,12 @@ func (this *AdminKey) NewSqler() *sqler.Sqler {
 		sqler.AppendArg(id)
 	}
 	if adminName := this.AdminName; adminName != "" {
-		sqler.AppendSql(" and tma.admin_name = ?")
+		sqler.AppendSql(" and tma.admin_name")
+		if strings.Contains(adminName, "%") {
+			sqler.AppendSql(" like ?")
+		} else {
+			sqler.AppendSql(" = ?")
+		}
 		sqler.AppendArg(adminName)
 	}
 	if userId := this.UserId; userId != 0 {
@@ -68,7 +83,7 @@ func (this *AdminKey) NewSqler() *sqler.Sqler {
 		sqler.AppendArg("%" + keyWord + "%")
 	}
 
-	if invalid := this.Invalid; invalid != nil {
+	if invalid := this.Invalid; invalid != ValidEnum_All {
 		sqler.AppendSql(" and tma.invalid = ?")
 		sqler.AppendArg(this.Invalid)
 	}
