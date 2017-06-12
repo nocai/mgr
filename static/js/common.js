@@ -1,7 +1,3 @@
-/**
- * Created by liujun on 16/12/24.
- */
-
 // 时间格式化
 Date.prototype.format = function (fmt) {
     var o = {
@@ -22,13 +18,16 @@ Date.prototype.format = function (fmt) {
         }
     }
     return fmt;
-}
+};
 
 //弹框
 $.extend({
-    alertMsg: function (msg) {
+    showMsg: function (msg, title) {
+        if (title == undefined) {
+            title = '系统提示';
+        }
         $.messager.show({
-            title: '系统提示',
+            title: title,
             msg: msg
         });
     }

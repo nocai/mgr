@@ -1,0 +1,476 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"sc",
+				"script	Tag"
+			],
+			[
+				"page",
+				"pageNo	int64 ν"
+			],
+			[
+				"role",
+				"roles	[]Role ν"
+			],
+			[
+				"rol",
+				"role	backmodels.Role ν"
+			],
+			[
+				"get",
+				"GetRoleByName	backmodels.Role, error ƒ"
+			],
+			[
+				"a",
+				"AddRole	backmodels.Role, error ƒ"
+			],
+			[
+				"pr",
+				"PrintErrorMsgValid	 ƒ"
+			],
+			[
+				"r",
+				"Result	struct ʈ"
+			],
+			[
+				"gets",
+				"GetString	string ƒ"
+			],
+			[
+				"li",
+				"link	Tag"
+			],
+			[
+				"print",
+				"PrintErrorMsg	 ƒ"
+			],
+			[
+				"Re",
+				"RoleResourceRef	struct ʈ"
+			],
+			[
+				"set",
+				"setSesstionRess	 ƒ"
+			],
+			[
+				"for",
+				"for	for - Yield"
+			],
+			[
+				"ro",
+				"QueryRows	int64, error ƒ"
+			],
+			[
+				"Get",
+				"GetRoleByAdminId	Role, error ƒ"
+			],
+			[
+				"q",
+				"QueryRows	int64, error ƒ"
+			],
+			[
+				"P",
+				"PasswordNotMatch	struct ʈ"
+			],
+			[
+				"err",
+				"errors	 package ρ"
+			],
+			[
+				"new",
+				"NewOrm	orm.Ormer ƒ"
+			],
+			[
+				"con",
+				"controllers	 package ρ"
+			],
+			[
+				"admi",
+				"adminId	interface{} ν"
+			],
+			[
+				"atr",
+				"atr2	AccessTokenResult ν"
+			],
+			[
+				"g",
+				"GetAppid	string ƒ"
+			],
+			[
+				"t",
+				"t	shortcut - trait"
+			],
+			[
+				"re",
+				"result	string ν"
+			],
+			[
+				"A",
+				"accessTokenURL	string ν"
+			],
+			[
+				"w",
+				"WriteString	 ƒ"
+			],
+			[
+				"s",
+				"String	string ƒ"
+			],
+			[
+				"app",
+				"AppConfig	*beego.beegoAppConfig ν"
+			],
+			[
+				"c",
+				"Ctx	*context.Context ν"
+			],
+			[
+				"sp",
+				"Sprintf	string ƒ"
+			],
+			[
+				"main",
+				"main	main()"
+			],
+			[
+				"func",
+				"func (*Integer)	func (...) {...} ʂ"
+			],
+			[
+				"GO",
+				"GOPATH"
+			],
+			[
+				"im",
+				"import	import (...) ʂ"
+			],
+			[
+				"fu",
+				"func	func {...} ʂ"
+			],
+			[
+				"p",
+				"func http handler	func(rw, req) ʂ"
+			],
+			[
+				"path",
+				"PATH"
+			],
+			[
+				"C",
+				"func http handler	func(rw, req) ʂ"
+			],
+			[
+				"cl",
+				"closeure	func(int) int ƒ"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "Packages/Golang Build/Go.sublime-build",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "Package Control: ",
+		"selected_items":
+		[
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			],
+			[
+				":w",
+				":w - Save"
+			],
+			[
+				":run",
+				"Build With: Go - Run"
+			],
+			[
+				":test",
+				"Build With: Go - Test"
+			],
+			[
+				":go in",
+				"Build With: Go - Install"
+			],
+			[
+				":go test",
+				"Build With: Go - Test"
+			],
+			[
+				"INSTALL",
+				"Package Control: Install Package"
+			],
+			[
+				"go",
+				"GoGdb: Run"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"subli",
+				"SublimeGDB: Start Debugging"
+			],
+			[
+				"remove ",
+				"GoSublime: Add/Remove package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"go run",
+				"GoGdb: Run"
+			],
+			[
+				"Gsf",
+				"GoSublime: Fmt and save"
+			],
+			[
+				"go build",
+				"GoSublime: List File declarations"
+			],
+			[
+				"goGD",
+				"GoSublime: List Package declarations"
+			]
+		],
+		"width": 432.0
+	},
+	"console":
+	{
+		"height": 272.0,
+		"history":
+		[
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())  ",
+			"go",
+			"go -version",
+			"go version",
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())  "
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/liujun/Desktop/新建文本文档.txt",
+		"/G/gopath/src/mgr/static/html/role/home.html",
+		"/G/codes/java_demo/java/java_pid2692.hprof",
+		"/C/Users/liujun/Desktop/html/js.html",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/GoSublime/CHANGELOG.md",
+		"/G/gopath/src/mgr/.git/config",
+		"/G/go/VERSION",
+		"/G/mygo/src/backmgr/views/back/role/home.html",
+		"/G/mygo/src/backmgr/util/pager.go",
+		"/G/mygo/src/backmgr/.git/config",
+		"/C/Users/liujun/Desktop/hosts",
+		"/C/Windows/System32/drivers/etc/hosts",
+		"/G/mygo/src/backmgr/models/backmodels/role.go",
+		"/G/mygo/src/backmgr/controllers/backcontrollers/role.go",
+		"/G/mygo/src/backmgr/controllers/base.go",
+		"/G/mygo/src/backmgr/routers/router.go",
+		"/G/mygo/src/backmgr/routers/backfilters.go",
+		"/G/mygo/src/backmgr/controllers/backcontrollers/default.go",
+		"/G/mygo/src/backmgr/controllers/backcontrollers/error.go",
+		"/G/mygo/src/backmgr/controllers/backcontrollers/index.go",
+		"/G/mygo/src/backmgr/controllers/backcontrollers/login.go",
+		"/G/mygo/src/backmgr/views/back/left.html",
+		"/G/mygo/src/backmgr/models/backmodels/admin.go",
+		"/G/mygo/src/backmgr/models/backmodels/models.go",
+		"/G/mygo/src/backmgr/models/backmodels/resource.go",
+		"/G/mygo/src/backmgr/models/backmodels/role_res.go",
+		"/G/mygo/src/backmgr/controllers/login.go",
+		"/G/mygo/src/backmgr/models/back/models.go",
+		"/G/mygo/src/backmgr/models/back/admin.go",
+		"/G/mygo/src/backmgr/models/back/role.go",
+		"/J/work_software/keygen.java",
+		"/G/mygo/src/backmgr/main.go",
+		"/G/mygo/src/temp.go",
+		"/G/mygo/src/backmgr/filter/filters.go",
+		"/G/mygo/src/backmgr/static/back/css/style.css",
+		"/C/Users/liujun/Desktop/applicationContext.xml",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/User/GoSublime.sublime-settings",
+		"/G/gopath/src/github.com/widuu/goini/conf.go",
+		"/G/mygo/src/malatang/util/confutil.go",
+		"/G/mygo/src/malatang/api/AccessTokenApi_test.go",
+		"/G/mygo/src/malatang/api/accesstoken.go",
+		"/G/mygo/src/malatang/controllers/default.go",
+		"/G/mygo/src/malatang/controllers/wechat.go",
+		"/G/mygo/src/malatang/routers/router.go",
+		"/C/Users/liujun/Desktop/wechat.properties",
+		"/G/mygo/src/malatang/controllers/WechatController_test.go",
+		"/G/go_workspace/src/malatang/controllers/WechatController.go",
+		"/G/go_workspace/src/malatang/api/AccessTokenApi.go",
+		"/G/go_workspace/src/malatang/controllers/WechatController_test.go",
+		"/G/go_workspace/src/malatang/api/AccessTokenApi_test.go",
+		"/G/go_workspace/src/temp.go",
+		"/G/go_workspace/src/malatang/routers/router.go",
+		"/G/go_workspace/src/malatang/controllers/default.go",
+		"/G/ngrok/ngrok.cfg",
+		"/G/GOPATH/src/temp.go",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/GoSublime/GoSublime.sublime-settings",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/GoSublime/USAGE.md",
+		"/G/GOPATH/temp.go",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/GoSublime/doc/autoinst.md",
+		"/C/Users/liujun/.ngrok2/ngrok.yml",
+		"/G/ngrok/使用说明.txt",
+		"/G/GOPATH/src/ozz_wechat/controllers/tcontroller.go",
+		"/G/GOPATH/src/main.go",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/User/golang.sublime-settings",
+		"/G/GOPATH/src/ozz_wechat/controllers/default.go",
+		"/G/GOPATH/src/ozz_wechat/views/t.html",
+		"/G/GOPATH/src/ozz_wechat/routers/router.go",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/User/GoGdb.sublime-settings",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/GoGdb/GoGdb.sublime-settings",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Installed Packages/GoGdb.sublime-package",
+		"/G/GOPATH/src/ozz_wechat/views/index.tpl",
+		"/C/Users/liujun/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/G/GOPATH/src/ozz_wechat/main.go",
+		"/G/GOPATH/src/wechat/main.go"
+	],
+	"find":
+	{
+		"height": 23.0
+	},
+	"find_in_files":
+	{
+		"height": 90.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"ReadList",
+			"GetAccessToken",
+			"f",
+			"env"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "main.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 229.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

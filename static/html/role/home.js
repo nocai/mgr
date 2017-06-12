@@ -1,6 +1,4 @@
 function RolePage() {
-    page = this;
-    this.url = 'a';
     this.datagrid = $('#dg').datagrid({
         url: this.baseUrl,
         pagination: true,
@@ -28,15 +26,16 @@ function RolePage() {
         ]]
     });
     this.dialog = $('#dlg').dialog({
-        width: 400,
+        width:400,
         modal: true,
-        closed:true,
-        buttons:'#dlg-buttons',
+        closed: true,
+        buttons: '#dlg-buttons',
     }).dialog('center');
 
     this.form = $('#fm').form({
-        onSubmit: function (param) {
-            if ($(this).form('validate')) {
+        onSubmit: function () {
+            var valid = $(this).form('validate');
+            if (valid) {
                 $.messager.progress();
                 return true;
             }
@@ -48,10 +47,7 @@ function RolePage() {
                 page.dialog.dialog('close');        // close the dialog
                 page.datagrid.datagrid('reload');    // reload the user data
             } else {
-                $.messager.show({
-                    title: '系统提示',
-                    msg: r.msg
-                });
+                $.showMsg(r.msg);
             }
             $.messager.progress('close');
         }
@@ -70,17 +66,19 @@ RolePage.prototype = {
 
     add: function () {
         this.dialog.dialog('open').dialog('setTitle', '添加角色');
-        $('#fm').form('clear');
+        this.form.form('clear');
         this.form.form({url: this.baseUrl});
+        return this;
     },
 
     edit: function () {
         var row = this.datagrid.datagrid('getSelected');
         if (row) {
             this.dialog.dialog('open').dialog('setTitle', '编辑角色');
-            $('#fm').form('load', row);
+            this.form.form('load', row);
             this.form.form({url: this.baseUrl + row.id});
         }
+        return this;
     },
 
     save: function () {
@@ -102,10 +100,7 @@ RolePage.prototype = {
                             if (result.ok) {
                                 p.datagrid.datagrid('reload');    // reload the user data
                             } else {
-                                $.messager.show({    // show error message
-                                    title: 'Error',
-                                    msg: result.msg
-                                });
+                                $.showMsg(result.msg)
                             }
                             $.messager.progress('close');
                         }
