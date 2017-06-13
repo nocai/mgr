@@ -29,7 +29,6 @@ function AdminPage() {
                 width: 100,
                 sortable: true,
                 formatter: function (value, row, index) {
-                    console.info(value)
                     return !value ? '是' : '否';
                 }
             }

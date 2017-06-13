@@ -84,6 +84,9 @@ func GetUserById(id int64) (*models.User, error) {
 }
 
 func IsExistOfUser(user *models.User) (bool, error) {
+	userId := user.Id
+	// 设置Id = 0，方便查询
+	user.Id = 0
 	userSlice, err := FindUserByKey(&models.UserKey{User:user})
 	if err != nil {
 		beego.Error(err)
@@ -91,11 +94,13 @@ func IsExistOfUser(user *models.User) (bool, error) {
 	}
 
 	for _, _user := range userSlice {
-		if _user.Id != user.Id {
+		if _user.Id != userId {
 			beego.Info(fmt.Sprintf("user exist:user = %#v", _user))
 			return true, nil
 		}
 	}
+	// 将Id设置回来，不然role的数据不对
+	user.Id = userId
 	return false, nil
 }
 
