@@ -30,6 +30,16 @@ $.extend({
             title: title,
             msg: msg
         });
+    },
+    alertMsg: function(msg, title) {
+        if (title == undefined) {
+            title = '系统提示';
+        }
+        $.messager.alert({
+            icon:'info',
+            title: title,
+            msg: msg
+        });
     }
 });
 

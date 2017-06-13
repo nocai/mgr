@@ -1,4 +1,4 @@
-function RolePage() {
+function AdminPage() {
     var me = this;
     this.datagrid = $('#dg').datagrid({
         url: this.baseUrl,
@@ -11,7 +11,7 @@ function RolePage() {
         singleSelect: true,
         columns: [[
             {field: 'id', title: 'Id', sortable: true},
-            {field: 'role_name', title: '角色名', width: 100, sortable: true},
+            {field: 'admin_name', title: '用户名', width: 100, sortable: true},
             {
                 field: 'create_time', title: '创建时间', width: 100, sortable: true,
                 formatter: function (value, row, index) {
@@ -22,6 +22,15 @@ function RolePage() {
                 field: 'update_time', title: '最后一次更新时间', width: 100, sortable: true,
                 formatter: function (value, row, index) {
                     return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+                }
+            }, {
+                field: 'invalid',
+                title: '是否有效',
+                width: 100,
+                sortable: true,
+                formatter: function (value, row, index) {
+                    console.info(value)
+                    return !value ? '是' : '否';
                 }
             }
         ]]
@@ -70,9 +79,9 @@ function RolePage() {
     });
 }
 
-RolePage.prototype = {
-    constructor: RolePage,
-    baseUrl: '/roles/',
+AdminPage.prototype = {
+    constructor: AdminPage,
+    baseUrl: '/admins/',
     queryDatagrid: function (queryParams) {
         this.datagrid.datagrid({
             queryParams: queryParams

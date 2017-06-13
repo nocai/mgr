@@ -2,26 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/themes/default/easyui.css">
-    <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.5.1/demo/demo.css">
-
-    <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
-    <script type="text/javascript" src="/static/jquery-easyui-1.5.1/plugins/datagrid-detailview.js"></script>
-
-    <script type="text/javascript" src="/static/js/common.js"></script>
-    <!--<style>-->
-        <!--span {-->
-            <!--padding: 0 4px;-->
-        <!--}-->
-    <!--</style>-->
+    <link rel="import" href="/static/html/input.html" >
+    <script type="text/javascript" src="home.js"></script>
 </head>
 
 <body>
-<table id="dg"></table>
+<table id="dg" class="easyui-datagrid"></table>
+
 <div id="toolbar">
-    <span>角色名称:</span>
+    <span style="padding: 0 4px">角色名称:</span>
     <input id="toolbar_rolename" class="easyui-textbox" style="width:110px">
     <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'"
        onclick="page.queryDatagrid({role_name: $('#toolbar_rolename').val()})">查询</a>
@@ -36,23 +25,16 @@
     </div>
 </div>
 
-<div id="dlg">
-    <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
+<div id="dlg" class="easyui-dialog">
+    <form id="fm" method="post" style="margin:0;padding:20px 50px">
         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">角色信息</div>
         <div style="margin-bottom:10px">
-            <input name="role_name" class="easyui-textbox" required="true" label="角色名:" style="width:100%">
+            <input name="role_name" class="easyui-textbox" style="width:100%"
+                    data-options="required:true, label:'角色名:'">
         </div>
     </form>
-    <div id="dlg-buttons">
-        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="page.save();"
-           >保存</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"
-           onclick="page.dialog.dialog('close');" >取消</a>
-    </div>
-
 </div>
 
-<script type="text/javascript" src="home.js"></script>
 <script>
         var page = new RolePage();
 </script>
