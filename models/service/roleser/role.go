@@ -42,7 +42,7 @@ func GetRoleById(id int64) (*models.Role, error) {
 		return nil, err
 	}
 	if len(roles) == 0 {
-		return nil, nil
+		return nil, orm.ErrNoRows
 	}
 	if len(roles) > 1 {
 		beego.Error(service.ErrDataDuplication)
@@ -64,6 +64,7 @@ func isExistOfRole(role *models.Role) (bool, error) {
 	}
 
 	for _, _role := range roles {
+		beego.Debug("the exist role = ", _role)
 		if _role.Id != roleId {
 			beego.Debug(fmt.Sprintf("the role is exist: role = %v", role))
 			beego.Debug(fmt.Sprintf("the role in db: role = %v", _role))

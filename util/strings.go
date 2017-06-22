@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 	"math/rand"
+	"testing"
 )
 
 func getFieldName(fieldName string) string {
@@ -22,6 +23,10 @@ func getFieldName(fieldName string) string {
 	r := strings.Join(b, "")
 	fmt.Println(r)
 	return r
+}
+
+func TestGetFieldName(t *testing.T) {
+	t.Error("a")
 }
 
 

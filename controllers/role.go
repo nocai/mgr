@@ -74,5 +74,5 @@ func (ctr *RoleController) Get() {
 	if err != nil {
 		beego.Error(err)
 	}
-	ctr.Print(pager.Pagination)
+	ctr.PrintData(pager.Pagination)
 }

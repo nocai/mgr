@@ -53,7 +53,7 @@ func (key *Key) GetOrderBySql() string {
 		}
 		return sql.String()
 	}
-	return ""
+	return " id desc"
 }
 
 func (key *Key) GetLimitSql() string {

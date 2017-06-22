@@ -29,7 +29,11 @@ function AdminPage() {
                 width: 100,
                 sortable: true,
                 formatter: function (value, row, index) {
-                    return !value ? '是' : '否';
+                    if (value == 1) {
+                        return "<img src='/static/jquery-easyui-1.5.1/themes/icons/cancel.png'>"
+                    } else if (value == 2) {
+                        return "<img src='/static/jquery-easyui-1.5.1/themes/icons/ok.png'>"
+                    }
                 }
             }
         ]]
@@ -131,6 +135,37 @@ AdminPage.prototype = {
             });
         } else {
             $.alertMsg('请选择一条数据进行删除！！！')
+        }
+    },
+
+    active: function () {
+        var row = this.datagrid.datagrid('getSelected');
+        if (row) {
+            if (row.invalid == 2) {
+                $.showMsg('此帐号有效，无需激活...')
+                return;
+            }
+            var p = this;
+            $.messager.confirm('系统提醒', '您确定激活这条数据吗?', function (r) {
+                if (r) {
+                    $.messager.progress();
+                    $.ajax({
+                        url: '/adminValid/' + row.id + '/2',
+                        type: 'PUT',
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.ok) {
+                                p.datagrid.datagrid('reload');    // reload the user data
+                            } else {
+                                $.showMsg(result.msg)
+                            }
+                            $.messager.progress('close');
+                        }
+                    });
+                }
+            });
+        } else {
+            $.alertMsg('请选择一条数据进行激活！！！')
         }
     }
 };

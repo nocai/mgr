@@ -7,6 +7,7 @@ import (
 	"mgr/util/key"
 
 	"github.com/astaxie/beego"
+	"errors"
 )
 
 type AdminController struct {
@@ -22,16 +23,16 @@ func (ctr *AdminController) Get() {
 	sort := ctr.GetString("sort")
 	order := ctr.GetString("order")
 	adminName := ctr.GetString("admin_name")
-	valid, _ := ctr.GetInt("valid", 0)
+	invalid, _ := ctr.GetInt("invalid", 0)
 	if sort == "" {
 		sort = "id"
 		order = "asc"
 	}
 
 	key := key.New(page, rows, []string{sort}, []string{order}, true)
-	admin := &models.Admin{AdminName: "%" + adminName + "%", Invalid:models.ValidEnum(valid)}
+	admin := &models.Admin{AdminName: "%" + adminName + "%", Invalid:models.ValidEnum(invalid)}
 	pager, err := adminser.PageAdmin(&models.AdminKey{Key: key, Admin: admin})
-	ctr.PrintResult(pager, err)
+	ctr.Print(pager, err)
 }
 
 // 添加 修改
@@ -47,6 +48,7 @@ func (ctr *AdminController) Post() {
 		// 添加
 		adminVo := &models.AdminVo{
 			Admin:  &models.Admin{
+				Invalid: models.ValidEnum_Invalid,
 				AdminName: adminName,
 			},
 			User: &models.User{
@@ -74,8 +76,37 @@ func (ctr *AdminController) Delete() {
 	beego.Debug(ctr.Input())
 
 	id, _ := ctr.GetInt64(":id", 0)
-	beego.Debug("id = %v", id)
+	beego.Debug("id = ", id)
 
 	err := adminser.DeleteAdminById(id)
 	ctr.PrintError(err)
+}
+
+type AdminInvalidController struct {
+	BaseController
+}
+
+func (aic *AdminInvalidController) Get() {
+	m := adminser.FindAdminValids()
+	aic.PrintData(m)
+}
+
+func (aic *AdminInvalidController) Put() {
+	id, _ := aic.GetInt(":id")
+	beego.Debug("id = ", id)
+	invalid, _ := aic.GetInt(":invalid")
+	beego.Debug("invalid = ", invalid)
+
+	admin, err := adminser.GetAdminById(int64(id))
+	if err != nil {
+		beego.Error(err)
+		aic.PrintError(err)
+		return
+	}
+	if admin.Invalid == models.ValidEnum_Valid {
+		aic.PrintError(errors.New("已经激活"))
+		return
+	}
+	admin.Invalid = models.ValidEnum(invalid)
+	aic.PrintError(adminser.UpdateAdmin(admin))
 }

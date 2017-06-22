@@ -58,48 +58,59 @@ const (
 	OK_MSG = "操作成功"
 	FAIL_MSG = "系统异常"
 )
+
 type JsonMsg struct {
 	Ok   bool `json:"ok"`
 	Msg  string `json:"msg"`
 	Data interface{} `json:"data"`
 }
 
-func (this *BaseController) PrintOk() {
-	this.printJson(true, OK_MSG, nil)
+func (this *BaseController) PrintOk(msg string) {
+	if msg == "" {
+		msg = OK_MSG
+	}
+	this.printJson(true, msg, nil)
 }
 
-func (this *BaseController) PrintFail() {
-	this.printJson(false, FAIL_MSG, nil)
+func (this *BaseController) PrintFail(msg string) {
+	if msg == "" {
+		msg = FAIL_MSG
+	}
+	this.printJson(false, msg, nil)
 }
 
 func (this *BaseController) printJson(ok bool, msg string, data interface{}) {
 	json := &JsonMsg{Ok: ok, Msg: msg, Data: data}
-	this.Print(json)
+	this.doPrint(json)
 }
 
-func (this *BaseController) Print(data interface{}) {
+func (this *BaseController) doPrint(data interface{}) {
 	beego.Debug(fmt.Sprintf("%+v", data))
 	this.Data["json"] = data
 	this.ServeJSON()
 }
 
+func (this *BaseController) PrintData(data interface{}) {
+	this.doPrint(data)
+}
+
 func (this *BaseController) PrintError(err error) {
 	if err != nil {
-		this.printJson(false, err.Error(), nil)
+		this.PrintFail(err.Error())
 	} else {
-		this.PrintOk()
+		this.PrintOk("")
 	}
 }
 
-func (this *BaseController) PrintResult(data interface{}, err error) {
+func (this *BaseController) Print(data interface{}, err error) {
 	if err != nil {
-		this.printJson(false, err.Error(), nil)
-	} else {
-		if data != nil {
-			this.Print(data)
-		} else {
-			this.PrintOk()
-		}
+		this.PrintFail(err.Error())
+		return
 	}
+	if data != nil {
+		this.doPrint(data)
+		return
+	}
+	panic("data and err are all nil")
 }
 

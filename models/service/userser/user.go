@@ -10,6 +10,24 @@ import (
 	"mgr/util/pager"
 )
 
+func UsernamPassMatched(username, password string) (bool, error) {
+	user, err := GetUserByUsername(username)
+	if err != nil {
+		if err == orm.ErrNoRows {
+			beego.Info("the username not exist: username = ", username)
+			return false, nil
+		} else {
+			beego.Error(err)
+			return false, err
+		}
+	}
+	if user.Password != password {
+		beego.Info("the password not matched: source = ", username, ", the target = ", user.Password)
+		return false, nil
+	}
+	beego.Debug("the username = ", username, " and password = ", password, " is matched")
+	return true, nil
+}
 func InsertUser(user *models.User) error {
 	if user == nil {
 		beego.Error("user is nil")

@@ -9,7 +9,7 @@ func init() {
 	//beego.InsertFilter("/*",beego.BeforeExec,filter.FilterUser)
 	//
 	beego.Router("/t", &controllers.MainController{}, "get:T")
-	//beego.Router("/", &controllers.MainController{})
+	beego.Router("/", &controllers.MainController{})
 	//
 	//beego.Router("/login", &controllers.LoginController{})
 	//

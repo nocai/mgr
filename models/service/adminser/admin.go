@@ -101,7 +101,7 @@ func DeleteAdminById(id int64) error {
 	if len(admins) == 0 {
 		beego.Error(orm.ErrNoRows)
 		return service.ErrDelete
-	} else if len(admins) > 0 {
+	} else if len(admins) > 1 {
 		beego.Error(service.ErrDataDuplication)
 	}
 
@@ -148,4 +148,38 @@ func GetAdminById(id int64) (*models.Admin, error) {
 		beego.Error(fmt.Sprintf("data duplication: id = %d", id))
 		return nil, service.ErrDataDuplication
 	}
+}
+
+// 取所有的Admin valid
+// key:models.ValidEnum value:string
+func FindAdminValids() ([]map[string]interface{}) {
+	allMap := make(map[string]interface{})
+	allMap["value"] = models.ValidEnum_All
+	allMap["text"] = "全部"
+
+	invalidMap := make(map[string]interface{})
+	invalidMap["value"] = models.ValidEnum_Invalid
+	invalidMap["text"] = "无效"
+
+	validMap := make(map[string]interface{})
+	validMap["value"] = models.ValidEnum_Valid
+	validMap["text"] = "有效"
+
+	return []map[string]interface{}{
+		allMap, invalidMap, validMap,
+	}
+}
+
+func UpdateAdmin(admin *models.Admin) error {
+	if admin == nil {
+		return service.ErrArgument
+	}
+	o := orm.NewOrm()
+	num, err := o.Update(admin)
+	if err != nil {
+		beego.Error(err)
+		return err
+	}
+	beego.Info("<UpdateAdmin>: num = ", num)
+	return nil
 }
