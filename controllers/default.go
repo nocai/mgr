@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"mgr/models"
+	"fmt"
 )
 
 type MainController struct {
@@ -20,6 +21,13 @@ func (c *MainController) T() {
 	user:= models.User{Username:"username",Password:"password"}
 	c.Data["json"] = user
 	c.ServeJSON()
-	//c.PrintOkMsgData("操作成功", "this is t method")
+}
 
+type HtmlController struct {
+	BaseController
+}
+
+func (this *HtmlController) Get() {
+	beego.Info(fmt.Sprintf("%#v",this.Ctx.Input.Params()))
+	this.TplName = this.GetString(":splat")
 }
