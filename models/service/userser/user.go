@@ -46,8 +46,7 @@ func insertUser(o orm.Ormer, user *models.User) error {
 	user.CreateTime = time.Now()
 	user.UpdateTime = time.Now()
 
-	ormer := orm.NewOrm()
-	id, err := ormer.Insert(user)
+	id, err := o.Insert(user)
 	if err != nil {
 		beego.Error(err)
 		return service.ErrInsert

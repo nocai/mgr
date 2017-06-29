@@ -3,10 +3,11 @@ package routers
 import (
 	"github.com/astaxie/beego"
 	"mgr/controllers"
+	"mgr/routers/filter"
 )
 
 func init() {
-	//beego.InsertFilter("/*",beego.BeforeExec,filter.FilterUser)
+	beego.InsertFilter("/*",beego.BeforeExec,filter.FilterUser)
 	//
 	beego.Router("/t", &controllers.MainController{}, "get:T")
 	beego.Router("/", &controllers.MainController{})
@@ -15,7 +16,6 @@ func init() {
 	//
 	//beego.Router("/nav", &controllers.NavController{})
 
-	// roles
-	beego.Router("/roles", &controllers.RoleController{})
-	beego.Router("/roles/:id:int", &controllers.RoleController{})
+	beego.Router("/:path.html", &controllers.HtmlController{})
+
 }

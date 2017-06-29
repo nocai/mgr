@@ -1,7 +1,8 @@
-function RolePage() {
-    var me = this;
-    this.datagrid = $('#dg').datagrid({
-        url: this.baseUrl,
+var rolePage = {
+    baseUrl: '/roles/',
+    datagrid: $('#dg').datagrid({
+        //url: this.baseUrl,
+        url: '/roles/',
         pagination: true,
         fitColumns: true,
         rownumbers: true,
@@ -25,30 +26,30 @@ function RolePage() {
                 }
             }
         ]]
-    });
+    }),
 
     // 弹出窗口：添加or修改
-    this.dialog = $('#dlg').dialog({
+    dialog: $('#dlg').dialog({
         width: 400,
         modal: true,
         closed: true,
-        buttons:[{
+        buttons: [{
             iconCls: 'icon-ok',
             text: '保存',
             handler: function () {
-                me.form.submit();
+                rolePage.form.submit();
             }
         }, {
             iconCls: 'icon-cancel',
             text: '取消',
             handler: function () {
-                me.dialog.dialog('close');
+                rolePage.dialog.dialog('close');
             }
         }]
-    }).dialog('center');
+    }).dialog('center'),
 
     // 表单：添加or修改
-    this.form = $('#fm').form({
+    form: $('#fm').form({
         onSubmit: function () {
             var valid = $(this).form('validate');
             if (valid) {
@@ -60,25 +61,14 @@ function RolePage() {
         success: function (r) {
             r = eval('(' + r + ')');
             if (r.ok) {
-                me.dialog.dialog('close');        // close the dialog
-                me.datagrid.datagrid('reload');    // reload the user data
+                rolePage.dialog.dialog('close');        // close the dialog
+                rolePage.datagrid.datagrid('reload');    // reload the user data
             } else {
                 $.showMsg(r.msg);
             }
             $.messager.progress('close');
         }
-    });
-}
-
-RolePage.prototype = {
-    constructor: RolePage,
-    baseUrl: '/roles/',
-    queryDatagrid: function (queryParams) {
-        this.datagrid.datagrid({
-            queryParams: queryParams
-        });
-        return this;
-    },
+    }),
 
     add: function () {
         this.dialog.dialog('open').dialog('setTitle', '添加角色');
@@ -89,40 +79,41 @@ RolePage.prototype = {
 
     edit: function () {
         var row = this.datagrid.datagrid('getSelected');
-        if (row) {
-            this.dialog.dialog('open').dialog('setTitle', '编辑角色');
-            this.form.form('load', row);
-            this.form.form({url: this.baseUrl + row.id});
-        } else {
+        if (!row) {
             $.alertMsg('请选择一条数据进行编辑！！！')
+            return this;
         }
+        this.dialog.dialog('open').dialog('setTitle', '编辑角色');
+        this.form.form('load', row);
+        this.form.form({url: this.baseUrl + row.id});
         return this;
     },
 
     destroy: function () {
         var row = this.datagrid.datagrid('getSelected');
-        if (row) {
-            var p = this;
-            $.messager.confirm('系统提醒', '您确定删除这条数据吗?', function (r) {
-                if (r) {
-                    $.messager.progress();
-                    $.ajax({
-                        url: p.baseUrl + row.id,
-                        type: 'DELETE',
-                        dataType: 'json',
-                        success: function (result) {
-                            if (result.ok) {
-                                p.datagrid.datagrid('reload');    // reload the user data
-                            } else {
-                                $.showMsg(result.msg)
-                            }
-                            $.messager.progress('close');
-                        }
-                    });
-                }
-            });
-        } else {
-            $.alertMsg('请选择一条数据进行删除！！！')
+        if (!row) {
+            $.alertMsg('请选择一条数据进行删除！！！');
+            return this;
         }
+        $.messager.confirm('系统提醒', '您确定删除这条数据吗?', function (r) {
+            if (r) {
+                $.messager.progress();
+                $.ajax({
+                    url: rolePage.baseUrl + row.id,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.ok) {
+                            rolePage.datagrid.datagrid('reload');    // reload the user data
+                        } else {
+                            $.showMsg(result.msg)
+                        }
+                        $.messager.progress('close');
+                    }
+                });
+            }
+        });
     }
+
 };
+

@@ -1,7 +1,7 @@
-function AdminPage() {
-    var me = this;
-    this.datagrid = $('#dg').datagrid({
-        url: this.baseUrl,
+var adminPage = {
+    baseUrl: '/admins/',
+    datagrid: $('#dg').datagrid({
+        url: '/admins/',
         pagination: true,
         fitColumns: true,
         rownumbers: true,
@@ -37,30 +37,30 @@ function AdminPage() {
                 }
             }
         ]]
-    });
+    }),
 
     // 弹出窗口：添加or修改
-    this.dialog = $('#dlg').dialog({
+    dialog: $('#dlg').dialog({
         width: 400,
         modal: true,
         closed: true,
-        buttons:[{
+        buttons: [{
             iconCls: 'icon-ok',
             text: '保存',
             handler: function () {
-                me.form.submit();
+                adminPage.form.submit();
             }
         }, {
             iconCls: 'icon-cancel',
             text: '取消',
             handler: function () {
-                me.dialog.dialog('close');
+                adminPage.dialog.dialog('close');
             }
         }]
-    }).dialog('center');
+    }).dialog('center'),
 
     // 表单：添加or修改
-    this.form = $('#fm').form({
+    form: $('#fm').form({
         onSubmit: function () {
             var valid = $(this).form('validate');
             if (valid) {
@@ -72,19 +72,15 @@ function AdminPage() {
         success: function (r) {
             r = eval('(' + r + ')');
             if (r.ok) {
-                me.dialog.dialog('close');        // close the dialog
-                me.datagrid.datagrid('reload');    // reload the user data
+                adminPage.dialog.dialog('close');        // close the dialog
+                adminPage.datagrid.datagrid('reload');    // reload the user data
             } else {
                 $.showMsg(r.msg);
             }
             $.messager.progress('close');
         }
-    });
-}
+    }),
 
-AdminPage.prototype = {
-    constructor: AdminPage,
-    baseUrl: '/admins/',
     queryDatagrid: function (queryParams) {
         this.datagrid.datagrid({
             queryParams: queryParams
@@ -169,3 +165,4 @@ AdminPage.prototype = {
         }
     }
 };
+

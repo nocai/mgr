@@ -94,7 +94,7 @@ func (aic *AdminInvalidController) Get() {
 func (aic *AdminInvalidController) Put() {
 	id, _ := aic.GetInt(":id")
 	beego.Debug("id = ", id)
-	invalid, _ := aic.GetInt(":invalid")
+	invalid, _:= aic.GetInt(":invalid")
 	beego.Debug("invalid = ", invalid)
 
 	admin, err := adminser.GetAdminById(int64(id))

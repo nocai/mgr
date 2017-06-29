@@ -2,41 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="import" href="/static/html/input.html" >
-    <script type="text/javascript" src="home.js"></script>
+    <link rel="import" href="/html/input.html">
 </head>
-
 <body>
 <table id="dg" class="easyui-datagrid"></table>
-
 <div id="toolbar">
     <span style="padding: 0 4px">角色名称:</span>
     <input id="toolbar_rolename" class="easyui-textbox" style="width:110px">
     <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'"
-       onclick="page.queryDatagrid({role_name: $('#toolbar_rolename').val()})">查询</a>
+       onclick="rolePage.datagrid.datagrid({
+                    queryParams: {role_name: $('#toolbar_rolename').val()}
+                });">查询</a>
 
     <div style="float:right">
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:'true'"
-           onclick="page.add();">添加</a>
+           onclick="rolePage.add();">添加</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:'true'"
-           onclick="page.edit();">编辑</a>
+           onclick="rolePage.edit();">编辑</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:'true'"
-           onclick="page.destroy();">删除</a>
+           onclick="rolePage.destroy();">删除</a>
     </div>
 </div>
-
 <div id="dlg" class="easyui-dialog">
     <form id="fm" method="post" style="margin:0;padding:20px 50px">
         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">角色信息</div>
         <div style="margin-bottom:10px">
             <input name="role_name" class="easyui-textbox" style="width:100%"
-                    data-options="required:true, label:'角色名:'">
+                   data-options="required:true, label:'角色名:'">
         </div>
     </form>
 </div>
-
-<script>
-        var page = new RolePage();
-</script>
 </body>
+<script type="text/javascript" src="/static/js/role/home.js"></script>
 </html>

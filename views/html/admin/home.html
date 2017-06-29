@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="import" href="/static/html/input.html">
-    <script type="text/javascript" src="home.js"></script>
+    <link rel="import" href="/html/input.html">
 </head>
 
 <body>
@@ -15,17 +14,17 @@
     <input id="invalid" class="easyui-combobox" name="invalid"
            data-options="url:'/adminValid',method:'get',width:60,editable:false">
     <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'"
-       onclick="page.queryDatagrid({admin_name: $('#admin_name').val(),invalid:$('#invalid').val()})">查询</a>
+       onclick="adminPage.queryDatagrid({admin_name: $('#admin_name').val(),invalid:$('#invalid').val()})">查询</a>
 
     <div style="float:right">
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:'true'"
-           onclick="page.add();">添加</a>
+           onclick="adminPage.add();">添加</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:'true'"
-           onclick="page.edit();">编辑</a>
+           onclick="adminPage.edit();">编辑</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:'true'"
-           onclick="page.destroy();">删除</a>
+           onclick="adminPage.destroy();">删除</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-tip',plain:'true'"
-           onclick="page.active();">激活帐号</a>
+           onclick="adminPage.active();">激活帐号</a>
     </div>
 </div>
 
@@ -43,7 +42,6 @@
     </form>
 </div>
 
-<script>
-    var page = new AdminPage();
-</script>
 </body>
+<script type="text/javascript" src="/static/js/admin/home.js"></script>
+</html>
