@@ -5,6 +5,10 @@ import (
 	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
 	"mgr/tests/testutil"
+	"time"
+	"mgr/conf"
+	"mgr/util/key"
+	"math/rand"
 )
 
 func TestRoleKey(t *testing.T) {
@@ -81,7 +85,7 @@ func TestAdminKey(t *testing.T) {
 			Id:rand.Int63n(100),
 			AdminName:"A",
 			UserId:rand.Int63n(100),
-			Invalid:ValidEnum_Invalid,
+			Invalid:Invalid,
 		},
 		CreateTimeStart:now,
 		UpdateTimeEnd:now,

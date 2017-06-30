@@ -8,7 +8,15 @@ import (
 	"github.com/astaxie/beego/orm"
 	"time"
 	"mgr/models/service/userser"
+	"github.com/pkg/errors"
+	"mgr/util/pager"
+	"mgr/util/key"
+	"mgr/util/sqler"
+	"strings"
 )
+
+
+
 //
 //import (
 //	"github.com/astaxie/beego"
@@ -80,38 +88,124 @@ import (
 //	return result, nil
 //}
 //
-//func PageAdminVo(key *models.AdminKey, selectUser bool) (*pager.Pager, error) {
-//	p, err := PageAdmin(key)
-//	if err != nil {
-//		var admins []models.AdminVo
-//		return pager.New(key.Key, 0, admins), service.ErrQuery
-//	}
-//
-//	var adminVos []models.AdminVo
-//	if admins, ok := p.PageList.([]models.Admin); ok {
-//		for _, admin := range admins {
-//			adminVo := models.AdminVo{Admin:admin}
-//			if selectUser {
-//				user, err := GetUserById(admin.UserId)
-//				if err != nil {
-//					beego.Error(err)
-//				} else {
-//					adminVo.User = *user
-//				}
-//			}
-//			//append(adminVos, adminVo)
-//		}
-//	}
-//	return pager.New(key.Key, p.Total, adminVos), nil
-//}
-//
-func InsertAdminVo(admin *models.AdminVo) error {
-	exist, err := userser.IsExistOfUser(&models.User{Username:admin.User.Username})
+
+type AdminVo struct {
+	*models.Admin
+	*models.User `json:"user"`
+
+	Roles []models.Role `json:"roles"`
+}
+
+type AdminVoKey struct {
+	*key.Key
+	*models.Admin
+	Invalid models.ValidEnum
+}
+
+func (this *AdminVoKey) NewSqler() *sqler.Sqler {
+	sqler := sqler.New(this.Key)
+
+	sqler.AppendSql(`select tma.* from t_mgr_admin as tma join t_mgr_user as tmu on tma.user_id = tmu.id where 1 = 1`)
+	if this.Invalid != models.ValidAll {
+		sqler.AppendSql(" and tmu.invalid = ?")
+		sqler.AppendArg(this.Invalid)
+	}
+	if id := this.Id; id != 0 {
+		sqler.AppendSql(" and tma.id = ?")
+		sqler.AppendArg(id)
+	}
+	if adminName := this.AdminName; adminName != "" {
+		sqler.AppendSql(" and tma.admin_name")
+		if strings.Contains(adminName, "%") {
+			sqler.AppendSql(" like ?")
+		} else {
+			sqler.AppendSql(" = ?")
+		}
+		sqler.AppendArg(adminName)
+	}
+	if userId := this.UserId; userId != 0 {
+		sqler.AppendSql(" and tma.user_id = ?")
+		sqler.AppendArg(userId)
+	}
+
+	//if createTimeStart := this.CreateTimeStart; !createTimeStart.IsZero() {
+	//	sqler.AppendSql(" and tma.create_time >= ?")
+	//	sqler.AppendArg(createTimeStart)
+	//}
+	//if createTimeEnd := this.CreateTimeEnd; !createTimeEnd.IsZero() {
+	//	sqler.AppendSql(" and tma.create_time < ?")
+	//	sqler.AppendArg(createTimeEnd)
+	//}
+	//
+	//if updateTimeStart := this.UpdateTimeStart; !updateTimeStart.IsZero() {
+	//	sqler.AppendSql(" and tma.update_time >= ?")
+	//	sqler.AppendArg(updateTimeStart)
+	//}
+	//if updateTimeEnd := this.UpdateTimeEnd; !updateTimeEnd.IsZero() {
+	//	sqler.AppendSql(" and tma.update_time < ?")
+	//	sqler.AppendArg(updateTimeEnd)
+	//}
+	//if keyWord := this.KeyWord; keyWord != "" {
+	//	sqler.AppendSql(" and tma.admin_name like ?")
+	//	sqler.AppendArg("%" + keyWord + "%")
+	//}
+
+	return sqler
+}
+
+func PageAdminVo(key *AdminVoKey) (*pager.Pager, error) {
+	sqler := key.NewSqler()
+	o := orm.NewOrm()
+
+	var total int64
+	err := o.Raw(sqler.GetCountSqlAndArgs()).QueryRow(&total)
+	if err != nil {
+		return pager.New(key.Key, 0, []models.Admin{}), errors.Wrap(err, service.MsgQuery)
+	}
+
+	var admins []models.Admin
+	affected, err := o.Raw(sqler.GetSqlAndArgs()).QueryRows(&admins)
 	if err != nil {
 		beego.Error(err)
-		return err
+		return pager.New(key.Key, 0, []models.Admin{}), errors.Wrap(err, service.MsgQuery)
+	}
+	beego.Debug(fmt.Sprintf("affected = %d", affected))
+	if affected == 0 {
+		return pager.New(key.Key, 0, []models.Admin{}), nil
+	}
+
+	var adminVos []AdminVo
+	for i, _ := range admins {
+		adminVos = append(adminVos, AdminVo{Admin:&admins[i]})
+	}
+
+	ch := make(chan error, len(adminVos))
+	for index, _ := range adminVos {
+		go func(i int, ch chan error) {
+			user, err := userser.GetUserById(adminVos[i].UserId)
+			if err != nil {
+				ch <- err
+			} else {
+				adminVos[i].User = user
+				ch <- nil
+			}
+		}(index, ch)
+	}
+
+	for i := 0; i < len(adminVos); i ++ {
+		err := <-ch
+		if err != nil {
+			return pager.New(key.Key, 0, []models.Admin{}), err
+		}
+	}
+	return pager.New(key.Key, total, adminVos), nil
+}
+
+func InsertAdminVo(admin *AdminVo) error {
+	exist, err := userser.IsExistOfUser(&models.User{Username:admin.User.Username})
+	if err != nil {
+		return errors.Wrap(err, service.MsgInsert)
 	} else if (exist) {
-		beego.Error(ErrUsernameExist)
 		return ErrUsernameExist
 	}
 
@@ -123,9 +217,8 @@ func InsertAdminVo(admin *models.AdminVo) error {
 	admin.User.UpdateTime = now
 	id, err := o.Insert(admin.User)
 	if err != nil {
-		beego.Error(err)
 		o.Rollback()
-		return service.ErrInsert
+		return errors.Wrap(err, service.MsgInsert)
 	}
 	admin.UserId = id
 	beego.Debug(fmt.Sprintf("Add User success. userId = %v", id))
@@ -134,16 +227,15 @@ func InsertAdminVo(admin *models.AdminVo) error {
 	admin.Admin.UpdateTime = now
 	id, err = o.Insert(admin.Admin)
 	if err != nil {
-		beego.Error(err)
 		o.Rollback()
-		return service.ErrInsert
+		return errors.Wrap(err, service.MsgInsert)
 	}
 	beego.Debug(fmt.Sprintf("Add Admin success. adminId = %v", id))
 	o.Commit()
 	return nil
 }
 
-func UpdateAdminVo(adminVo *models.AdminVo) error {
+func UpdateAdminVo(adminVo *AdminVo) error {
 	if adminVo == nil {
 		return service.ErrArgument
 	}
@@ -153,7 +245,7 @@ func UpdateAdminVo(adminVo *models.AdminVo) error {
 		Username:adminVo.Username,
 	}
 	exist, err := userser.IsExistOfUser(user)
-	if  err != nil {
+	if err != nil {
 		beego.Error(err)
 		return err
 	} else if exist {
@@ -187,7 +279,7 @@ func UpdateAdminVo(adminVo *models.AdminVo) error {
 	return nil
 }
 
-func GetAdminVoById(id int64) (*models.AdminVo, error) {
+func GetAdminVoById(id int64) (*AdminVo, error) {
 	admin, err := GetAdminById(id)
 	if err != nil {
 		beego.Error(err)
@@ -200,7 +292,7 @@ func GetAdminVoById(id int64) (*models.AdminVo, error) {
 		return nil, err
 	}
 
-	return &models.AdminVo{
+	return &AdminVo{
 		Admin : admin,
 		User : user,
 	}, nil

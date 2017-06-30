@@ -82,6 +82,7 @@ func GetUserById(id int64) (*models.User, error) {
 	userKey := &models.UserKey{
 		User :&models.User{
 			Id : id,
+			Invalid:models.Valid,
 		},
 	}
 	userSlice, err := FindUserByKey(userKey)

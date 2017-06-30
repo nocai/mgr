@@ -7,7 +7,6 @@ import (
 	"mgr/util/key"
 
 	"github.com/astaxie/beego"
-	"errors"
 )
 
 type AdminController struct {
@@ -23,15 +22,15 @@ func (ctr *AdminController) Get() {
 	sort := ctr.GetString("sort")
 	order := ctr.GetString("order")
 	adminName := ctr.GetString("admin_name")
-	invalid, _ := ctr.GetInt("invalid", 0)
+	//invalid, _ := ctr.GetInt("invalid", 0)
 	if sort == "" {
 		sort = "id"
 		order = "asc"
 	}
 
 	key := key.New(page, rows, []string{sort}, []string{order}, true)
-	admin := &models.Admin{AdminName: "%" + adminName + "%", Invalid:models.ValidEnum(invalid)}
-	pager, err := adminser.PageAdmin(&models.AdminKey{Key: key, Admin: admin})
+	admin := &models.Admin{AdminName: "%" + adminName + "%"}
+	pager, err := adminser.PageAdminVo(&adminser.AdminVoKey{Key: key, Admin: admin,Invalid:models.ValidAll})
 	ctr.Print(pager, err)
 }
 
@@ -46,14 +45,14 @@ func (ctr *AdminController) Post() {
 
 	if id == 0 {
 		// 添加
-		adminVo := &models.AdminVo{
+		adminVo := &adminser.AdminVo{
 			Admin:  &models.Admin{
-				Invalid: models.ValidEnum_Invalid,
 				AdminName: adminName,
 			},
 			User: &models.User{
 				Username: adminName,
 				Password: password,
+				Invalid:models.Valid,
 			},
 		}
 		ctr.PrintError(adminser.InsertAdminVo(adminVo))
@@ -103,10 +102,10 @@ func (aic *AdminInvalidController) Put() {
 		aic.PrintError(err)
 		return
 	}
-	if admin.Invalid == models.ValidEnum_Valid {
-		aic.PrintError(errors.New("已经激活"))
-		return
-	}
-	admin.Invalid = models.ValidEnum(invalid)
+	//if mod.Invalid == models.Valid {
+	//	aic.PrintError(errors.New("已经激活"))
+	//	return
+	//}
+	//admin.Invalid = models.ValidEnum(invalid)
 	aic.PrintError(adminser.UpdateAdmin(admin))
 }

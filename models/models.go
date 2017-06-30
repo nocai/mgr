@@ -29,92 +29,28 @@ func init() {
 	orm.Debug = true
 }
 
-// 所有模型共同的属性.
-// create_time.
-// update_time
-type ModelBase struct {
-	CreateTime time.Time  `json:"create_time"`
-	UpdateTime time.Time `json:"update_time"`
-}
+type ValidEnum int
 
-// 系统角色
-type Role struct {
-	ModelBase
-
-	Id       int64  `json:"id"`
-	RoleName string `orm:"unique" json:"role_name"`
-}
-
-// 多字段索引
-func (role *Role) TableIndex() [][]string {
-	return [][]string{
-		[]string{"RoleName"},
-	}
-}
-
-type RoleKey struct {
-	*key.Key
-	*Role
-
-	CreateTimeStart time.Time
-	CreateTimeEnd   time.Time
-	UpdateTimeStart time.Time
-	UpdateTimeEnd   time.Time
-	KeyWord         string
-}
-
-func (this *RoleKey) NewSqler() *sqler.Sqler {
-	sqler := sqler.New(this.Key)
-	sqler.AppendSql("select * from t_mgr_role as tmr where 1 = 1")
-	if id := this.Id; id != 0 {
-		sqler.AppendSql(" and tmr.id = ?")
-		sqler.AppendArg(id)
-	}
-	if roleName := this.RoleName; roleName != "" {
-		sqler.AppendSql(" and tmr.role_name ")
-		if strings.Contains(roleName, "%") {
-			sqler.AppendSql(" like ?")
-		} else {
-			sqler.AppendSql(" = ?")
-		}
-
-		sqler.AppendArg(roleName)
-	}
-	if !this.CreateTimeStart.IsZero() {
-		sqler.AppendSql(" and tmr.create_time >= ?")
-		sqler.AppendArg(this.CreateTimeStart)
-	}
-	if !this.CreateTimeEnd.IsZero() {
-		sqler.AppendSql(" and tmr.create_time <= ?")
-		sqler.AppendArg(this.CreateTimeEnd)
-	}
-	if !this.UpdateTimeStart.IsZero() {
-		sqler.AppendSql(" and tmr.update_time >= ?")
-		sqler.AppendArg(this.UpdateTimeStart)
-	}
-	if !this.UpdateTimeEnd.IsZero() {
-		sqler.AppendSql(" and tmr.update_time <= ?")
-		sqler.AppendArg(this.UpdateTimeEnd)
-	}
-
-	return sqler
-}
+const (
+	// 无效的
+	Invalid ValidEnum = iota
+	// 有效的
+	Valid
+	// 所有
+	ValidAll
+)
 
 type User struct {
-	ModelBase
+	Id         int64
+	Username   string
+	Password   string
 
-	Id       int64
-	Username string `orm:"unique"`
-	Password string
-	Invalid  bool `json:"invalid"`
+	CreateTime time.Time  `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+
+	Invalid    ValidEnum `json:"invalid"`
 }
 
-// 多字段索引
-func (user *User) TableIndex() [][]string {
-	return [][]string{
-		[]string{"Username"},
-	}
-}
 
 // 多字段唯一键
 func (user *User) TableUnique() [][]string {
@@ -122,6 +58,16 @@ func (user *User) TableUnique() [][]string {
 		[]string{"Username"},
 	}
 }
+
+// 多字段索引
+func (user *User) TableIndex() [][]string {
+	return [][]string{
+		[]string{"CreateTime"},
+		[]string{"UpdateTime"},
+		[]string{"Invalid"},
+	}
+}
+
 
 type UserKey struct {
 	*key.Key
@@ -186,25 +132,28 @@ func (this *UserKey) NewSqler() *sqler.Sqler {
 	return sqler;
 }
 
-type ValidEnum int
-
-const (
-	// 所有
-	ValidEnum_All ValidEnum = iota
-	// 无效的
-	ValidEnum_Invalid
-	// 有效的
-	ValidEnum_Valid
-)
-
 type Admin struct {
-	ModelBase
+	Id         int64 `json:"id"`
+	AdminName  string `json:"admin_name"`
+	UserId     int64 `json:"user_id"`
 
-	Id        int64 `json:"id"`
-	AdminName string `json:"admin_name"`
-	UserId    int64 `orm:"unique" json:"user_id"`
+	CreateTime time.Time  `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+}
 
-	Invalid   ValidEnum `json:"invalid"`
+// 多字段唯一键
+func (admin *Admin) TableUnique() [][]string {
+	return [][]string{
+		[]string{"AdminName"},
+		[]string{"UserId"},
+	}
+}
+// 多字段索引
+func (admin *Admin) TableIndex() [][]string {
+	return [][]string{
+		[]string{"CreateTime"},
+		[]string{"UpdateTime"},
+	}
 }
 
 type AdminKey struct {
@@ -262,16 +211,78 @@ func (this *AdminKey) NewSqler() *sqler.Sqler {
 		sqler.AppendArg("%" + keyWord + "%")
 	}
 
-	if invalid := this.Invalid; invalid != ValidEnum_All {
-		sqler.AppendSql(" and tma.invalid = ?")
-		sqler.AppendArg(this.Invalid)
-	}
 	return sqler
 }
 
-type AdminVo struct {
-	*Admin
-	*User `orm:"-" json:"user"`
 
-	Roles []Role `orm:"-" json:"roles"`
+
+// 系统角色
+type Role struct {
+	Id         int64  `json:"id"`
+	RoleName   string `json:"role_name"`
+
+	CreateTime time.Time  `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+}
+
+// 多字段唯一键
+func (role *Role) TableUnique() [][]string {
+	return [][]string{
+		[]string{"RoleName"},
+	}
+}
+// 多字段索引
+func (role *Role) TableIndex() [][]string {
+	return [][]string{
+		[]string{"CreateTime"},
+		[]string{"UpdateTime"},
+	}
+}
+
+type RoleKey struct {
+	*key.Key
+	*Role
+
+	CreateTimeStart time.Time
+	CreateTimeEnd   time.Time
+	UpdateTimeStart time.Time
+	UpdateTimeEnd   time.Time
+	KeyWord         string
+}
+
+func (this *RoleKey) NewSqler() *sqler.Sqler {
+	sqler := sqler.New(this.Key)
+	sqler.AppendSql("select * from t_mgr_role as tmr where 1 = 1")
+	if id := this.Id; id != 0 {
+		sqler.AppendSql(" and tmr.id = ?")
+		sqler.AppendArg(id)
+	}
+	if roleName := this.RoleName; roleName != "" {
+		sqler.AppendSql(" and tmr.role_name ")
+		if strings.Contains(roleName, "%") {
+			sqler.AppendSql(" like ?")
+		} else {
+			sqler.AppendSql(" = ?")
+		}
+
+		sqler.AppendArg(roleName)
+	}
+	if !this.CreateTimeStart.IsZero() {
+		sqler.AppendSql(" and tmr.create_time >= ?")
+		sqler.AppendArg(this.CreateTimeStart)
+	}
+	if !this.CreateTimeEnd.IsZero() {
+		sqler.AppendSql(" and tmr.create_time <= ?")
+		sqler.AppendArg(this.CreateTimeEnd)
+	}
+	if !this.UpdateTimeStart.IsZero() {
+		sqler.AppendSql(" and tmr.update_time >= ?")
+		sqler.AppendArg(this.UpdateTimeStart)
+	}
+	if !this.UpdateTimeEnd.IsZero() {
+		sqler.AppendSql(" and tmr.update_time <= ?")
+		sqler.AppendArg(this.UpdateTimeEnd)
+	}
+
+	return sqler
 }

@@ -24,14 +24,14 @@ var adminPage = {
                     return new Date(value).format("yyyy-MM-dd hh:mm:ss");
                 }
             }, {
-                field: 'invalid',
+                field: 'user',
                 title: '是否有效',
                 width: 100,
                 sortable: true,
                 formatter: function (value, row, index) {
-                    if (value == 1) {
+                    if (value.invalid == 0) {
                         return "<img src='/static/jquery-easyui-1.5.1/themes/icons/cancel.png'>"
-                    } else if (value == 2) {
+                    } else if (value.invalid == 1) {
                         return "<img src='/static/jquery-easyui-1.5.1/themes/icons/ok.png'>"
                     }
                 }

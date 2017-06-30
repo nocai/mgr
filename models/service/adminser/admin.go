@@ -154,15 +154,15 @@ func GetAdminById(id int64) (*models.Admin, error) {
 // key:models.ValidEnum value:string
 func FindAdminValids() ([]map[string]interface{}) {
 	allMap := make(map[string]interface{})
-	allMap["value"] = models.ValidEnum_All
+	allMap["value"] = models.ValidAll
 	allMap["text"] = "全部"
 
 	invalidMap := make(map[string]interface{})
-	invalidMap["value"] = models.ValidEnum_Invalid
+	invalidMap["value"] = models.Invalid
 	invalidMap["text"] = "无效"
 
 	validMap := make(map[string]interface{})
-	validMap["value"] = models.ValidEnum_Valid
+	validMap["value"] = models.Valid
 	validMap["text"] = "有效"
 
 	return []map[string]interface{}{
