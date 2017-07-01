@@ -10,16 +10,16 @@ var adminPage = {
         method: 'get',
         singleSelect: true,
         columns: [[
-            {field: 'id', title: 'Id', sortable: true},
-            {field: 'admin_name', title: '用户名', width: 100, sortable: true},
+            //{field: 'id', title: 'Id', sortable: true, width: 100,hidden:true},
+            {field: 'admin_name', title: '用户名', sortable: true, width: 100},
             {
-                field: 'create_time', title: '创建时间', width: 100, sortable: true,
+                field: 'create_time', title: '创建时间', sortable: true, width: 100,
                 formatter: function (value, row, index) {
                     return new Date(value).format("yyyy-MM-dd hh:mm:ss");
                 }
             },
             {
-                field: 'update_time', title: '最后一次更新时间', width: 100, sortable: true,
+                field: 'update_time', title: '最后一次更新时间', sortable: true, width: 100,
                 formatter: function (value, row, index) {
                     return new Date(value).format("yyyy-MM-dd hh:mm:ss");
                 }
@@ -27,13 +27,21 @@ var adminPage = {
                 field: 'user',
                 title: '是否有效',
                 width: 100,
-                sortable: true,
                 formatter: function (value, row, index) {
                     if (value.invalid == 0) {
                         return "<img src='/static/jquery-easyui-1.5.1/themes/icons/cancel.png'>"
                     } else if (value.invalid == 1) {
                         return "<img src='/static/jquery-easyui-1.5.1/themes/icons/ok.png'>"
                     }
+                }
+            }, {
+                field: 'id',
+                title: '操作',
+                width: 100,
+                //hidden:true,
+                formatter: function (val, row, index) {
+                    console.info(row.user.invalid)
+                    return '<a href="#" onclick="adminPage.active(' + val + ','+row.user.invalid+')">激活</a>';
                 }
             }
         ]]
@@ -134,35 +142,29 @@ var adminPage = {
         }
     },
 
-    active: function () {
-        var row = this.datagrid.datagrid('getSelected');
-        if (row) {
-            if (row.invalid == 2) {
-                $.showMsg('此帐号有效，无需激活...')
-                return;
-            }
-            var p = this;
-            $.messager.confirm('系统提醒', '您确定激活这条数据吗?', function (r) {
-                if (r) {
-                    $.messager.progress();
-                    $.ajax({
-                        url: '/adminValid/' + row.id + '/2',
-                        type: 'PUT',
-                        dataType: 'json',
-                        success: function (result) {
-                            if (result.ok) {
-                                p.datagrid.datagrid('reload');    // reload the user data
-                            } else {
-                                $.showMsg(result.msg)
-                            }
-                            $.messager.progress('close');
-                        }
-                    });
-                }
-            });
-        } else {
-            $.alertMsg('请选择一条数据进行激活！！！')
+    active: function (id, invalid) {
+        if (invalid == 1) {
+            $.showMsg('此帐号有效，无需激活...');
+            return;
         }
+        $.messager.confirm('系统提醒', '您确定激活这条数据吗?', function (r) {
+            if (r) {
+                $.messager.progress();
+                $.ajax({
+                    url: '/adminValid/' + id ,
+                    type: 'PUT',
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.ok) {
+                            adminPage.datagrid.datagrid('reload');    // reload the user data
+                        } else {
+                            $.showMsg(result.msg)
+                        }
+                        $.messager.progress('close');
+                    }
+                });
+            }
+        });
     }
 };
 

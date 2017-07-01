@@ -22,6 +22,7 @@ type BaseController struct {
 }
 
 func (controller *BaseController) debugInput() {
+	beego.Info("路径:",fmt.Sprintf("%#v",controller.Ctx.Input.Params()))
 	beego.Debug("输入参数:", controller.Input())
 }
 // 将用户信息放到Session里

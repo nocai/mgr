@@ -3,7 +3,6 @@ package got
 import (
 	"testing"
 	"fmt"
-	"github.com/smartystreets/goconvey/convey"
 )
 
 func sum(values []int, resultChan chan int) {
@@ -22,9 +21,7 @@ func TestT(t *testing.T) {
 	go sum(values[len(values) / 3:], resultChan)
 
 	//close(resultChan)
-	for ch := <-resultChan {
-		fmt.Println(ch);
-	}
+
 	for i := 0; i<3;i++ {
 		fmt.Println(<-resultChan)
 	}

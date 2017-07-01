@@ -8,6 +8,7 @@ import (
 	"mgr/models"
 	"mgr/models/service"
 	"mgr/util/pager"
+	"github.com/pkg/errors"
 )
 
 func UsernamPassMatched(username, password string) (bool, error) {
@@ -82,7 +83,7 @@ func GetUserById(id int64) (*models.User, error) {
 	userKey := &models.UserKey{
 		User :&models.User{
 			Id : id,
-			Invalid:models.Valid,
+			Invalid:models.ValidAll,
 		},
 	}
 	userSlice, err := FindUserByKey(userKey)
@@ -194,5 +195,33 @@ func DeleteUserById(id int64) error {
 	}
 
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	return nil
+}
+
+var (
+	ErrUsernameExist = errors.New("用户名存在")
+)
+
+// 更新
+func UpdateUser(user *models.User) error {
+	ormer := orm.NewOrm()
+	exist, err := IsExistOfUser(&models.User{
+		Id : user.Id,
+		Username:user.Username,
+	});
+	if err != nil {
+		beego.Error(err)
+		return errors.Wrap(err, service.MsgQuery)
+	}
+	if exist {
+		return ErrUsernameExist
+	}
+
+	affected, err := ormer.Update(user)
+	if err != nil {
+		beego.Error(err)
+		return service.ErrUpdate
+	}
+	beego.Debug("<UpdateUser> affected = ", affected)
 	return nil
 }

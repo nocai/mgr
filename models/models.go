@@ -126,9 +126,11 @@ func (this *UserKey) NewSqler() *sqler.Sqler {
 		sqler.AppendSql(" and tmu.username like ?")
 		sqler.AppendArg("%" + this.KeyWord + "%")
 	}
+	if this.Invalid != ValidAll {
+		sqler.AppendSql(" and tmu.invalid = ?")
+		sqler.AppendArg(this.Invalid)
+	}
 
-	sqler.AppendSql(" and tmu.invalid = ?")
-	sqler.AppendArg(this.Invalid)
 	return sqler;
 }
 
