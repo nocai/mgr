@@ -43,10 +43,19 @@
     </form>
 </div>
 
-<div id="w" class="easyui-window" title="Basic Window" data-options="iconCls:'icon-save',closed:true" style="width:500px;height:200px;padding:10px;">
+<div id="w" class="easyui-window" title="Basic Window" 
+	data-options="iconCls:'icon-save',closed:true,footer:'#ft'" 
+	style="width:500px;height:200px;padding:10px;">
     The window content.
     <table id="dg2" class="easyui-datagrid"></table>  
+    <div id="ft" style="padding:2px 5px;">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true"></a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true"></a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-save" plain="true"></a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cut" plain="true"></a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true"></a>
+    </div>
 </div>
 </body>
-<script type="text/javascript" src="/static/js/admin/home.js"></script>
+<script type="text/javascript" src="/static/js/admin/home.js?version=1.0"></script>
 </html>

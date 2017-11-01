@@ -40,8 +40,16 @@ var adminPage = {
                 width: 100,
                 //hidden:true,
                 formatter: function (val, row, index) {
-                    console.info(row.user.invalid)
-                    return '<a href="#" onclick="adminPage.active(' + val + ','+row.user.invalid+')">激活</a>';
+                    var invalid = row.user.invalid;
+                    var html = '';
+                    if (invalid == 0) {
+                        html += '<a href="#" onclick="adminPage.active(' + val + ',1)">激活</a>';
+                    } else {
+                        html += '<a href="#" onclick="adminPage.active(' + val + ',0)">注销</a>';
+                    }
+                    html += '|<a href="#" onclick="adminPage.grantRole(' + val + ')">授予角色</a>'
+                    return html;
+
                 }
             }
         ]]
@@ -143,15 +151,16 @@ var adminPage = {
     },
 
     active: function (id, invalid) {
+        var msg = '您确定注销这条数据吗？';
         if (invalid == 1) {
-            $.showMsg('此帐号有效，无需激活...');
-            return;
+            msg = '您确定激活这条数据吗？';
         }
-        $.messager.confirm('系统提醒', '您确定激活这条数据吗?', function (r) {
+
+        $.messager.confirm('系统提醒', msg, function (r) {
             if (r) {
                 $.messager.progress();
                 $.ajax({
-                    url: '/adminValid/' + id ,
+                    url: '/adminValid/' + id + "/" + invalid,
                     type: 'PUT',
                     dataType: 'json',
                     success: function (result) {
@@ -165,6 +174,29 @@ var adminPage = {
                 });
             }
         });
+    },
+
+    grantRole: function(id) {
+        var datagrid2 = $('#dg2').datagrid({
+            url: '/admins/',
+            fitColumns: true,
+            rownumbers: true,
+            fit: true,
+            method: 'get',
+            singleSelect: true,
+            columns: [[
+                //{field: 'id', title: 'Id', sortable: true, width: 100,hidden:true},
+		{field:'id', checkbox:true},	
+                {field: 'admin_name', title: '用户名', sortable: true, width: 100},
+                {
+                    field: 'create_time', title: '创建时间', sortable: true, width: 100,
+                    formatter: function (value, row, index) {
+                        return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                }
+	    ]]
+        })
+    	$('#w').window('open');
     }
 };
 
