@@ -95,6 +95,9 @@ func (aic *AdminInvalidController) Put() {
 	aic.debugInput()
 
 	id, _ := aic.GetInt(":id")
+	invalid, _ := aic.GetInt(":invalid", 0)
+
+
 	admin, err := adminser.GetAdminById(int64(id))
 	if err != nil {
 		aic.PrintError(err)
@@ -105,7 +108,7 @@ func (aic *AdminInvalidController) Put() {
 		aic.PrintError(err)
 		return
 	}
-	user.Invalid = models.Valid
+	user.Invalid = models.ValidEnum(invalid)
 	err = userser.UpdateUser(user)
 	aic.PrintError(err)
 }
