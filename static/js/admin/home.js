@@ -178,25 +178,59 @@ var adminPage = {
 
     grantRole: function(id) {
         var datagrid2 = $('#dg2').datagrid({
-            url: '/admins/',
+            url: '/roles//',
             fitColumns: true,
             rownumbers: true,
             fit: true,
             method: 'get',
-            singleSelect: true,
+
             columns: [[
                 //{field: 'id', title: 'Id', sortable: true, width: 100,hidden:true},
-		{field:'id', checkbox:true},	
-                {field: 'admin_name', title: '用户名', sortable: true, width: 100},
+		        {field:'id', checkbox:true},
+                {field: 'role_name', title: '角色名', sortable: true, width: 100},
                 {
                     field: 'create_time', title: '创建时间', sortable: true, width: 100,
                     formatter: function (value, row, index) {
                         return new Date(value).format("yyyy-MM-dd hh:mm:ss");
                     }
                 }
-	    ]]
-        })
-    	$('#w').window('open');
+	        ]]
+        });
+        var dlg2 = $('#dlg2').dialog({
+            title:'授予角色',
+            iconCls:'icon-save',
+            buttons: [{
+                text:'授权',
+                iconCls:'icon-ok',
+                handler:function(){
+                    var roles = datagrid2.datagrid('getSelections')
+                    console.info(roles)
+
+                    var roleIds = new Array();
+                    for(var i = 0; i < roles.length; i ++) {
+                        roleIds[i] = roles[i].id;
+                    }
+                    $.ajax({
+                        url: '/arrefs/',
+                        type: 'POST',
+                        dataType: 'json',
+                        data : {adminId:id, roleIds:roleIds},
+                        success: function (result) {
+                            if (result.ok) {
+                                dlg2.dialog('close');
+                            }
+                            $.showMsg(result.msg)
+                        }
+                    });
+                }
+            },{
+                text:'取消',
+                iconCls:'icon-cancel',
+                handler:function(){
+                    dlg2.dialog('close');
+                }
+            }]
+        });
     }
 };
 

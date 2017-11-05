@@ -35,6 +35,10 @@ func init() {
 	beego.Router("/roles/:id:int", &controllers.RoleController{})
 }
 
+// admin role ref
+func init() {
+	beego.Router("/arrefs", &controllers.AdminRoleRefController{})
+}
 // res
 func init() {
 	//beego.Router("/res", &controllers.ResController{}) // Get method
