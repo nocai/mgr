@@ -178,7 +178,7 @@ var adminPage = {
 
     grantRole: function(id) {
         var datagrid2 = $('#dg2').datagrid({
-            url: '/roles//',
+            url: '/roles/adminId/' + id,
             fitColumns: true,
             rownumbers: true,
             fit: true,
