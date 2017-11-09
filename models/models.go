@@ -4,7 +4,6 @@ import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	"time"
-	//"github.com/astaxie/beego"
 	"mgr/util/key"
 	"mgr/util/sqler"
 	"strings"
@@ -253,20 +252,24 @@ type RoleKey struct {
 func (this *RoleKey) NewSqler() *sqler.Sqler {
 	sqler := sqler.New(this.Key)
 	sqler.AppendSql("select * from t_mgr_role as tmr where 1 = 1")
-	if id := this.Id; id != 0 {
-		sqler.AppendSql(" and tmr.id = ?")
-		sqler.AppendArg(id)
-	}
-	if roleName := this.RoleName; roleName != "" {
-		sqler.AppendSql(" and tmr.role_name ")
-		if strings.Contains(roleName, "%") {
-			sqler.AppendSql(" like ?")
-		} else {
-			sqler.AppendSql(" = ?")
-		}
 
-		sqler.AppendArg(roleName)
+	if this.Role != nil {
+		if id := this.Id; id != 0 {
+			sqler.AppendSql(" and tmr.id = ?")
+			sqler.AppendArg(id)
+		}
+		if roleName := this.RoleName; roleName != "" {
+			sqler.AppendSql(" and tmr.role_name ")
+			if strings.Contains(roleName, "%") {
+				sqler.AppendSql(" like ?")
+			} else {
+				sqler.AppendSql(" = ?")
+			}
+
+			sqler.AppendArg(roleName)
+		}
 	}
+
 	if !this.CreateTimeStart.IsZero() {
 		sqler.AppendSql(" and tmr.create_time >= ?")
 		sqler.AppendArg(this.CreateTimeStart)

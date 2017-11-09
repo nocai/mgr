@@ -83,7 +83,7 @@ type RoleDatagridController struct {
 
 type RoleDatagrid struct {
 	*models.Role
-	Checked bool
+	Checked bool `json:"checked"`
 }
 
 func (this *RoleDatagridController) Get() {
@@ -104,10 +104,11 @@ func (this *RoleDatagridController) Get() {
 
 	var rds []RoleDatagrid
 	if roles, ok := pager.Pagination.PageList.([]models.Role); ok {
-		for _, role := range roles {
-			rd := RoleDatagrid{Role: &role, Checked: true}
+		for i := 0; i < len(roles); i++ {
+			rd := RoleDatagrid{Role: &roles[i], Checked: true}
 			rds = append(rds, rd)
 		}
+
 	}
 	pager.Pagination.PageList = rds
 	this.PrintData(pager)
