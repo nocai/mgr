@@ -5,8 +5,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"time"
 	//"github.com/astaxie/beego"
-	"mgr/util/sqler"
 	"mgr/util/key"
+	"mgr/util/sqler"
 	"strings"
 )
 
@@ -41,33 +41,31 @@ const (
 )
 
 type User struct {
-	Id         int64
-	Username   string
-	Password   string
+	Id       int64
+	Username string
+	Password string
 
-	CreateTime time.Time  `json:"create_time"`
+	CreateTime time.Time `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
 
-	Invalid    ValidEnum `json:"invalid"`
+	Invalid ValidEnum `json:"invalid"`
 }
-
 
 // 多字段唯一键
 func (user *User) TableUnique() [][]string {
 	return [][]string{
-		[]string{"Username"},
+		{"Username"},
 	}
 }
 
 // 多字段索引
 func (user *User) TableIndex() [][]string {
 	return [][]string{
-		[]string{"CreateTime"},
-		[]string{"UpdateTime"},
-		[]string{"Invalid"},
+		{"CreateTime"},
+		{"UpdateTime"},
+		{"Invalid"},
 	}
 }
-
 
 type UserKey struct {
 	*key.Key
@@ -131,15 +129,15 @@ func (this *UserKey) NewSqler() *sqler.Sqler {
 		sqler.AppendArg(this.Invalid)
 	}
 
-	return sqler;
+	return sqler
 }
 
 type Admin struct {
-	Id         int64 `json:"id"`
-	AdminName  string `json:"admin_name"`
-	UserId     int64 `json:"user_id"`
+	Id        int64  `json:"id"`
+	AdminName string `json:"admin_name"`
+	UserId    int64  `json:"user_id"`
 
-	CreateTime time.Time  `json:"create_time"`
+	CreateTime time.Time `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
 }
 
@@ -150,6 +148,7 @@ func (admin *Admin) TableUnique() [][]string {
 		[]string{"UserId"},
 	}
 }
+
 // 多字段索引
 func (admin *Admin) TableIndex() [][]string {
 	return [][]string{
@@ -216,14 +215,12 @@ func (this *AdminKey) NewSqler() *sqler.Sqler {
 	return sqler
 }
 
-
-
 // 系统角色
 type Role struct {
-	Id         int64  `json:"id"`
-	RoleName   string `json:"role_name"`
+	Id       int64  `json:"id"`
+	RoleName string `json:"role_name"`
 
-	CreateTime time.Time  `json:"create_time"`
+	CreateTime time.Time `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
 }
 
@@ -233,6 +230,7 @@ func (role *Role) TableUnique() [][]string {
 		[]string{"RoleName"},
 	}
 }
+
 // 多字段索引
 func (role *Role) TableIndex() [][]string {
 	return [][]string{
