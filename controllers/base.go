@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
 	"fmt"
+	"github.com/astaxie/beego"
 )
 
 const (
-	OK int = 200
+	OK  int = 200
 	Bad int = 400
 
 	// session key "adminId"
@@ -21,10 +21,22 @@ type BaseController struct {
 	beego.Controller
 }
 
-func (controller *BaseController) debugInput() {
-	beego.Info("路径:",fmt.Sprintf("%#v",controller.Ctx.Input.Params()))
-	beego.Debug("输入参数:", controller.Input())
+func (this *BaseController) recoverPanic() {
+	if err := recover(); err != nil {
+		beego.Error("请求路径:", fmt.Sprintf("%#v", this.Ctx.Input.Params()))
+		beego.Error("输入参数:", this.Input())
+		beego.Error(err)
+		switch err.(type) {
+		case error:
+			this.PrintError(err.(error))
+		case string:
+			this.PrintFail(err.(string))
+		default:
+			this.PrintData(err)
+		}
+	}
 }
+
 // 将用户信息放到Session里
 //func (controller *BaseController) SetSesseionAdmin(admin models.Admin) {
 //	controller.SetSession(ADMIN_ID, admin.Id)
@@ -56,13 +68,13 @@ func (controller *BaseController) debugInput() {
 //	return ""
 //}
 const (
-	OK_MSG = "操作成功"
+	OK_MSG   = "操作成功"
 	FAIL_MSG = "系统异常"
 )
 
 type JsonMsg struct {
-	Ok   bool `json:"ok"`
-	Msg  string `json:"msg"`
+	Ok   bool        `json:"ok"`
+	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
 }
 
@@ -114,4 +126,3 @@ func (this *BaseController) Print(data interface{}, err error) {
 	}
 	panic("data and err are all nil")
 }
-

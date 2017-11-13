@@ -7,6 +7,7 @@ import (
 )
 
 func init() {
+	beego.InsertFilter("/*", beego.BeforeExec, filter.FilterInput)
 	beego.InsertFilter("/*", beego.BeforeExec, filter.FilterUser)
 	//
 	beego.Router("/t", &controllers.MainController{}, "get:T")

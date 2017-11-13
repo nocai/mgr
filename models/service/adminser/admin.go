@@ -1,21 +1,21 @@
 package adminser
 
 import (
+	"errors"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-	"errors"
-	"time"
 	"mgr/models"
 	"mgr/models/service"
 	"mgr/util/pager"
+	"time"
 )
 
 var (
-	ErrUsernameNotExist = errors.New("用户名不存在")
-	ErrUsernameExist = errors.New("用户名存在")
+	ErrUsernameNotExist   = errors.New("用户名不存在")
+	ErrUsernameExist      = errors.New("用户名存在")
 	ErrPasswordNotMatched = errors.New("密码错误")
-	ErrNotSysAdmin = errors.New("对不起,您还不是系统管理员")
+	ErrNotSysAdmin        = errors.New("对不起,您还不是系统管理员")
 )
 
 func CountAdminByKey(key *models.AdminKey) (int64, error) {
@@ -92,7 +92,7 @@ func DeleteAdminById(id int64) error {
 		return service.ErrArgument
 	}
 
-	key := &models.AdminKey{Admin:&models.Admin{Id:id}}
+	key := &models.AdminKey{Admin: &models.Admin{Id: id}}
 	admins, err := FindAdminByKey(key)
 	if err != nil {
 		beego.Error(err)
@@ -110,14 +110,14 @@ func DeleteAdminById(id int64) error {
 	o := orm.NewOrm()
 	o.Begin()
 
-	affected, err := o.Delete(&models.Admin{Id:id})
+	affected, err := o.Delete(&models.Admin{Id: id})
 	if err != nil {
 		beego.Error(err)
 		return service.ErrDelete
 	}
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
 
-	affected, err = o.Delete(&models.User{Id:_admin.UserId})
+	affected, err = o.Delete(&models.User{Id: _admin.UserId})
 	if err != nil {
 		beego.Error(err)
 		return service.ErrDelete
@@ -130,8 +130,8 @@ func DeleteAdminById(id int64) error {
 
 func GetAdminById(id int64) (*models.Admin, error) {
 	adminKey := &models.AdminKey{
-		Admin:&models.Admin{
-			Id : id,
+		Admin: &models.Admin{
+			Id: id,
 		},
 	}
 	adminSlice, err := FindAdminByKey(adminKey)
@@ -152,7 +152,7 @@ func GetAdminById(id int64) (*models.Admin, error) {
 
 // 取所有的Admin valid
 // key:models.ValidEnum value:string
-func FindAdminValids() ([]map[string]interface{}) {
+func FindAdminValids() []map[string]interface{} {
 	allMap := make(map[string]interface{})
 	allMap["value"] = models.ValidAll
 	allMap["text"] = "全部"

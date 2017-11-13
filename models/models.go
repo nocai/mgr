@@ -3,10 +3,10 @@ package models
 import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
-	"time"
 	"mgr/util/key"
 	"mgr/util/sqler"
 	"strings"
+	"time"
 )
 
 func init() {

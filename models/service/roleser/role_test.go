@@ -1,11 +1,11 @@
 package roleser
 
 import (
-	"testing"
+	"fmt"
+	"github.com/astaxie/beego/orm"
 	. "github.com/smartystreets/goconvey/convey"
 	"mgr/models"
-	"github.com/astaxie/beego/orm"
-	"fmt"
+	"testing"
 )
 
 func TestInsertRole(t *testing.T) {
@@ -14,8 +14,8 @@ func TestInsertRole(t *testing.T) {
 	if err != nil {
 		if err == orm.ErrNoRows {
 			role = &models.Role{
-				Id:1,
-				RoleName:"roleName",
+				Id:       1,
+				RoleName: "roleName",
 			}
 			err = InsertRole(role)
 			Convey("InsertRole", t, func() {
@@ -32,8 +32,8 @@ func TestInsertRole(t *testing.T) {
 	})
 
 	exist, err := isExistOfRole(&models.Role{
-		Id:role.Id,
-		RoleName:role.RoleName,
+		Id:       role.Id,
+		RoleName: role.RoleName,
 	})
 	Convey("isExistOfRole", t, func() {
 		Convey("err is nil", func() {
@@ -44,7 +44,4 @@ func TestInsertRole(t *testing.T) {
 		})
 	})
 
-
 }
-
-

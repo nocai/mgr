@@ -1,12 +1,11 @@
 package test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestAdmin(t *testing.T) {
 	fmt.Println("TestAdmin...")
 
 }
-

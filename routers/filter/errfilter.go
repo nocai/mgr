@@ -1,11 +1,11 @@
 package filter
 
 import (
-	"github.com/astaxie/beego/context"
 	"fmt"
+	"github.com/astaxie/beego/context"
 )
 
 var FilterUser = func(ctx *context.Context) {
 	fmt.Println("filter...")
-}
 
+}

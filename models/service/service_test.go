@@ -1,8 +1,8 @@
 package service
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestNewError(t *testing.T) {

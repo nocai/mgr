@@ -1,21 +1,19 @@
 package adminser
 
 import (
-	"mgr/models/service"
 	"fmt"
 	"github.com/astaxie/beego"
-	"mgr/models"
 	"github.com/astaxie/beego/orm"
-	"time"
-	"mgr/models/service/userser"
 	"github.com/pkg/errors"
-	"mgr/util/pager"
+	"mgr/models"
+	"mgr/models/service"
+	"mgr/models/service/userser"
 	"mgr/util/key"
+	"mgr/util/pager"
 	"mgr/util/sqler"
 	"strings"
+	"time"
 )
-
-
 
 //
 //import (
@@ -176,7 +174,7 @@ func PageAdminVo(key *AdminVoKey) (*pager.Pager, error) {
 
 	var adminVos []AdminVo
 	for i, _ := range admins {
-		adminVos = append(adminVos, AdminVo{Admin:&admins[i]})
+		adminVos = append(adminVos, AdminVo{Admin: &admins[i]})
 	}
 
 	ch := make(chan error, len(adminVos))
@@ -192,7 +190,7 @@ func PageAdminVo(key *AdminVoKey) (*pager.Pager, error) {
 		}(index, ch)
 	}
 
-	for i := 0; i < len(adminVos); i ++ {
+	for i := 0; i < len(adminVos); i++ {
 		err := <-ch
 		if err != nil {
 			return pager.New(key.Key, 0, []models.Admin{}), err
@@ -202,10 +200,10 @@ func PageAdminVo(key *AdminVoKey) (*pager.Pager, error) {
 }
 
 func InsertAdminVo(admin *AdminVo) error {
-	exist, err := userser.IsExistOfUser(&models.User{Username:admin.User.Username})
+	exist, err := userser.IsExistOfUser(&models.User{Username: admin.User.Username})
 	if err != nil {
 		return errors.Wrap(err, service.MsgInsert)
-	} else if (exist) {
+	} else if exist {
 		return ErrUsernameExist
 	}
 
@@ -241,8 +239,8 @@ func UpdateAdminVo(adminVo *AdminVo) error {
 	}
 
 	user := &models.User{
-		Id:adminVo.UserId,
-		Username:adminVo.Username,
+		Id:       adminVo.UserId,
+		Username: adminVo.Username,
 	}
 	exist, err := userser.IsExistOfUser(user)
 	if err != nil {
@@ -253,7 +251,7 @@ func UpdateAdminVo(adminVo *AdminVo) error {
 		return ErrUsernameExist
 	}
 
-	o := orm.NewOrm();
+	o := orm.NewOrm()
 	o.Begin()
 
 	now := time.Now()
@@ -293,7 +291,7 @@ func GetAdminVoById(id int64) (*AdminVo, error) {
 	}
 
 	return &AdminVo{
-		Admin : admin,
-		User : user,
+		Admin: admin,
+		User:  user,
 	}, nil
 }

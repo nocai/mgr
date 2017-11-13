@@ -1,14 +1,14 @@
 package userser
 
 import (
-	"github.com/astaxie/beego/orm"
-	"time"
-	"github.com/astaxie/beego"
 	"fmt"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
+	"github.com/pkg/errors"
 	"mgr/models"
 	"mgr/models/service"
 	"mgr/util/pager"
-	"github.com/pkg/errors"
+	"time"
 )
 
 func UsernamPassMatched(username, password string) (bool, error) {
@@ -81,9 +81,9 @@ func checkUser(user *models.User) error {
 // By Id
 func GetUserById(id int64) (*models.User, error) {
 	userKey := &models.UserKey{
-		User :&models.User{
-			Id : id,
-			Invalid:models.ValidAll,
+		User: &models.User{
+			Id:      id,
+			Invalid: models.ValidAll,
 		},
 	}
 	userSlice, err := FindUserByKey(userKey)
@@ -106,7 +106,7 @@ func IsExistOfUser(user *models.User) (bool, error) {
 	userId := user.Id
 	// 设置Id = 0，方便查询
 	user.Id = 0
-	userSlice, err := FindUserByKey(&models.UserKey{User:user})
+	userSlice, err := FindUserByKey(&models.UserKey{User: user})
 	if err != nil {
 		beego.Error(err)
 		return false, err
@@ -124,7 +124,7 @@ func IsExistOfUser(user *models.User) (bool, error) {
 }
 
 func GetUserByUsername(username string) (*models.User, error) {
-	users, err := FindUserByKey(&models.UserKey{User:&models.User{Username:username}})
+	users, err := FindUserByKey(&models.UserKey{User: &models.User{Username: username}})
 	if err != nil {
 		beego.Error(err)
 		return nil, err
@@ -188,7 +188,7 @@ func DeleteUserById(id int64) error {
 		return service.ErrArgument
 	}
 
-	affected, err := orm.NewOrm().Delete(&models.User{Id:id})
+	affected, err := orm.NewOrm().Delete(&models.User{Id: id})
 	if err != nil {
 		beego.Error(err)
 		return service.ErrDelete
@@ -206,9 +206,9 @@ var (
 func UpdateUser(user *models.User) error {
 	ormer := orm.NewOrm()
 	exist, err := IsExistOfUser(&models.User{
-		Id : user.Id,
-		Username:user.Username,
-	});
+		Id:       user.Id,
+		Username: user.Username,
+	})
 	if err != nil {
 		beego.Error(err)
 		return errors.Wrap(err, service.MsgQuery)

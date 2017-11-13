@@ -16,8 +16,6 @@ type AdminController struct {
 
 // Get method, for query
 func (ctr *AdminController) Get() {
-	ctr.debugInput()
-
 	page, _ := ctr.GetInt64("page", conf.Page)
 	rows, _ := ctr.GetInt64("rows", conf.Rows)
 	sort := ctr.GetString("sort")
@@ -29,16 +27,14 @@ func (ctr *AdminController) Get() {
 		order = "asc"
 	}
 
-	key := key.New(page, rows, []string{sort}, []string{order}, true)
+	key := key.New(page, rows, []string{sort}, []string{order})
 	admin := &models.Admin{AdminName: "%" + adminName + "%"}
-	pager, err := adminser.PageAdminVo(&adminser.AdminVoKey{Key: key, Admin: admin, Invalid:models.ValidAll})
+	pager, err := adminser.PageAdminVo(&adminser.AdminVoKey{Key: key, Admin: admin, Invalid: models.ValidAll})
 	ctr.Print(pager, err)
 }
 
 // 添加 修改
 func (ctr *AdminController) Post() {
-	ctr.debugInput()
-
 	id, _ := ctr.GetInt64(":id", 0)
 	beego.Debug("id = ", id)
 	adminName := ctr.GetString("admin_name")
@@ -47,13 +43,13 @@ func (ctr *AdminController) Post() {
 	if id == 0 {
 		// 添加
 		adminVo := &adminser.AdminVo{
-			Admin:  &models.Admin{
+			Admin: &models.Admin{
 				AdminName: adminName,
 			},
 			User: &models.User{
 				Username: adminName,
 				Password: password,
-				Invalid:models.Invalid,
+				Invalid:  models.Invalid,
 			},
 		}
 		ctr.PrintError(adminser.InsertAdminVo(adminVo))
@@ -92,11 +88,8 @@ func (aic *AdminInvalidController) Get() {
 }
 
 func (aic *AdminInvalidController) Put() {
-	aic.debugInput()
-
 	id, _ := aic.GetInt(":id")
 	invalid, _ := aic.GetInt(":invalid", 0)
-
 
 	admin, err := adminser.GetAdminById(int64(id))
 	if err != nil {

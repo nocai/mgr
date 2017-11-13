@@ -1,22 +1,22 @@
 package models
 
 import (
-	"testing"
 	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
-	"mgr/tests/testutil"
-	"time"
-	"mgr/conf"
-	"mgr/util/key"
 	"math/rand"
+	"mgr/conf"
+	"mgr/tests/testutil"
+	"mgr/util/key"
+	"testing"
+	"time"
 )
 
 func TestRoleKey(t *testing.T) {
 	roleKey := &RoleKey{
-		Key:testutil.GetTestKey(),
-		Role:&Role{
-			Id:1,
-			RoleName:"roleName",
+		Key: testutil.GetTestKey(),
+		Role: &Role{
+			Id:       1,
+			RoleName: "roleName",
 		},
 	}
 	sqler := roleKey.NewSqler()
@@ -40,14 +40,12 @@ func TestRoleKey(t *testing.T) {
 	})
 }
 
-
-
 func TestUserKey(t *testing.T) {
 	userKey := &UserKey{
-		Key : testutil.GetTestKey(),
-		User:&User{
-			Id:1,
-			Username:"username",
+		Key: testutil.GetTestKey(),
+		User: &User{
+			Id:       1,
+			Username: "username",
 		},
 	}
 	sqler := userKey.NewSqler()
@@ -72,26 +70,25 @@ func TestUserKey(t *testing.T) {
 	})
 }
 
-
 func TestAdminKey(t *testing.T) {
 	now := time.Now()
 	adminKey := &AdminKey{
-		Key : key.New(conf.Page, conf.Rows, []string {}, []string{}, true),
-		Admin:&Admin{
-			ModelBase : ModelBase{
-				CreateTime:time.Now(),
-				UpdateTime:time.Now(),
+		Key: key.New(conf.Page, conf.Rows, []string{}, []string{}),
+		Admin: &Admin{
+			ModelBase: ModelBase{
+				CreateTime: time.Now(),
+				UpdateTime: time.Now(),
 			},
-			Id:rand.Int63n(100),
-			AdminName:"A",
-			UserId:rand.Int63n(100),
-			Invalid:Invalid,
+			Id:        rand.Int63n(100),
+			AdminName: "A",
+			UserId:    rand.Int63n(100),
+			Invalid:   Invalid,
 		},
-		CreateTimeStart:now,
-		UpdateTimeEnd:now,
-		UpdateTimeStart:now,
-		CreateTimeEnd:now,
-		KeyWord:"keyword",
+		CreateTimeStart: now,
+		UpdateTimeEnd:   now,
+		UpdateTimeStart: now,
+		CreateTimeEnd:   now,
+		KeyWord:         "keyword",
 	}
 	sqler := adminKey.NewSqler()
 	Convey("TestAdminKey", t, func() {
@@ -113,4 +110,3 @@ func TestAdminKey(t *testing.T) {
 		})
 	})
 }
-
