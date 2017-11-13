@@ -4,7 +4,6 @@ import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	"time"
-	//"github.com/astaxie/beego"
 	"mgr/util/key"
 	"mgr/util/sqler"
 	"strings"
@@ -21,7 +20,7 @@ func init() {
 	orm.RegisterDataBase("default", "mysql", "root:root@/mgr?charset=utf8", 30)
 	// register model
 	//orm.RegisterModelWithPrefix("t_mgr_", new(User), new(role.Role), new(AdminRoleRef), new(Admin), new(Res))
-	orm.RegisterModelWithPrefix("t_mgr_", new(Role), new(User), new(Admin))
+	orm.RegisterModelWithPrefix("t_mgr_", new(Role), new(User), new(Admin), new(AdminRoleRef))
 
 	// create table
 	orm.RunSyncdb("default", false, true)
@@ -54,16 +53,16 @@ type User struct {
 // 多字段唯一键
 func (user *User) TableUnique() [][]string {
 	return [][]string{
-		{"Username"},
+		[]string{"Username"},
 	}
 }
 
 // 多字段索引
 func (user *User) TableIndex() [][]string {
 	return [][]string{
-		{"CreateTime"},
-		{"UpdateTime"},
-		{"Invalid"},
+		[]string{"CreateTime"},
+		[]string{"UpdateTime"},
+		[]string{"Invalid"},
 	}
 }
 
@@ -253,20 +252,24 @@ type RoleKey struct {
 func (this *RoleKey) NewSqler() *sqler.Sqler {
 	sqler := sqler.New(this.Key)
 	sqler.AppendSql("select * from t_mgr_role as tmr where 1 = 1")
-	if id := this.Id; id != 0 {
-		sqler.AppendSql(" and tmr.id = ?")
-		sqler.AppendArg(id)
-	}
-	if roleName := this.RoleName; roleName != "" {
-		sqler.AppendSql(" and tmr.role_name ")
-		if strings.Contains(roleName, "%") {
-			sqler.AppendSql(" like ?")
-		} else {
-			sqler.AppendSql(" = ?")
-		}
 
-		sqler.AppendArg(roleName)
+	if this.Role != nil {
+		if id := this.Id; id != 0 {
+			sqler.AppendSql(" and tmr.id = ?")
+			sqler.AppendArg(id)
+		}
+		if roleName := this.RoleName; roleName != "" {
+			sqler.AppendSql(" and tmr.role_name ")
+			if strings.Contains(roleName, "%") {
+				sqler.AppendSql(" like ?")
+			} else {
+				sqler.AppendSql(" = ?")
+			}
+
+			sqler.AppendArg(roleName)
+		}
 	}
+
 	if !this.CreateTimeStart.IsZero() {
 		sqler.AppendSql(" and tmr.create_time >= ?")
 		sqler.AppendArg(this.CreateTimeStart)
@@ -281,6 +284,66 @@ func (this *RoleKey) NewSqler() *sqler.Sqler {
 	}
 	if !this.UpdateTimeEnd.IsZero() {
 		sqler.AppendSql(" and tmr.update_time <= ?")
+		sqler.AppendArg(this.UpdateTimeEnd)
+	}
+
+	return sqler
+}
+
+type AdminRoleRef struct {
+	Id         int64     `json:"id"`
+	AdminId    int64     `json:"admin_id"`
+	RoleId     int64     `json:"role_id"`
+	CreateTime time.Time `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+}
+
+func (ref *AdminRoleRef) TableIndex() [][]string {
+	return [][]string{
+		[]string{"AdminId"},
+		[]string{"RoleId"},
+	}
+}
+
+type AdminRoleRefKey struct {
+	*key.Key
+	*AdminRoleRef
+
+	CreateTimeStart time.Time
+	CreateTimeEnd   time.Time
+	UpdateTimeStart time.Time
+	UpdateTimeEnd   time.Time
+}
+
+func (this *AdminRoleRefKey) NewSqler() *sqler.Sqler {
+	sqler := sqler.New(this.Key)
+	sqler.AppendSql("select * from t_mgr_admin_role_ref as t where 1 = 1")
+	if id := this.Id; id != 0 {
+		sqler.AppendSql(" and t.id = ?")
+		sqler.AppendArg(id)
+	}
+	if adminId := this.AdminId; adminId != 0 {
+		sqler.AppendSql(" and t.admin_id = ?")
+		sqler.AppendArg(adminId)
+	}
+	if roleId := this.RoleId; roleId != 0 {
+		sqler.AppendSql(" and t.role_id = ?")
+		sqler.AppendArg(roleId)
+	}
+	if !this.CreateTimeStart.IsZero() {
+		sqler.AppendSql(" and t.create_time >= ?")
+		sqler.AppendArg(this.CreateTimeStart)
+	}
+	if !this.CreateTimeEnd.IsZero() {
+		sqler.AppendSql(" and t.create_time <= ?")
+		sqler.AppendArg(this.CreateTimeEnd)
+	}
+	if !this.UpdateTimeStart.IsZero() {
+		sqler.AppendSql(" and t.update_time >= ?")
+		sqler.AppendArg(this.UpdateTimeStart)
+	}
+	if !this.UpdateTimeEnd.IsZero() {
+		sqler.AppendSql(" and t.update_time <= ?")
 		sqler.AppendArg(this.UpdateTimeEnd)
 	}
 

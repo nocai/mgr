@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	beego.InsertFilter("/*",beego.BeforeExec,filter.FilterUser)
+	beego.InsertFilter("/*", beego.BeforeExec, filter.FilterUser)
 	//
 	beego.Router("/t", &controllers.MainController{}, "get:T")
 	beego.Router("/", &controllers.MainController{})
@@ -33,6 +33,13 @@ func init() {
 func init() {
 	beego.Router("/roles", &controllers.RoleController{})
 	beego.Router("/roles/:id:int", &controllers.RoleController{})
+
+	beego.Router("/roles/adminId/:adminId:int", &controllers.RoleDatagridController{})
+}
+
+// admin role ref
+func init() {
+	beego.Router("/arrefs", &controllers.AdminRoleRefController{})
 }
 
 // res

@@ -6,7 +6,7 @@ import (
 )
 
 func TestNewError(t *testing.T) {
-	err1 := NewError(ErrArgument, "aaaaaaaaaaaaa")
-	err2 := NewError(err1, "BBBBBBBBBBBB")
+	err1 := NewError(MsgQuery, ErrArgument)
+	err2 := NewError(MsgDataDuplication, err1)
 	fmt.Println(err2)
 }

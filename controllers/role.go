@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"mgr/models"
-	"github.com/astaxie/beego"
-	"time"
-	"mgr/conf"
 	"fmt"
+	"github.com/astaxie/beego"
+	"mgr/conf"
+	"mgr/models"
 	"mgr/models/service/roleser"
 	"mgr/util/key"
+	"time"
 )
 
 type RoleController struct {
@@ -53,8 +53,8 @@ func updateRole(id int64, roleName string) error {
 }
 
 func addRole(roleName string) error {
-	r := &models.Role{RoleName:roleName}
-	return roleser.InsertRole(r);
+	r := &models.Role{RoleName: roleName}
+	return roleser.InsertRole(r)
 }
 
 func (ctr *RoleController) Get() {
@@ -68,11 +68,48 @@ func (ctr *RoleController) Get() {
 	roleName := ctr.GetString("role_name")
 
 	key := key.New(page, rows, []string{sort}, []string{order}, true)
-	r := &models.Role{RoleName:"%" + roleName + "%"}
-	roleKey := &models.RoleKey{Key:key, Role:r}
+	r := &models.Role{RoleName: "%" + roleName + "%"}
+	roleKey := &models.RoleKey{Key: key, Role: r}
 	pager, err := roleser.PageRole(roleKey)
 	if err != nil {
 		beego.Error(err)
 	}
 	ctr.PrintData(pager.Pagination)
+}
+
+type RoleDatagridController struct {
+	BaseController
+}
+
+type RoleDatagrid struct {
+	*models.Role
+	Checked bool `json:"checked"`
+}
+
+func (this *RoleDatagridController) Get() {
+	this.debugInput()
+	page, _ := this.GetInt64("page", conf.Page)
+	rows, _ := this.GetInt64("rows", conf.Rows)
+	sort := this.GetString("sort")
+	order := this.GetString("order")
+	adminId, _ := this.GetInt64(":adminId")
+	beego.Info("admin = ", adminId)
+
+	key := key.New(page, rows, []string{sort}, []string{order}, true)
+	roleKey := &models.RoleKey{Key: key}
+	pager, err := roleser.PageRole(roleKey)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	var rds []RoleDatagrid
+	if roles, ok := pager.Pagination.PageList.([]models.Role); ok {
+		for i := 0; i < len(roles); i++ {
+			rd := RoleDatagrid{Role: &roles[i], Checked: true}
+			rds = append(rds, rd)
+		}
+
+	}
+	pager.Pagination.PageList = rds
+	this.PrintData(pager)
 }

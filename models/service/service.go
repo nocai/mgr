@@ -24,6 +24,6 @@ var (
 	ErrDataDuplication = errors.New(MsgDataDuplication)
 )
 
-func NewError(err error, msg string) error {
+func NewError(msg string, err error) error {
 	return errors2.Wrap(err, msg)
 }
