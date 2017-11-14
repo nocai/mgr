@@ -5,9 +5,6 @@ import (
 	"github.com/astaxie/beego/orm"
 	"mgr/models"
 	"mgr/models/service"
-	"mgr/models/service/adminser"
-	"mgr/models/service/roleser"
-	"sync"
 	"time"
 )
 
@@ -26,68 +23,6 @@ func FindAdminRoleRefByKey(key *models.AdminRoleRefKey) ([]models.AdminRoleRef, 
 		return []models.AdminRoleRef{}, nil
 	}
 	return refs, nil
-}
-
-func FindAdminByRoleId(roleId int64) ([]models.Admin, error) {
-	key := &models.AdminRoleRefKey{AdminRoleRef: &models.AdminRoleRef{RoleId: roleId}}
-	refs, err := FindAdminRoleRefByKey(key)
-	if err != nil {
-		beego.Error(err)
-		return []models.Admin{}, service.NewError(service.MsgQuery, err)
-	}
-	if len(refs) == 0 {
-		return []models.Admin{}, nil
-	}
-
-	wg := &sync.WaitGroup{}
-	wg.Add(len(refs))
-
-	var result []models.Admin
-	for _, ref := range refs {
-		go func() {
-			defer wg.Done()
-			aKey := &models.AdminKey{Admin: &models.Admin{Id: ref.AdminId}}
-			admins, err := adminser.FindAdminByKey(aKey)
-			if err != nil {
-				beego.Error(err)
-			}
-			for _, admin := range admins {
-				result = append(result, admin)
-			}
-		}()
-	}
-	return result, nil
-}
-
-func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
-	key := &models.AdminRoleRefKey{AdminRoleRef: &models.AdminRoleRef{AdminId: adminId}}
-	refs, err := FindAdminRoleRefByKey(key)
-	if err != nil {
-		beego.Error(err)
-		return []models.Role{}, service.NewError(service.MsgQuery, err)
-	}
-	if len(refs) == 0 {
-		return []models.Role{}, nil
-	}
-
-	wg := &sync.WaitGroup{}
-	wg.Add(len(refs))
-
-	var result []models.Role
-	for _, ref := range refs {
-		go func() {
-			defer wg.Done()
-			rKey := &models.RoleKey{Role: &models.Role{Id: ref.RoleId}}
-			roles, err := roleser.FindRoleByKey(rKey)
-			if err != nil {
-				beego.Error(err)
-			}
-			for _, role := range roles {
-				result = append(result, role)
-			}
-		}()
-	}
-	return result, nil
 }
 
 func InsertAdminRoleRef(arRef *models.AdminRoleRef) error {

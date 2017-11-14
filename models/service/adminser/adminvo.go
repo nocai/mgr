@@ -13,6 +13,7 @@ import (
 	"mgr/util/sqler"
 	"strings"
 	"time"
+	"mgr/models/service/roleser"
 )
 
 //
@@ -151,34 +152,33 @@ func (this *AdminVoKey) NewSqler() *sqler.Sqler {
 	return sqler
 }
 
-func PageAdminVo(key *AdminVoKey) (*pager.Pager, error) {
+func PageAdminVo(key *AdminVoKey) *pager.Pager {
 	sqler := key.NewSqler()
 	o := orm.NewOrm()
 
 	var total int64
 	err := o.Raw(sqler.GetCountSqlAndArgs()).QueryRow(&total)
 	if err != nil {
-		return pager.New(key.Key, 0, []models.Admin{}), errors.Wrap(err, service.MsgQuery)
+		panic(service.NewError(service.MsgQuery, err ))
 	}
 
 	var admins []models.Admin
 	affected, err := o.Raw(sqler.GetSqlAndArgs()).QueryRows(&admins)
 	if err != nil {
-		beego.Error(err)
-		return pager.New(key.Key, 0, []models.Admin{}), errors.Wrap(err, service.MsgQuery)
+		panic(service.NewError(service.MsgQuery, err))
 	}
 	beego.Debug(fmt.Sprintf("affected = %d", affected))
 	if affected == 0 {
-		return pager.New(key.Key, 0, []models.Admin{}), nil
+		return pager.New(key.Key, 0, []models.Admin{})
 	}
 
-	var adminVos []AdminVo
-	for i, _ := range admins {
-		adminVos = append(adminVos, AdminVo{Admin: &admins[i]})
+	adminVos := make([]AdminVo, len(admins))
+	for i := range admins {
+		adminVos[i] = AdminVo{Admin:&admins[i]}
 	}
 
-	ch := make(chan error, len(adminVos))
-	for index, _ := range adminVos {
+	ch := make(chan error, len(adminVos) * 2)
+	for index := range adminVos {
 		go func(i int, ch chan error) {
 			user, err := userser.GetUserById(adminVos[i].UserId)
 			if err != nil {
@@ -187,16 +187,23 @@ func PageAdminVo(key *AdminVoKey) (*pager.Pager, error) {
 				adminVos[i].User = user
 				ch <- nil
 			}
+
+			roles, err := roleser.FindRoleByAdminId(adminVos[i].Admin.Id)
+			ch <- err
+			if err == nil {
+				beego.Error(roles)
+				adminVos[i].Roles = roles
+			}
 		}(index, ch)
 	}
 
-	for i := 0; i < len(adminVos); i++ {
+	for i := 0; i < len(adminVos) * 2; i++ {
 		err := <-ch
 		if err != nil {
-			return pager.New(key.Key, 0, []models.Admin{}), err
+			panic(err)
 		}
 	}
-	return pager.New(key.Key, total, adminVos), nil
+	return pager.New(key.Key, total, adminVos)
 }
 
 func InsertAdminVo(admin *AdminVo) error {

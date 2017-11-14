@@ -9,6 +9,8 @@ import (
 	"mgr/models/service"
 	"mgr/util/pager"
 	"time"
+	"sync"
+	"mgr/models/service/arrefser"
 )
 
 var (
@@ -183,3 +185,36 @@ func UpdateAdmin(admin *models.Admin) error {
 	beego.Info("<UpdateAdmin>: num = ", num)
 	return nil
 }
+
+
+func FindAdminByRoleId(roleId int64) ([]models.Admin, error) {
+	key := &models.AdminRoleRefKey{AdminRoleRef: &models.AdminRoleRef{RoleId: roleId}}
+	refs, err := arrefser.FindAdminRoleRefByKey(key)
+	if err != nil {
+		beego.Error(err)
+		return []models.Admin{}, service.NewError(service.MsgQuery, err)
+	}
+	if len(refs) == 0 {
+		return []models.Admin{}, nil
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(len(refs))
+
+	var result []models.Admin
+	for _, ref := range refs {
+		go func() {
+			defer wg.Done()
+			aKey := &models.AdminKey{Admin: &models.Admin{Id: ref.AdminId}}
+			admins, err := FindAdminByKey(aKey)
+			if err != nil {
+				beego.Error(err)
+			}
+			for _, admin := range admins {
+				result = append(result, admin)
+			}
+		}()
+	}
+	return result, nil
+}
+

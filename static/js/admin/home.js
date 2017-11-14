@@ -13,12 +13,20 @@ var adminPage = {
             //{field: 'id', title: 'Id', sortable: true, width: 100,hidden:true},
             {field: 'admin_name', title: '用户名', sortable: true, width: 100},
             {
+                field: 'roles', title: '拥有角色', width: 100,
+                formatter:function (value, row, index) {
+                    var roleNames = new Array();
+                    $.each(value, function(i, v){
+                        roleNames.push(v.role_name)
+                    })
+                    return roleNames;
+                }
+            }, {
                 field: 'create_time', title: '创建时间', sortable: true, width: 100,
                 formatter: function (value, row, index) {
                     return new Date(value).format("yyyy-MM-dd hh:mm:ss");
                 }
-            },
-            {
+            }, {
                 field: 'update_time', title: '最后一次更新时间', sortable: true, width: 100,
                 formatter: function (value, row, index) {
                     return new Date(value).format("yyyy-MM-dd hh:mm:ss");
