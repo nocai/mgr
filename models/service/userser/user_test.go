@@ -1,8 +1,8 @@
 package userser
 
 import (
-	"testing"
 	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestUsernamPassMatched(t *testing.T) {

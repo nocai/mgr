@@ -1,8 +1,8 @@
 package test
 
 import (
-	"time"
 	"testing"
+	"time"
 )
 
 var (

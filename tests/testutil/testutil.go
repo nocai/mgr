@@ -6,7 +6,5 @@ import (
 )
 
 func GetTestKey() *key.Key {
-	return key.New(conf.Page, conf.Rows, []string {}, []string{}, true)
+	return key.New(conf.Page, conf.Rows, []string{}, []string{})
 }
-
-

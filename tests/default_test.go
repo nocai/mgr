@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"fmt"
 	"github.com/astaxie/beego"
 	. "github.com/smartystreets/goconvey/convey"
-	"fmt"
 	"path/filepath"
 	"runtime"
 )

@@ -1,9 +1,8 @@
 package key
 
 import (
-	"mgr/conf"
-	"strconv"
 	"bytes"
+	"strconv"
 )
 
 //type Key interface {
@@ -14,13 +13,11 @@ import (
 //}
 
 type Key struct {
-	page   int64
-	rows   int64
+	page int64
+	rows int64
 
-	sort   []string
-	order  []string
-
-	isPage bool
+	sort  []string
+	order []string
 }
 
 func (key Key) GetPage() int64 {
@@ -31,7 +28,7 @@ func (key Key) GetRows() int64 {
 	return key.rows
 }
 
-func (key *Key) GetOrderBySql() string {
+func (key *Key) GetOrderBySql(alias string) string {
 	if len(key.sort) > 0 && len(key.order) > 0 {
 		var sql bytes.Buffer
 		sql.WriteString(" order by")
@@ -39,40 +36,48 @@ func (key *Key) GetOrderBySql() string {
 			s := key.sort[i]
 			o := key.order[i]
 			if s == "" || o == "" {
+				if alias != "" {
+					sql.WriteString(" ")
+					sql.WriteString(alias)
+					sql.WriteString(".")
+					sql.WriteString("id desc")
+					return sql.String()
+				}
 				sql.WriteString(" id desc")
 				return sql.String()
 			}
 
 			sql.WriteString(" ")
+			if alias != "" {
+				sql.WriteString(alias)
+				sql.WriteString(".")
+			}
 			sql.WriteString(s)
 			sql.WriteString(" ")
 			sql.WriteString(o)
-			if i != len(key.sort) - 1 {
+			if i != len(key.sort)-1 {
 				sql.WriteString(",")
 			}
 		}
 		return sql.String()
 	}
+	if alias != "" {
+		return " " + alias + ".id desc"
+	}
 	return " id desc"
 }
 
 func (key *Key) GetLimitSql() string {
-	if key.isPage {
-		if key.page <= 0 {
-			key.page = conf.Page
-		}
-		if key.rows <= 0 {
-			key.rows = conf.Rows
-		}
+	if key.page > 0 && key.rows > 0 {
 		startIndex := (key.page - 1) * key.rows
 		return " limit " + strconv.FormatInt(startIndex, 10) + ", " + strconv.FormatInt(key.rows, 10)
 	}
 	return ""
 }
 
-func New(page, rows int64, sort, order []string, isPage bool) *Key {
+func New(page, rows int64, sort, order []string) *Key {
 	if len(sort) != len(order) {
 		panic("sort 与 order 长度不相等")
 	}
-	return &Key{page:page, rows:rows, sort:sort, order:order, isPage:isPage}
+	return &Key{page: page, rows: rows, sort: sort, order: order}
 }

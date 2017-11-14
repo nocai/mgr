@@ -1,14 +1,14 @@
 package roleser
 
 import (
-	"github.com/astaxie/beego/orm"
-	"github.com/astaxie/beego"
 	"errors"
 	"fmt"
-	"time"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
 	"mgr/models"
 	"mgr/models/service"
 	"mgr/util/pager"
+	"time"
 )
 
 var (
@@ -23,7 +23,7 @@ func DeleteRoleById(id int64) error {
 	}
 
 	o := orm.NewOrm()
-	affected, err := o.Delete(&models.Role{Id:id})
+	affected, err := o.Delete(&models.Role{Id: id})
 	if err != nil {
 		beego.Error(err)
 		return service.ErrDelete
@@ -35,7 +35,7 @@ func DeleteRoleById(id int64) error {
 
 // 取Role By Id
 func GetRoleById(id int64) (*models.Role, error) {
-	key := &models.RoleKey{Role:&models.Role{Id:id}}
+	key := &models.RoleKey{Role: &models.Role{Id: id}}
 	roles, err := FindRoleByKey(key)
 	if err != nil {
 		beego.Error(err)
@@ -56,7 +56,7 @@ func isExistOfRole(role *models.Role) (bool, error) {
 	roleId := role.Id
 	// 设置Id = 0，方便查询
 	role.Id = 0
-	key := &models.RoleKey{Role:role}
+	key := &models.RoleKey{Role: role}
 	roles, err := FindRoleByKey(key)
 	if err != nil {
 		beego.Error(err)
@@ -81,9 +81,9 @@ func isExistOfRole(role *models.Role) (bool, error) {
 func UpdateRole(role *models.Role) error {
 	ormer := orm.NewOrm()
 	exist, err := isExistOfRole(&models.Role{
-		Id : role.Id,
-		RoleName:role.RoleName,
-	});
+		Id:       role.Id,
+		RoleName: role.RoleName,
+	})
 	if err != nil {
 		beego.Error(err)
 		return err
@@ -192,7 +192,7 @@ func FindRoleByKey(key *models.RoleKey) ([]models.Role, error) {
 func GetRoleByRoleName(roleName string) (*models.Role, error) {
 	beego.Info(fmt.Sprintf("GetRoleByRoleName.roleName = %s", roleName))
 
-	key := &models.RoleKey{Role:&models.Role{RoleName:roleName}}
+	key := &models.RoleKey{Role: &models.Role{RoleName: roleName}}
 	roles, err := FindRoleByKey(key)
 	if err != nil {
 		beego.Error(err)

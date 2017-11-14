@@ -1,8 +1,8 @@
 package got
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func sum(values []int, resultChan chan int) {
@@ -16,13 +16,13 @@ func sum(values []int, resultChan chan int) {
 func TestT(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	resultChan := make(chan int, 3)
-	go sum(values[:len(values) / 2], resultChan)
-	go sum(values[len(values) / 2:], resultChan)
-	go sum(values[len(values) / 3:], resultChan)
+	go sum(values[:len(values)/2], resultChan)
+	go sum(values[len(values)/2:], resultChan)
+	go sum(values[len(values)/3:], resultChan)
 
 	//close(resultChan)
 
-	for i := 0; i<3;i++ {
+	for i := 0; i < 3; i++ {
 		fmt.Println(<-resultChan)
 	}
 	//for ch := range (resultChan) {

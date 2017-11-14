@@ -6,7 +6,7 @@ import (
 )
 
 type Sqler struct {
-	key  *key.Key // Has a key
+	key *key.Key // Has a key
 
 	sql  bytes.Buffer
 	args []interface{}
@@ -14,7 +14,7 @@ type Sqler struct {
 
 func (sqler *Sqler) GetCountSqlAndArgs() (string, []interface{}) {
 	sql := sqler.GetCountSql()
-	args := sqler.GetArgs();
+	args := sqler.GetArgs()
 	return sql, args
 }
 
@@ -42,7 +42,7 @@ func (sqler *Sqler) GetSql() string {
 	}
 	sql := sqler.sql.String()
 	if sqler.key != nil {
-		sql += sqler.key.GetOrderBySql() + sqler.key.GetLimitSql()
+		sql += sqler.key.GetOrderBySql("") + sqler.key.GetLimitSql()
 	}
 	return sql
 }
@@ -61,5 +61,5 @@ func (sqler *Sqler) isEmptySql() bool {
 }
 
 func New(key *key.Key) *Sqler {
-	return &Sqler{key:key}
+	return &Sqler{key: key}
 }

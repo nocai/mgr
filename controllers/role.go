@@ -58,8 +58,6 @@ func addRole(roleName string) error {
 }
 
 func (ctr *RoleController) Get() {
-	ctr.debugInput()
-
 	page, _ := ctr.GetInt64("page", conf.Page)
 	rows, _ := ctr.GetInt64("rows", conf.Rows)
 	sort := ctr.GetString("sort")
@@ -67,7 +65,7 @@ func (ctr *RoleController) Get() {
 
 	roleName := ctr.GetString("role_name")
 
-	key := key.New(page, rows, []string{sort}, []string{order}, true)
+	key := key.New(page, rows, []string{sort}, []string{order})
 	r := &models.Role{RoleName: "%" + roleName + "%"}
 	roleKey := &models.RoleKey{Key: key, Role: r}
 	pager, err := roleser.PageRole(roleKey)
@@ -75,41 +73,4 @@ func (ctr *RoleController) Get() {
 		beego.Error(err)
 	}
 	ctr.PrintData(pager.Pagination)
-}
-
-type RoleDatagridController struct {
-	BaseController
-}
-
-type RoleDatagrid struct {
-	*models.Role
-	Checked bool `json:"checked"`
-}
-
-func (this *RoleDatagridController) Get() {
-	this.debugInput()
-	page, _ := this.GetInt64("page", conf.Page)
-	rows, _ := this.GetInt64("rows", conf.Rows)
-	sort := this.GetString("sort")
-	order := this.GetString("order")
-	adminId, _ := this.GetInt64(":adminId")
-	beego.Info("admin = ", adminId)
-
-	key := key.New(page, rows, []string{sort}, []string{order}, true)
-	roleKey := &models.RoleKey{Key: key}
-	pager, err := roleser.PageRole(roleKey)
-	if err != nil {
-		beego.Error(err)
-	}
-
-	var rds []RoleDatagrid
-	if roles, ok := pager.Pagination.PageList.([]models.Role); ok {
-		for i := 0; i < len(roles); i++ {
-			rd := RoleDatagrid{Role: &roles[i], Checked: true}
-			rds = append(rds, rd)
-		}
-
-	}
-	pager.Pagination.PageList = rds
-	this.PrintData(pager)
 }

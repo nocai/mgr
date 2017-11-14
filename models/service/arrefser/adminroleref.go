@@ -1,14 +1,14 @@
 package arrefser
 
 import (
-	"sync"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"mgr/models"
 	"mgr/models/service"
 	"mgr/models/service/adminser"
 	"mgr/models/service/roleser"
+	"sync"
 	"time"
-	"mgr/models"
 )
 
 func FindAdminRoleRefByKey(key *models.AdminRoleRefKey) ([]models.AdminRoleRef, error) {
@@ -29,7 +29,7 @@ func FindAdminRoleRefByKey(key *models.AdminRoleRefKey) ([]models.AdminRoleRef, 
 }
 
 func FindAdminByRoleId(roleId int64) ([]models.Admin, error) {
-	key := &models.AdminRoleRefKey{AdminRoleRef:&models.AdminRoleRef{RoleId:roleId}}
+	key := &models.AdminRoleRefKey{AdminRoleRef: &models.AdminRoleRef{RoleId: roleId}}
 	refs, err := FindAdminRoleRefByKey(key)
 	if err != nil {
 		beego.Error(err)
@@ -46,7 +46,7 @@ func FindAdminByRoleId(roleId int64) ([]models.Admin, error) {
 	for _, ref := range refs {
 		go func() {
 			defer wg.Done()
-			aKey := &models.AdminKey{Admin:&models.Admin{Id:ref.AdminId}}
+			aKey := &models.AdminKey{Admin: &models.Admin{Id: ref.AdminId}}
 			admins, err := adminser.FindAdminByKey(aKey)
 			if err != nil {
 				beego.Error(err)
@@ -60,7 +60,7 @@ func FindAdminByRoleId(roleId int64) ([]models.Admin, error) {
 }
 
 func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
-	key := &models.AdminRoleRefKey{AdminRoleRef:&models.AdminRoleRef{AdminId:adminId}}
+	key := &models.AdminRoleRefKey{AdminRoleRef: &models.AdminRoleRef{AdminId: adminId}}
 	refs, err := FindAdminRoleRefByKey(key)
 	if err != nil {
 		beego.Error(err)
@@ -77,7 +77,7 @@ func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
 	for _, ref := range refs {
 		go func() {
 			defer wg.Done()
-			rKey := &models.RoleKey{Role:&models.Role{Id:ref.RoleId}}
+			rKey := &models.RoleKey{Role: &models.Role{Id: ref.RoleId}}
 			roles, err := roleser.FindRoleByKey(rKey)
 			if err != nil {
 				beego.Error(err)
@@ -119,29 +119,42 @@ func InsertAdminRoleRef(arRef *models.AdminRoleRef) error {
 
 }
 
-func GrantRole(adminId int64, roleIds []int64) ([]int64, error) {
+func GrantRole(adminId int64, roleIds []int64) []int64 {
 	now := time.Now()
 
-	var arIds []int64
+
 	o := orm.NewOrm()
 	o.Begin()
+	res, err := o.Raw("delete from t_mgr_admin_role_ref where admin_id = ?", adminId).Exec()
+	//affected, err := o.Delete(&models.AdminRoleRef{AdminId:adminId})
+	if err != nil {
+		o.Rollback()
+		panic(service.NewError(service.MsgDelete, err))
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		o.Rollback()
+		panic(err)
+	}
+	beego.Info("affected = ", affected)
+
+	var arIds []int64
 	for _, roleId := range roleIds {
 		arRef := &models.AdminRoleRef{
-			AdminId:adminId,
-			RoleId:roleId,
-			CreateTime:now,
-			UpdateTime:now,
+			AdminId:    adminId,
+			RoleId:     roleId,
+			CreateTime: now,
+			UpdateTime: now,
 		}
 
 		id, err := o.Insert(arRef)
 		if err != nil {
-			beego.Error(err.Error())
 			o.Rollback()
-			return []int64{}, service.NewError(service.MsgInsert, err)
+			panic(service.NewError(service.MsgInsert, err))
 		}
 		arIds = append(arIds, id)
 	}
 	o.Commit()
-	return arIds, nil
+	return arIds
 
 }
