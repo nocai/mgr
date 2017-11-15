@@ -3,6 +3,7 @@ package sqler
 import (
 	"bytes"
 	"mgr/util/key"
+	"strconv"
 )
 
 type Sqler struct {
@@ -10,7 +11,60 @@ type Sqler struct {
 
 	sql  bytes.Buffer
 	args []interface{}
+	alias string
 }
+
+func (this *Sqler) SetAlias(alias string) {
+	this.alias = alias
+}
+
+func (this *Sqler) GetOrderBySql() string {
+	if len(this.key.Sort) > 0 && len(this.key.Order) > 0 {
+		var sql bytes.Buffer
+		sql.WriteString(" order by")
+		for i := 0; i < len(this.key.Sort); i++ {
+			s := this.key.Sort[i]
+			o := this.key.Order[i]
+			if s == "" || o == "" {
+				if this.alias != "" {
+					sql.WriteString(" ")
+					sql.WriteString(this.alias)
+					sql.WriteString(".")
+					sql.WriteString("id desc")
+					return sql.String()
+				}
+				sql.WriteString(" id desc")
+				return sql.String()
+			}
+
+			sql.WriteString(" ")
+			if this.alias != "" {
+				sql.WriteString(this.alias)
+				sql.WriteString(".")
+			}
+			sql.WriteString(s)
+			sql.WriteString(" ")
+			sql.WriteString(o)
+			if i != len(this.key.Sort)-1 {
+				sql.WriteString(",")
+			}
+		}
+		return sql.String()
+	}
+	if this.alias != "" {
+		return " " + this.alias + ".id desc"
+	}
+	return " id desc"
+}
+
+func (this *Sqler) GetLimitSql() string {
+	if this.key.GetPage() > 0 && this.key.GetRows() > 0 {
+		startIndex := (this.key.GetPage() - 1) * this.key.GetRows()
+		return " limit " + strconv.FormatInt(startIndex, 10) + ", " + strconv.FormatInt(this.key.GetRows(), 10)
+	}
+	return ""
+}
+
 
 func (sqler *Sqler) GetCountSqlAndArgs() (string, []interface{}) {
 	sql := sqler.GetCountSql()
@@ -42,7 +96,7 @@ func (sqler *Sqler) GetSql() string {
 	}
 	sql := sqler.sql.String()
 	if sqler.key != nil {
-		sql += sqler.key.GetOrderBySql("") + sqler.key.GetLimitSql()
+		sql += sqler.GetOrderBySql() + sqler.GetLimitSql()
 	}
 	return sql
 }

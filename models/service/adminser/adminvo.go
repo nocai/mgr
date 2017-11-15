@@ -105,6 +105,7 @@ func (this *AdminVoKey) NewSqler() *sqler.Sqler {
 	sqler := sqler.New(this.Key)
 
 	sqler.AppendSql(`select tma.* from t_mgr_admin as tma join t_mgr_user as tmu on tma.user_id = tmu.id where 1 = 1`)
+	sqler.SetAlias("tma")
 	if this.Invalid != models.ValidAll {
 		sqler.AppendSql(" and tmu.invalid = ?")
 		sqler.AppendArg(this.Invalid)
@@ -154,6 +155,7 @@ func (this *AdminVoKey) NewSqler() *sqler.Sqler {
 
 func PageAdminVo(key *AdminVoKey) *pager.Pager {
 	sqler := key.NewSqler()
+	beego.Error(sqler.GetSql())
 	o := orm.NewOrm()
 
 	var total int64

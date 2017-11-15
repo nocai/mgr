@@ -7,10 +7,10 @@ import (
 	"github.com/astaxie/beego/orm"
 	"mgr/models"
 	"mgr/models/service"
-	"mgr/util/pager"
-	"time"
-	"sync"
 	"mgr/models/service/arrefser"
+	"mgr/util/pager"
+	"sync"
+	"time"
 )
 
 var (
@@ -89,45 +89,47 @@ func InsertAdmin(admin *models.Admin) error {
 	return nil
 }
 
-func DeleteAdminById(id int64) error {
+func DeleteAdminById(id int64) {
 	if id == 0 {
-		return service.ErrArgument
+		panic(service.ErrArgument)
 	}
 
 	key := &models.AdminKey{Admin: &models.Admin{Id: id}}
 	admins, err := FindAdminByKey(key)
 	if err != nil {
-		beego.Error(err)
-		return service.ErrDelete
+		panic(service.NewError(service.MsgQuery, err))
 	}
 	if len(admins) == 0 {
-		beego.Error(orm.ErrNoRows)
-		return service.ErrDelete
-	} else if len(admins) > 1 {
-		beego.Error(service.ErrDataDuplication)
+		return
 	}
-
-	_admin := admins[0]
+	if len(admins) > 1 {
+		panic(service.ErrDataDuplication)
+	}
 
 	o := orm.NewOrm()
 	o.Begin()
 
-	affected, err := o.Delete(&models.Admin{Id: id})
+	affected, err := o.Delete(&models.User{Id: admins[0].UserId})
 	if err != nil {
-		beego.Error(err)
-		return service.ErrDelete
+		o.Rollback()
+		panic(service.NewError(service.MsgQuery, err))
+	}
+	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	affected, err = o.Delete(&models.Admin{Id: id})
+	if err != nil {
+		o.Rollback()
+		panic(service.NewError(service.MsgDelete, err))
 	}
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
 
-	affected, err = o.Delete(&models.User{Id: _admin.UserId})
+	affected, err = o.Delete(&models.AdminRoleRef{AdminId: id}, "admin_id")
 	if err != nil {
-		beego.Error(err)
-		return service.ErrDelete
+		o.Rollback()
+		panic(service.NewError(service.MsgDelete, err))
 	}
-	beego.Debug(fmt.Sprintf("affected = %v", affected))
+	beego.Debug("affected = ", affected)
 
 	o.Commit()
-	return nil
 }
 
 func GetAdminById(id int64) (*models.Admin, error) {
@@ -186,7 +188,6 @@ func UpdateAdmin(admin *models.Admin) error {
 	return nil
 }
 
-
 func FindAdminByRoleId(roleId int64) ([]models.Admin, error) {
 	key := &models.AdminRoleRefKey{AdminRoleRef: &models.AdminRoleRef{RoleId: roleId}}
 	refs, err := arrefser.FindAdminRoleRefByKey(key)
@@ -217,4 +218,3 @@ func FindAdminByRoleId(roleId int64) ([]models.Admin, error) {
 	}
 	return result, nil
 }
-

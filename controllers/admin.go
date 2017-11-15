@@ -7,17 +7,12 @@ import (
 	"mgr/util/key"
 
 	"github.com/astaxie/beego"
-	"mgr/models/service/userser"
 )
 
 type AdminController struct {
 	BaseController
 }
 
-type AdminDatagrid struct {
-	*models.Admin
-	BelongRoles []models.Role `json:"belong_roles"`
-}
 
 // Get method, for query
 func (ctr *AdminController) Get() {
@@ -76,34 +71,7 @@ func (ctr *AdminController) Delete() {
 	id, _ := ctr.GetInt64(":id", 0)
 	beego.Debug("id = ", id)
 
-	err := adminser.DeleteAdminById(id)
-	ctr.PrintError(err)
+	adminser.DeleteAdminById(id)
+	ctr.PrintOk("删除成功")
 }
 
-type AdminInvalidController struct {
-	BaseController
-}
-
-func (aic *AdminInvalidController) Get() {
-	m := adminser.FindAdminValids()
-	aic.PrintData(m)
-}
-
-func (aic *AdminInvalidController) Put() {
-	id, _ := aic.GetInt(":id")
-	invalid, _ := aic.GetInt(":invalid", 0)
-
-	admin, err := adminser.GetAdminById(int64(id))
-	if err != nil {
-		aic.PrintError(err)
-		return
-	}
-	user, err := userser.GetUserById(admin.UserId)
-	if err != nil {
-		aic.PrintError(err)
-		return
-	}
-	user.Invalid = models.ValidEnum(invalid)
-	err = userser.UpdateUser(user)
-	aic.PrintError(err)
-}

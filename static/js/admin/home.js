@@ -159,11 +159,24 @@ var adminPage = {
     },
 
     active: function (id, invalid) {
+        if (id === undefined || invalid === undefined) {
+            var row = adminPage.datagrid.datagrid('getSelected')
+            if (row == null) {
+                $.showMsg('请选择一条数据');
+                return;
+            }
+            id = row.id;
+            if (row.user.invalid === 0) {
+                invalid = 1;
+            } else {
+                invalid = 0;
+            }
+        }
+
         var msg = '您确定注销这条数据吗？';
         if (invalid == 1) {
             msg = '您确定激活这条数据吗？';
         }
-
         $.messager.confirm('系统提醒', msg, function (r) {
             if (r) {
                 $.messager.progress();

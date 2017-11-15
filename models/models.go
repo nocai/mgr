@@ -252,7 +252,7 @@ type RoleKey struct {
 func (this *RoleKey) NewSqler() *sqler.Sqler {
 	sqler := sqler.New(this.Key)
 	sqler.AppendSql("select * from t_mgr_role as tmr where 1 = 1")
-
+	sqler.SetAlias("tmr")
 	if this.Role != nil {
 		if id := this.Id; id != 0 {
 			sqler.AppendSql(" and tmr.id = ?")
@@ -318,6 +318,7 @@ type AdminRoleRefKey struct {
 func (this *AdminRoleRefKey) NewSqler() *sqler.Sqler {
 	sqler := sqler.New(this.Key)
 	sqler.AppendSql("select * from t_mgr_admin_role_ref as t where 1 = 1")
+	sqler.SetAlias("t")
 	if id := this.Id; id != 0 {
 		sqler.AppendSql(" and t.id = ?")
 		sqler.AppendArg(id)

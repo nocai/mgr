@@ -7,10 +7,11 @@ import (
 	"github.com/astaxie/beego/orm"
 	"mgr/models"
 	"mgr/models/service"
-	"mgr/util/pager"
-	"time"
 	"mgr/models/service/arrefser"
+	"mgr/util/key"
+	"mgr/util/pager"
 	"sync"
+	"time"
 )
 
 var (
@@ -208,10 +209,13 @@ func GetRoleByRoleName(roleName string) (*models.Role, error) {
 	return &roles[0], nil
 }
 
-
 func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
-	key := &models.AdminRoleRefKey{AdminRoleRef: &models.AdminRoleRef{AdminId: adminId}}
-	refs, err := arrefser.FindAdminRoleRefByKey(key)
+	arrefKey := &models.AdminRoleRefKey{
+		AdminRoleRef: &models.AdminRoleRef{AdminId: adminId},
+		Key:          &key.Key{Sort: []string{"id"}, Order: []string{"desc"}},
+	}
+
+	refs, err := arrefser.FindAdminRoleRefByKey(arrefKey)
 	beego.Error(refs)
 	if err != nil {
 		beego.Error(err)
@@ -228,7 +232,7 @@ func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
 	for i := range refs {
 		go func(index int) {
 			defer wg.Done()
-			rKey := &models.RoleKey{Role: &models.Role{Id: refs[index].RoleId}}
+			rKey := &models.RoleKey{Role: &models.Role{Id: refs[index].RoleId},Key:&key.Key{Sort:[]string{"id"},Order:[]string{"desc"}}}
 			roles, err := FindRoleByKey(rKey)
 			if err != nil {
 				beego.Error(err)
