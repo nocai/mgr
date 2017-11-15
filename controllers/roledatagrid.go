@@ -22,27 +22,25 @@ func (this *RoleDatagridController) Get() {
 	order := this.GetString("order")
 	adminId, _ := this.GetInt64(":adminId")
 
-	key := key.New(0, 0, []string{sort}, []string{order})
+	//key := key.New(0, 0, []string{sort}, []string{order})
+	key := &key.Key{Sort: []string{sort}, Order: []string{order}}
 	roleKey := &models.RoleKey{Key: key}
 	pager, err := roleser.PageRole(roleKey)
 	if err != nil {
 		beego.Error(err)
 	}
 
-	rdKey := &roleser.RoleDatagridKey{Key: key, AdminId: adminId}
-	roles := roleser.FindRoleByRoleDatagridKey(rdKey)
-
-	var rds []RoleDatagrid
+	roles := roleser.FindRoleByRoleDatagridKey(&roleser.RoleDatagridKey{Key: key, AdminId: adminId})
+	var pageListNew []RoleDatagrid
 	if allRoles, ok := pager.Pagination.PageList.([]models.Role); ok {
-		for i := 0; i < len(allRoles); i++ {
-			rds = append(rds, RoleDatagrid{
+		for i := range allRoles {
+			pageListNew = append(pageListNew, RoleDatagrid{
 				Role:    &allRoles[i],
 				Checked: contains(roles, &allRoles[i]),
 			})
 		}
-
 	}
-	pager.Pagination.PageList = rds
+	pager.Pagination.PageList = pageListNew
 	this.PrintData(pager)
 }
 

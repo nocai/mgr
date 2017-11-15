@@ -16,8 +16,8 @@ type Key struct {
 	page int64
 	rows int64
 
-	sort  []string
-	order []string
+	Sort  []string
+	Order []string
 }
 
 func (key Key) GetPage() int64 {
@@ -29,12 +29,12 @@ func (key Key) GetRows() int64 {
 }
 
 func (key *Key) GetOrderBySql(alias string) string {
-	if len(key.sort) > 0 && len(key.order) > 0 {
+	if len(key.Sort) > 0 && len(key.Order) > 0 {
 		var sql bytes.Buffer
-		sql.WriteString(" order by")
-		for i := 0; i < len(key.sort); i++ {
-			s := key.sort[i]
-			o := key.order[i]
+		sql.WriteString(" Order by")
+		for i := 0; i < len(key.Sort); i++ {
+			s := key.Sort[i]
+			o := key.Order[i]
 			if s == "" || o == "" {
 				if alias != "" {
 					sql.WriteString(" ")
@@ -55,7 +55,7 @@ func (key *Key) GetOrderBySql(alias string) string {
 			sql.WriteString(s)
 			sql.WriteString(" ")
 			sql.WriteString(o)
-			if i != len(key.sort)-1 {
+			if i != len(key.Sort)-1 {
 				sql.WriteString(",")
 			}
 		}
@@ -77,7 +77,7 @@ func (key *Key) GetLimitSql() string {
 
 func New(page, rows int64, sort, order []string) *Key {
 	if len(sort) != len(order) {
-		panic("sort 与 order 长度不相等")
+		panic("Sort 与 Order 长度不相等")
 	}
-	return &Key{page: page, rows: rows, sort: sort, order: order}
+	return &Key{page: page, rows: rows, Sort: sort, Order: order}
 }

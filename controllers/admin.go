@@ -14,23 +14,25 @@ type AdminController struct {
 	BaseController
 }
 
+type AdminDatagrid struct {
+	*models.Admin
+	BelongRoles []models.Role `json:"belong_roles"`
+}
+
 // Get method, for query
 func (ctr *AdminController) Get() {
+	defer ctr.recoverPanic()
 	page, _ := ctr.GetInt64("page", conf.Page)
 	rows, _ := ctr.GetInt64("rows", conf.Rows)
-	sort := ctr.GetString("sort")
-	order := ctr.GetString("order")
+	sort := ctr.GetString("sort", "id")
+	order := ctr.GetString("order", "asc")
 	adminName := ctr.GetString("admin_name")
-	//invalid, _ := ctr.GetInt("invalid", 0)
-	if sort == "" {
-		sort = "id"
-		order = "asc"
-	}
+	invalid, _ := ctr.GetInt("invalid", 2)
 
 	key := key.New(page, rows, []string{sort}, []string{order})
 	admin := &models.Admin{AdminName: "%" + adminName + "%"}
-	pager, err := adminser.PageAdminVo(&adminser.AdminVoKey{Key: key, Admin: admin, Invalid: models.ValidAll})
-	ctr.Print(pager, err)
+	pager := adminser.PageAdminVo(&adminser.AdminVoKey{Key: key, Admin: admin, Invalid: models.ValidEnum(invalid)})
+	ctr.PrintData(pager)
 }
 
 // 添加 修改

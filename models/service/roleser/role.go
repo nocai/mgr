@@ -9,6 +9,8 @@ import (
 	"mgr/models/service"
 	"mgr/util/pager"
 	"time"
+	"mgr/models/service/arrefser"
+	"sync"
 )
 
 var (
@@ -205,4 +207,37 @@ func GetRoleByRoleName(roleName string) (*models.Role, error) {
 		beego.Error(service.ErrDataDuplication, "roleName = ", roleName)
 	}
 	return &roles[0], nil
+}
+
+
+func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
+	key := &models.AdminRoleRefKey{AdminRoleRef: &models.AdminRoleRef{AdminId: adminId}}
+	refs, err := arrefser.FindAdminRoleRefByKey(key)
+	if err != nil {
+		beego.Error(err)
+		return []models.Role{}, service.NewError(service.MsgQuery, err)
+	}
+	if len(refs) == 0 {
+		return []models.Role{}, nil
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(len(refs))
+
+	var result []models.Role
+	for i := range refs {
+		go func() {
+			defer wg.Done()
+			rKey := &models.RoleKey{Role: &models.Role{Id: refs[i].RoleId}}
+			roles, err := FindRoleByKey(rKey)
+			if err != nil {
+				beego.Error(err)
+			}
+			for _, role := range roles {
+				result = append(result, role)
+			}
+		}()
+	}
+	wg.Wait()
+	return result, nil
 }

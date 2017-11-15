@@ -111,18 +111,6 @@ func (this *BaseController) PrintError(err error) {
 	if err != nil {
 		this.PrintFail(err.Error())
 	} else {
-		this.PrintOk("")
+		this.PrintOk(OK_MSG)
 	}
-}
-
-func (this *BaseController) Print(data interface{}, err error) {
-	if err != nil {
-		this.PrintFail(err.Error())
-		return
-	}
-	if data != nil {
-		this.doPrint(data)
-		return
-	}
-	panic("data and err are all nil")
 }

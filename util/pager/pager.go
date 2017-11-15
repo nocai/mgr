@@ -1,7 +1,6 @@
 package pager
 
 import (
-	"github.com/astaxie/beego"
 	"mgr/util/key"
 )
 
@@ -19,9 +18,8 @@ type Pager struct {
 
 // New
 func New(k *key.Key, total int64, pageList interface{}) *Pager {
-	beego.Error(k)
 	if k.GetPage() == 0 || k.GetRows() == 0 {
-		return &Pager{Page: 0, Rows: 0, PageCount: 0, Pagination: Pagination{Total: total, PageList: pageList}}
+		return &Pager{Page: 1, Rows: total, PageCount: 1, Pagination: Pagination{Total: total, PageList: pageList}}
 	}
 
 	var pageCount int64
