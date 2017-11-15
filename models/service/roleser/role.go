@@ -171,7 +171,6 @@ func countRoleByKey(key *models.RoleKey) (int64, error) {
 // The key:see models.RoleKey
 // If no row in he database, the method will return empty slice and nil error
 func FindRoleByKey(key *models.RoleKey) ([]models.Role, error) {
-	beego.Info(key)
 	o := orm.NewOrm()
 	sqler := key.NewSqler()
 
@@ -213,6 +212,7 @@ func GetRoleByRoleName(roleName string) (*models.Role, error) {
 func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
 	key := &models.AdminRoleRefKey{AdminRoleRef: &models.AdminRoleRef{AdminId: adminId}}
 	refs, err := arrefser.FindAdminRoleRefByKey(key)
+	beego.Error(refs)
 	if err != nil {
 		beego.Error(err)
 		return []models.Role{}, service.NewError(service.MsgQuery, err)
@@ -226,9 +226,9 @@ func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
 
 	var result []models.Role
 	for i := range refs {
-		go func() {
+		go func(index int) {
 			defer wg.Done()
-			rKey := &models.RoleKey{Role: &models.Role{Id: refs[i].RoleId}}
+			rKey := &models.RoleKey{Role: &models.Role{Id: refs[index].RoleId}}
 			roles, err := FindRoleByKey(rKey)
 			if err != nil {
 				beego.Error(err)
@@ -236,8 +236,9 @@ func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
 			for _, role := range roles {
 				result = append(result, role)
 			}
-		}()
+		}(i)
 	}
 	wg.Wait()
+	beego.Error(result)
 	return result, nil
 }

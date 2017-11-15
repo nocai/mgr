@@ -7,13 +7,13 @@ import (
 	"github.com/pkg/errors"
 	"mgr/models"
 	"mgr/models/service"
+	"mgr/models/service/roleser"
 	"mgr/models/service/userser"
 	"mgr/util/key"
 	"mgr/util/pager"
 	"mgr/util/sqler"
 	"strings"
 	"time"
-	"mgr/models/service/roleser"
 )
 
 //
@@ -159,7 +159,7 @@ func PageAdminVo(key *AdminVoKey) *pager.Pager {
 	var total int64
 	err := o.Raw(sqler.GetCountSqlAndArgs()).QueryRow(&total)
 	if err != nil {
-		panic(service.NewError(service.MsgQuery, err ))
+		panic(service.NewError(service.MsgQuery, err))
 	}
 
 	var admins []models.Admin
@@ -174,32 +174,27 @@ func PageAdminVo(key *AdminVoKey) *pager.Pager {
 
 	adminVos := make([]AdminVo, len(admins))
 	for i := range admins {
-		adminVos[i] = AdminVo{Admin:&admins[i]}
+		adminVos[i] = AdminVo{Admin: &admins[i]}
 	}
 
-	ch := make(chan error, len(adminVos) * 2)
+	ch := make(chan error, len(adminVos)*2)
 	for index := range adminVos {
 		go func(i int, ch chan error) {
 			user, err := userser.GetUserById(adminVos[i].UserId)
-			if err != nil {
-				ch <- err
-			} else {
+			ch <- err
+			if err == nil {
 				adminVos[i].User = user
-				ch <- nil
 			}
-
 			roles, err := roleser.FindRoleByAdminId(adminVos[i].Admin.Id)
 			ch <- err
 			if err == nil {
-				beego.Error(roles)
 				adminVos[i].Roles = roles
 			}
 		}(index, ch)
 	}
 
-	for i := 0; i < len(adminVos) * 2; i++ {
-		err := <-ch
-		if err != nil {
+	for i := 0; i < len(adminVos)*2; i++ {
+		if err := <-ch; err != nil {
 			panic(err)
 		}
 	}

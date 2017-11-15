@@ -25,7 +25,7 @@ func (this *BaseController) recoverPanic() {
 	if err := recover(); err != nil {
 		beego.Error("请求路径:", fmt.Sprintf("%#v", this.Ctx.Input.Params()))
 		beego.Error("输入参数:", this.Input())
-		beego.Error(err)
+
 		switch err.(type) {
 		case error:
 			this.PrintError(err.(error))
@@ -34,6 +34,7 @@ func (this *BaseController) recoverPanic() {
 		default:
 			this.PrintData(err)
 		}
+		panic(err)
 	}
 }
 

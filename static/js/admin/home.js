@@ -16,9 +16,9 @@ var adminPage = {
                 field: 'roles', title: '拥有角色', width: 100,
                 formatter:function (value, row, index) {
                     var roleNames = new Array();
-                    $.each(value, function(i, v){
+                    $.each(value, function (i, v) {
                         roleNames.push(v.role_name)
-                    })
+                    });
                     return roleNames;
                 }
             }, {
@@ -202,7 +202,14 @@ var adminPage = {
                         return new Date(value).format("yyyy-MM-dd hh:mm:ss");
                     }
                 }
-	        ]]
+	        ]],
+            onLoadSuccess: function(data) {
+                $.each(data.rows, function (idx, val) {
+                    if (val.checked) {
+                        datagrid2.datagrid("selectRow", idx);
+                    }
+                });
+            }
         });
         var dlg2 = $('#dlg2').dialog({
             title:'授予角色',
@@ -211,10 +218,11 @@ var adminPage = {
                 text:'授权',
                 iconCls:'icon-ok',
                 handler:function(){
-                    var roles = datagrid2.datagrid('getSelections')
-                    console.info(roles)
+                    var roles = datagrid2.datagrid('getChecked')
+                    var selRows = datagrid2.datagrid('getChecked');
+                    console.info(selRows)
 
-                    var roleIds = new Array();
+                    var roleIds = [];
                     for(var i = 0; i < roles.length; i ++) {
                         roleIds[i] = roles[i].id;
                     }
@@ -226,6 +234,7 @@ var adminPage = {
                         success: function (result) {
                             if (result.ok) {
                                 dlg2.dialog('close');
+                                adminPage.datagrid.datagrid('reload');
                             }
                             $.showMsg(result.msg)
                         }
