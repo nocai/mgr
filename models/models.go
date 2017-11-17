@@ -7,6 +7,7 @@ import (
 	"mgr/util/sqler"
 	"strings"
 	"time"
+	"mgr/models/service/resser"
 )
 
 func init() {
@@ -20,7 +21,7 @@ func init() {
 	orm.RegisterDataBase("default", "mysql", "root:root@/mgr?charset=utf8", 30)
 	// register model
 	//orm.RegisterModelWithPrefix("t_mgr_", new(User), new(role.Role), new(AdminRoleRef), new(Admin), new(Res))
-	orm.RegisterModelWithPrefix("t_mgr_", new(Role), new(User), new(Admin), new(AdminRoleRef))
+	orm.RegisterModelWithPrefix("t_mgr_", new(Role), new(User), new(Admin), new(AdminRoleRef), new(resser.Res))
 
 	// create table
 	orm.RunSyncdb("default", false, true)
