@@ -12,7 +12,6 @@
     <script type="text/javascript" src="/static/jquery-easyui-1.5.1/plugins/datagrid-detailview.js"></script>
 
     <script type="text/javascript" src="/static/js/common.js"></script>
-    <script type="text/javascript" src="home.js"></script>
 </head>
 
 <body>
@@ -21,17 +20,17 @@
     资源名称: <input id="resName" class="easyui-textbox">
     <a href="javascript:void(0)" class="easyui-linkbutton"
        data-options="iconCls:'icon-search'"
-       onclick="resHomePage.query({resName: $('#resName').val()});">查询</a>
+       onclick="resPage.query({resName: $('#resName').val()});">查询</a>
     <div style="float:right">
         <a href="javascript:void(0)" class="easyui-linkbutton"
            data-options="iconCls:'icon-add',plain:true"
-           onclick="resHomePage.add()">添加</a>
+           onclick="resPage.add()">添加</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"
            data-options="iconCls:'icon-edit',plain:true"
-           onclick="resHomePage.edit()">编辑</a>
+           onclick="resPage.edit()">编辑</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"
            data-options="iconCls:'icon-remove',plain:true"
-           onclick="resHomePage.destroy()">删除</a>
+           onclick="resPage.destroy()">删除</a>
     </div>
 </div>
 
@@ -97,10 +96,11 @@
     </form>
 </div>
 <div id="dlg-buttons">
-    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="resHomePage.save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'"
+       onclick="resPage.save()">保存</a>
     <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'"
        onclick="javascript:$('#dlg').dialog('close')">取消</a>
 </div>
 </body>
-
+<script type="text/javascript" src="/static/js/res/home.js?version=1.0"></script>
 </html>
