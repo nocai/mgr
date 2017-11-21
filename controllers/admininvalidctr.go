@@ -1,9 +1,9 @@
 package controllers
 
 import (
+	"mgr/models"
 	"mgr/models/service/adminser"
 	"mgr/models/service/userser"
-	"mgr/models"
 )
 
 type AdminInvalidController struct {

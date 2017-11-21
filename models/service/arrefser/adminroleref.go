@@ -57,7 +57,6 @@ func InsertAdminRoleRef(arRef *models.AdminRoleRef) error {
 func GrantRole(adminId int64, roleIds []int64) []int64 {
 	now := time.Now()
 
-
 	o := orm.NewOrm()
 	o.Begin()
 	res, err := o.Raw("delete from t_mgr_admin_role_ref where admin_id = ?", adminId).Exec()

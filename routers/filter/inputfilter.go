@@ -2,8 +2,8 @@ package filter
 
 import (
 	"fmt"
-	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/context"
 )
 
 var FilterInput = func(ctx *context.Context) {

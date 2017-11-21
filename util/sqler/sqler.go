@@ -9,8 +9,8 @@ import (
 type Sqler struct {
 	key *key.Key // Has a key
 
-	sql  bytes.Buffer
-	args []interface{}
+	sql   bytes.Buffer
+	args  []interface{}
 	alias string
 }
 
@@ -64,7 +64,6 @@ func (this *Sqler) GetLimitSql() string {
 	}
 	return ""
 }
-
 
 func (sqler *Sqler) GetCountSqlAndArgs() (string, []interface{}) {
 	sql := sqler.GetCountSql()

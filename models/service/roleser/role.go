@@ -232,7 +232,7 @@ func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
 	for i := range refs {
 		go func(index int) {
 			defer wg.Done()
-			rKey := &models.RoleKey{Role: &models.Role{Id: refs[index].RoleId},Key:&key.Key{Sort:[]string{"id"},Order:[]string{"desc"}}}
+			rKey := &models.RoleKey{Role: &models.Role{Id: refs[index].RoleId}, Key: &key.Key{Sort: []string{"id"}, Order: []string{"desc"}}}
 			roles, err := FindRoleByKey(rKey)
 			if err != nil {
 				beego.Error(err)

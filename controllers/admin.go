@@ -13,7 +13,6 @@ type AdminController struct {
 	BaseController
 }
 
-
 // Get method, for query
 func (ctr *AdminController) Get() {
 	defer ctr.recoverPanic()
@@ -74,4 +73,3 @@ func (ctr *AdminController) Delete() {
 	adminser.DeleteAdminById(id)
 	ctr.PrintOk("删除成功")
 }
-
