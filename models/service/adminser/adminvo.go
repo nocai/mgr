@@ -14,6 +14,7 @@ import (
 	"mgr/util/sqler"
 	"strings"
 	"time"
+	"mgr/conf"
 )
 
 //
@@ -161,13 +162,13 @@ func PageAdminVo(key *AdminVoKey) *pager.Pager {
 	var total int64
 	err := o.Raw(sqler.GetCountSqlAndArgs()).QueryRow(&total)
 	if err != nil {
-		panic(service.NewError(service.MsgQuery, err))
+		panic(service.NewError(conf.MsgQuery, err))
 	}
 
 	var admins []models.Admin
 	affected, err := o.Raw(sqler.GetSqlAndArgs()).QueryRows(&admins)
 	if err != nil {
-		panic(service.NewError(service.MsgQuery, err))
+		panic(service.NewError(conf.MsgQuery, err))
 	}
 	beego.Debug(fmt.Sprintf("affected = %d", affected))
 	if affected == 0 {
@@ -206,7 +207,7 @@ func PageAdminVo(key *AdminVoKey) *pager.Pager {
 func InsertAdminVo(admin *AdminVo) error {
 	exist, err := userser.IsExistOfUser(&models.User{Username: admin.User.Username})
 	if err != nil {
-		return errors.Wrap(err, service.MsgInsert)
+		return errors.Wrap(err, conf.MsgInsert)
 	} else if exist {
 		return ErrUsernameExist
 	}
@@ -220,7 +221,7 @@ func InsertAdminVo(admin *AdminVo) error {
 	id, err := o.Insert(admin.User)
 	if err != nil {
 		o.Rollback()
-		return errors.Wrap(err, service.MsgInsert)
+		return errors.Wrap(err, conf.MsgInsert)
 	}
 	admin.UserId = id
 	beego.Debug(fmt.Sprintf("Add User success. userId = %v", id))
@@ -230,7 +231,7 @@ func InsertAdminVo(admin *AdminVo) error {
 	id, err = o.Insert(admin.Admin)
 	if err != nil {
 		o.Rollback()
-		return errors.Wrap(err, service.MsgInsert)
+		return errors.Wrap(err, conf.MsgInsert)
 	}
 	beego.Debug(fmt.Sprintf("Add Admin success. adminId = %v", id))
 	o.Commit()

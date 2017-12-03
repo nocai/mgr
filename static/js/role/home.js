@@ -60,7 +60,7 @@ var rolePage = {
         },
         success: function (r) {
             r = eval('(' + r + ')');
-            if (r.ok) {
+            if (r.code === 0) {
                 rolePage.dialog.dialog('close');        // close the dialog
                 rolePage.datagrid.datagrid('reload');    // reload the user data
             } else {
@@ -103,7 +103,7 @@ var rolePage = {
                     type: 'DELETE',
                     dataType: 'json',
                     success: function (result) {
-                        if (result.ok) {
+                        if (result.code === 0) {
                             rolePage.datagrid.datagrid('reload');    // reload the user data
                         } else {
                             $.showMsg(result.msg)

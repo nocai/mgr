@@ -6,6 +6,7 @@ import (
 	"mgr/models"
 	"mgr/models/service"
 	"time"
+	"mgr/conf"
 )
 
 func FindAdminRoleRefByKey(key *models.AdminRoleRefKey) ([]models.AdminRoleRef, error) {
@@ -16,7 +17,7 @@ func FindAdminRoleRefByKey(key *models.AdminRoleRefKey) ([]models.AdminRoleRef, 
 	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&refs)
 	if err != nil {
 		beego.Error(err)
-		return []models.AdminRoleRef{}, service.NewError(service.MsgQuery, err)
+		return []models.AdminRoleRef{}, service.NewError(conf.MsgQuery, err)
 	}
 	beego.Debug("affected = ", affected)
 	if affected == 0 {
@@ -47,7 +48,7 @@ func InsertAdminRoleRef(arRef *models.AdminRoleRef) error {
 	id, err := o.Insert(arRef)
 	if err != nil {
 		beego.Error(err)
-		return service.NewError(service.MsgInsert, err)
+		return service.NewError(conf.MsgInsert, err)
 	}
 	arRef.Id = id
 	return nil
@@ -63,7 +64,7 @@ func GrantRole(adminId int64, roleIds []int64) []int64 {
 	//affected, err := o.Delete(&models.AdminRoleRef{AdminId:adminId})
 	if err != nil {
 		o.Rollback()
-		panic(service.NewError(service.MsgDelete, err))
+		panic(service.NewError(conf.MsgDelete, err))
 	}
 	affected, err := res.RowsAffected()
 	if err != nil {
@@ -84,7 +85,7 @@ func GrantRole(adminId int64, roleIds []int64) []int64 {
 		id, err := o.Insert(arRef)
 		if err != nil {
 			o.Rollback()
-			panic(service.NewError(service.MsgInsert, err))
+			panic(service.NewError(conf.MsgInsert, err))
 		}
 		arIds = append(arIds, id)
 	}

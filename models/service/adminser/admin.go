@@ -11,6 +11,7 @@ import (
 	"mgr/util/pager"
 	"sync"
 	"time"
+	"mgr/conf"
 )
 
 var (
@@ -97,7 +98,7 @@ func DeleteAdminById(id int64) {
 	key := &models.AdminKey{Admin: &models.Admin{Id: id}}
 	admins, err := FindAdminByKey(key)
 	if err != nil {
-		panic(service.NewError(service.MsgQuery, err))
+		panic(service.NewError(conf.MsgQuery, err))
 	}
 	if len(admins) == 0 {
 		return
@@ -112,20 +113,20 @@ func DeleteAdminById(id int64) {
 	affected, err := o.Delete(&models.User{Id: admins[0].UserId})
 	if err != nil {
 		o.Rollback()
-		panic(service.NewError(service.MsgQuery, err))
+		panic(service.NewError(conf.MsgQuery, err))
 	}
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
 	affected, err = o.Delete(&models.Admin{Id: id})
 	if err != nil {
 		o.Rollback()
-		panic(service.NewError(service.MsgDelete, err))
+		panic(service.NewError(conf.MsgDelete, err))
 	}
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
 
 	affected, err = o.Delete(&models.AdminRoleRef{AdminId: id}, "admin_id")
 	if err != nil {
 		o.Rollback()
-		panic(service.NewError(service.MsgDelete, err))
+		panic(service.NewError(conf.MsgDelete, err))
 	}
 	beego.Debug("affected = ", affected)
 
@@ -193,7 +194,7 @@ func FindAdminByRoleId(roleId int64) ([]models.Admin, error) {
 	refs, err := arrefser.FindAdminRoleRefByKey(key)
 	if err != nil {
 		beego.Error(err)
-		return []models.Admin{}, service.NewError(service.MsgQuery, err)
+		return []models.Admin{}, service.NewError(conf.MsgQuery, err)
 	}
 	if len(refs) == 0 {
 		return []models.Admin{}, nil

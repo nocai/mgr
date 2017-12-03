@@ -6,6 +6,7 @@ import (
 	"mgr/models"
 	"mgr/models/service"
 	"mgr/util/sqler"
+	"mgr/conf"
 )
 
 func FindRoleByRoleDatagridKey(key *RoleDatagridKey) []models.Role {
@@ -20,7 +21,7 @@ func FindRoleByRoleDatagridKey(key *RoleDatagridKey) []models.Role {
 
 	affect, err := o.Raw(sqler.GetSql(), key.AdminId).QueryRows(&roles)
 	if err != nil {
-		panic(service.NewError(service.MsgQuery, err))
+		panic(service.NewError(conf.MsgQuery, err))
 	}
 	beego.Info("affect = ", affect)
 	return roles

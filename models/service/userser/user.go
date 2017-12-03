@@ -9,6 +9,7 @@ import (
 	"mgr/models/service"
 	"mgr/util/pager"
 	"time"
+	"mgr/conf"
 )
 
 func UsernamPassMatched(username, password string) (bool, error) {
@@ -211,7 +212,7 @@ func UpdateUser(user *models.User) error {
 	})
 	if err != nil {
 		beego.Error(err)
-		return errors.Wrap(err, service.MsgQuery)
+		return errors.Wrap(err, conf.MsgQuery)
 	}
 	if exist {
 		return ErrUsernameExist

@@ -185,7 +185,7 @@ var adminPage = {
                     type: 'PUT',
                     dataType: 'json',
                     success: function (result) {
-                        if (result.ok) {
+                        if (result.code === 0) {
                             adminPage.datagrid.datagrid('reload');    // reload the user data
                         } else {
                             $.showMsg(result.msg)
@@ -245,7 +245,7 @@ var adminPage = {
                         dataType: 'json',
                         data : {adminId:id, roleIds:roleIds},
                         success: function (result) {
-                            if (result.ok) {
+                            if (result.code === 0) {
                                 dlg2.dialog('close');
                                 adminPage.datagrid.datagrid('reload');
                             }

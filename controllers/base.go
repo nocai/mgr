@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/astaxie/beego"
+	"mgr/conf"
 )
 
 const (
@@ -68,33 +69,29 @@ func (this *BaseController) recoverPanic() {
 //	}
 //	return ""
 //}
-const (
-	OK_MSG   = "操作成功"
-	FAIL_MSG = "系统异常"
-)
 
-type JsonMsg struct {
-	Ok   bool        `json:"ok"`
+type ResultMsg struct {
+	Code   int        `json:"code"`
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
 }
 
 func (this *BaseController) PrintOk(msg string) {
 	if msg == "" {
-		msg = OK_MSG
+		msg = conf.SuccessMsg
 	}
-	this.printJson(true, msg, nil)
+	this.printJson(conf.SuccessCode, msg, nil)
 }
 
 func (this *BaseController) PrintFail(msg string) {
 	if msg == "" {
-		msg = FAIL_MSG
+		msg = conf.FailMsg
 	}
-	this.printJson(false, msg, nil)
+	this.printJson(conf.FailCode, msg, nil)
 }
 
-func (this *BaseController) printJson(ok bool, msg string, data interface{}) {
-	json := &JsonMsg{Ok: ok, Msg: msg, Data: data}
+func (this *BaseController) printJson(code int, msg string, data interface{}) {
+	json := &ResultMsg{Code:code, Msg: msg, Data: data}
 	this.doPrint(json)
 }
 
@@ -112,6 +109,6 @@ func (this *BaseController) PrintError(err error) {
 	if err != nil {
 		this.PrintFail(err.Error())
 	} else {
-		this.PrintOk(OK_MSG)
+		this.PrintOk("")
 	}
 }

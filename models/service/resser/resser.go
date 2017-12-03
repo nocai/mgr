@@ -8,6 +8,7 @@ import (
 	"mgr/models/service"
 	"mgr/util/pager"
 	"time"
+	"mgr/conf"
 )
 
 // 分页
@@ -18,7 +19,7 @@ func PageRes(key *ResKey) *pager.Pager {
 	var total int64
 	err := o.Raw(sqler.GetCountSql(), sqler.GetArgs()).QueryRow(&total)
 	if err != nil {
-		panic(service.NewError(service.MsgQuery, err))
+		panic(service.NewError(conf.MsgQuery, err))
 	}
 
 	ress := FindResByKey(key)
@@ -33,7 +34,7 @@ func FindResByKey(key *ResKey) []Res {
 	ress := make([]Res, 0)
 	affected, err := o.Raw(sqler.GetSql(), sqler.GetArgs()).QueryRows(&ress)
 	if err != nil {
-		panic(service.NewError(service.MsgQuery, err))
+		panic(service.NewError(conf.MsgQuery, err))
 	}
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
 	return ress
@@ -52,7 +53,7 @@ func InsertRes(res *Res) error {
 	o := orm.NewOrm()
 	resId, err := o.Insert(res)
 	if err != nil {
-		panic(service.NewError(service.MsgInsert, err))
+		panic(service.NewError(conf.MsgInsert, err))
 	}
 	res.Id = resId
 	return nil
@@ -69,7 +70,7 @@ func UpdateRes(res *Res) error {
 
 	affected, err := o.Update(res)
 	if err != nil {
-		panic(service.NewError(service.MsgUpdate, err))
+		panic(service.NewError(conf.MsgUpdate, err))
 	}
 
 	beego.Debug(fmt.Sprintf("affected = %v", affected))
@@ -129,7 +130,7 @@ func DeleteResById(id int64) error {
 	affected, err := orm.NewOrm().Delete(&Res{Id: id})
 	if err != nil {
 		beego.Error(err)
-		return service.NewError(service.MsgDelete, err)
+		return service.NewError(conf.MsgDelete, err)
 	}
 
 	beego.Debug(fmt.Sprintf("affected = %v", affected))

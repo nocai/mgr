@@ -12,6 +12,7 @@ import (
 	"mgr/util/pager"
 	"sync"
 	"time"
+	"mgr/conf"
 )
 
 var (
@@ -219,7 +220,7 @@ func FindRoleByAdminId(adminId int64) ([]models.Role, error) {
 	beego.Error(refs)
 	if err != nil {
 		beego.Error(err)
-		return []models.Role{}, service.NewError(service.MsgQuery, err)
+		return []models.Role{}, service.NewError(conf.MsgQuery, err)
 	}
 	if len(refs) == 0 {
 		return []models.Role{}, nil

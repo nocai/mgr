@@ -3,25 +3,18 @@ package service
 import (
 	"errors"
 	errors2 "github.com/pkg/errors"
+	"mgr/conf"
 )
 
-const (
-	MsgQuery           = "查询失败"
-	MsgInsert          = "添加失败"
-	MsgUpdate          = "更新失败"
-	MsgDelete          = "删除失败"
-	MsgArgument        = "无效参数"
-	MsgDataDuplication = "数据重复"
-)
 
 var (
-	ErrQuery  = errors.New(MsgQuery)
-	ErrInsert = errors.New(MsgInsert)
-	ErrUpdate = errors.New(MsgUpdate)
-	ErrDelete = errors.New(MsgDelete)
+	ErrQuery  = errors.New(conf.MsgQuery)
+	ErrInsert = errors.New(conf.MsgInsert)
+	ErrUpdate = errors.New(conf.MsgUpdate)
+	ErrDelete = errors.New(conf.MsgDelete)
 
-	ErrArgument        = errors.New(MsgArgument)
-	ErrDataDuplication = errors.New(MsgDataDuplication)
+	ErrArgument        = errors.New(conf.MsgArgument)
+	ErrDataDuplication = errors.New(conf.MsgDataDuplication)
 )
 
 func NewError(msg string, err error) error {
