@@ -22,7 +22,7 @@ func (ctr *RoleController) Delete() {
 	beego.Error(id)
 
 	err := roleser.DeleteRoleById(id)
-	ctr.PrintError(err)
+	ctr.PrintJson(err)
 }
 
 // 添加 修改
@@ -34,10 +34,10 @@ func (ctr *RoleController) Post() {
 	roleName := ctr.GetString("role_name")
 	if id == 0 {
 		beego.Error("add")
-		ctr.PrintError(addRole(roleName))
+		ctr.PrintJson(addRole(roleName))
 	} else {
 		beego.Error("update")
-		ctr.PrintError(updateRole(id, roleName))
+		ctr.PrintJson(updateRole(id, roleName))
 	}
 }
 
@@ -72,5 +72,5 @@ func (ctr *RoleController) Get() {
 	if err != nil {
 		beego.Error(err)
 	}
-	ctr.PrintData(pager.Pagination)
+	ctr.PrintJson(pager.Pagination)
 }

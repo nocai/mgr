@@ -25,5 +25,5 @@ func (this *AdminRoleRefController) Post() {
 	}
 	arIds := arrefser.GrantRole(adminId, roleIds)
 	beego.Debug(fmt.Sprintf("%#v", arIds))
-	this.PrintOk("授权成功")
+	this.PrintJson("授权成功")
 }

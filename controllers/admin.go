@@ -21,12 +21,12 @@ func (ctr *AdminController) Get() {
 	sort := ctr.GetString("sort", "id")
 	order := ctr.GetString("order", "asc")
 	adminName := ctr.GetString("admin_name")
-	invalid, _ := ctr.GetInt("invalid", 2)
+	invalid, _ := ctr.GetInt("invalid")
 
 	key := key.New(page, rows, []string{sort}, []string{order})
 	admin := &models.Admin{AdminName: "%" + adminName + "%"}
 	pager := adminser.PageAdminVo(&adminser.AdminVoKey{Key: key, Admin: admin, Invalid: models.ValidEnum(invalid)})
-	ctr.PrintData(pager)
+	ctr.PrintJson(pager)
 }
 
 // 添加 修改
@@ -48,19 +48,19 @@ func (ctr *AdminController) Post() {
 				Invalid:  models.Invalid,
 			},
 		}
-		ctr.PrintError(adminser.InsertAdminVo(adminVo))
+		ctr.PrintJson(adminser.InsertAdminVo(adminVo))
 	} else {
 		// 更新
 		adminVo, err := adminser.GetAdminVoById(id)
 		if err != nil {
 			beego.Error(err)
-			ctr.PrintError(err)
+			ctr.PrintJson(err)
 			return
 		}
 		adminVo.AdminName = adminName
 		adminVo.User.Username = adminName
 		adminVo.User.Password = password
-		ctr.PrintError(adminser.UpdateAdminVo(adminVo))
+		ctr.PrintJson(adminser.UpdateAdminVo(adminVo))
 	}
 }
 
@@ -71,5 +71,5 @@ func (ctr *AdminController) Delete() {
 	beego.Debug("id = ", id)
 
 	adminser.DeleteAdminById(id)
-	ctr.PrintOk("删除成功")
+	ctr.PrintJson("删除成功")
 }

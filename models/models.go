@@ -32,12 +32,12 @@ func init() {
 type ValidEnum int
 
 const (
+	// 所有
+	ValidAll ValidEnum = iota
 	// 无效的
-	Invalid ValidEnum = iota
+	Invalid
 	// 有效的
 	Valid
-	// 所有
-	ValidAll
 )
 
 type User struct {

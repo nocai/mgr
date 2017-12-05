@@ -12,7 +12,7 @@ type AdminInvalidController struct {
 
 func (aic *AdminInvalidController) Get() {
 	m := adminser.FindAdminValids()
-	aic.PrintData(m)
+	aic.PrintJson(m)
 }
 
 func (aic *AdminInvalidController) Put() {
@@ -21,15 +21,15 @@ func (aic *AdminInvalidController) Put() {
 
 	admin, err := adminser.GetAdminById(int64(id))
 	if err != nil {
-		aic.PrintError(err)
+		aic.PrintJson(err)
 		return
 	}
 	user, err := userser.GetUserById(admin.UserId)
 	if err != nil {
-		aic.PrintError(err)
+		aic.PrintJson(err)
 		return
 	}
 	user.Invalid = models.ValidEnum(invalid)
 	err = userser.UpdateUser(user)
-	aic.PrintError(err)
+	aic.PrintJson(err)
 }

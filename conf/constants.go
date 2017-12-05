@@ -9,8 +9,8 @@ const (
 
 const (
 	// ResultMsg
-	SuccessCode = 0
-	SuccessMsg = "操作成功"
+	CodeSuccess = 0
+	MsgSuccess  = "操作成功"
 
 	FailCode = -1
 	FailMsg = "系统异常"

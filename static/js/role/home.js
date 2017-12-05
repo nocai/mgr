@@ -25,7 +25,23 @@ var rolePage = {
                     return new Date(value).format("yyyy-MM-dd hh:mm:ss");
                 }
             }
-        ]]
+        ]],
+        // loader:function(_253,_254,_255){
+        //     alert('a')
+        //     var opts=$(this).datagrid("options");
+        //     if(!opts.url){
+        //         return false;
+        //     }
+        //     $.ajax({type:opts.method,url:opts.url,data:_253,dataType:"json",success:function(data){
+        //         console.info(data)
+        //
+        //             _254(data.data);
+        //         },error:function(){
+        //             _255.apply(this,arguments);
+        //         }}
+        //     );
+        // }
+
     }),
 
     // 弹出窗口：添加or修改

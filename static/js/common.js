@@ -31,14 +31,40 @@ $.extend({
             msg: msg
         });
     },
-    alertMsg: function(msg, title) {
+    alertMsg: function (msg, title) {
         if (title == undefined) {
             title = '系统提示';
         }
         $.messager.alert({
-            icon:'info',
+            icon: 'info',
             title: title,
             msg: msg
+        });
+    }
+});
+
+
+$.extend($.fn.datagrid.defaults, {
+    loader: function (param, success, error) {
+        var opts = $(this).datagrid("options");
+        if (!opts.url) {
+            return false;
+        }
+        $.ajax({
+            type: opts.method,
+            url: opts.url,
+            data: param,
+            dataType: "json",
+            success: function (data) {
+                if (data.code === 0) {
+                    success(data.data)
+                } else {
+                    $.showMsg(data.msg);
+                    success([])
+                }
+            }, error: function () {
+                error.apply(this, arguments);
+            }
         });
     }
 });

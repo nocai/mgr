@@ -41,7 +41,7 @@ func (this *RoleDatagridController) Get() {
 		}
 	}
 	pager.Pagination.PageList = pageListNew
-	this.PrintData(pager)
+	this.PrintJson(pager)
 }
 
 func contains(roles []models.Role, role *models.Role) bool {

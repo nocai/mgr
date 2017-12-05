@@ -35,7 +35,7 @@ func (ctr *ResController) Get() {
 		},
 	}
 	pager := resser.PageRes(key)
-	ctr.PrintData(pager)
+	ctr.PrintJson(pager)
 }
 
 func (ctr *ResController) Post() {
@@ -51,14 +51,14 @@ func (ctr *ResController) Post() {
 	if id == 0 {
 		// 添加
 		res := &resser.Res{Id: id, ResName: resName, Path: path, Pid: pid}
-		ctr.PrintError(resser.InsertRes(res))
+		ctr.PrintJson(resser.InsertRes(res))
 	} else {
 		// 修改
 		res := resser.GetResByResId(id)
 		res.Pid = pid
 		res.ResName = resName
 		res.Path = path
-		ctr.PrintError(resser.UpdateRes(res))
+		ctr.PrintJson(resser.UpdateRes(res))
 	}
 }
 
@@ -67,7 +67,7 @@ func (ctr *ResController) Delete() {
 	beego.Debug("id = %v", id)
 
 	err := resser.DeleteResById(id)
-	ctr.PrintError(err)
+	ctr.PrintJson(err)
 }
 
 //

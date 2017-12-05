@@ -7,9 +7,6 @@ import (
 )
 
 const (
-	OK  int = 200
-	Bad int = 400
-
 	// session key "adminId"
 	ADMIN_ID = "adminId"
 	// session key "adminName"
@@ -26,16 +23,9 @@ func (this *BaseController) recoverPanic() {
 	if err := recover(); err != nil {
 		beego.Error("请求路径:", fmt.Sprintf("%#v", this.Ctx.Input.Params()))
 		beego.Error("输入参数:", this.Input())
+panic(err)
+		//this.PrintJson(err)
 
-		switch err.(type) {
-		case error:
-			this.PrintError(err.(error))
-		case string:
-			this.PrintFail(err.(string))
-		default:
-			this.PrintData(err)
-		}
-		panic(err)
 	}
 }
 
@@ -71,44 +61,26 @@ func (this *BaseController) recoverPanic() {
 //}
 
 type ResultMsg struct {
-	Code   int        `json:"code"`
+	Code int         `json:"code"`
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
 }
 
-func (this *BaseController) PrintOk(msg string) {
-	if msg == "" {
-		msg = conf.SuccessMsg
+func (this *BaseController) PrintJson(ret interface{}) {
+	if ret == nil {
+		this.Data["json"] = ResultMsg{Code: conf.CodeSuccess, Msg: conf.MsgSuccess}
+	} else {
+		switch ret.(type) {
+		case error:
+			this.Data["json"] = ResultMsg{Code: conf.CodeSuccess, Msg: ret.(error).Error()}
+		case string:
+			this.Data["json"] = ResultMsg{Code: conf.CodeSuccess, Msg: ret.(string)}
+		default:
+			this.Data["json"] = ResultMsg{Code: conf.CodeSuccess, Msg: conf.MsgSuccess, Data: ret}
+		}
 	}
-	this.printJson(conf.SuccessCode, msg, nil)
-}
-
-func (this *BaseController) PrintFail(msg string) {
-	if msg == "" {
-		msg = conf.FailMsg
-	}
-	this.printJson(conf.FailCode, msg, nil)
-}
-
-func (this *BaseController) printJson(code int, msg string, data interface{}) {
-	json := &ResultMsg{Code:code, Msg: msg, Data: data}
-	this.doPrint(json)
-}
-
-func (this *BaseController) doPrint(data interface{}) {
-	beego.Debug(fmt.Sprintf("%+v", data))
-	this.Data["json"] = data
+	beego.Debug(fmt.Sprintf("%+v", this.Data["json"]))
 	this.ServeJSON()
 }
 
-func (this *BaseController) PrintData(data interface{}) {
-	this.doPrint(data)
-}
 
-func (this *BaseController) PrintError(err error) {
-	if err != nil {
-		this.PrintFail(err.Error())
-	} else {
-		this.PrintOk("")
-	}
-}

@@ -40,7 +40,7 @@ package controllers
 //	//
 //	//beego.Debug(role)
 //
-//	ctr.PrintOk();
+//	ctr.PrintJson();
 //
 //}
 //
