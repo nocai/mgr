@@ -12,8 +12,8 @@ const (
 	CodeSuccess = 0
 	MsgSuccess  = "操作成功"
 
-	FailCode = -1
-	FailMsg = "系统异常"
+	CodeFail = -1
+	FailMsg  = "系统异常"
 )
 
 const (

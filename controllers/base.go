@@ -72,7 +72,7 @@ func (this *BaseController) PrintJson(ret interface{}) {
 	} else {
 		switch ret.(type) {
 		case error:
-			this.Data["json"] = ResultMsg{Code: conf.CodeSuccess, Msg: ret.(error).Error()}
+			this.Data["json"] = ResultMsg{Code: conf.CodeFail, Msg: ret.(error).Error()}
 		case string:
 			this.Data["json"] = ResultMsg{Code: conf.CodeSuccess, Msg: ret.(string)}
 		default:
