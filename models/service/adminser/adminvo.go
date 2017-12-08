@@ -91,7 +91,7 @@ import (
 
 type AdminVo struct {
 	*models.Admin
-	*models.User `json:"user"`
+	*userser.User `json:"user"`
 
 	Roles []models.Role `json:"roles"`
 }
@@ -99,7 +99,7 @@ type AdminVo struct {
 type AdminVoKey struct {
 	*key.Key
 	*models.Admin
-	Invalid models.ValidEnum
+	Invalid userser.ValidEnum
 }
 
 func (this *AdminVoKey) NewSqler() *sqler.Sqler {
@@ -107,7 +107,7 @@ func (this *AdminVoKey) NewSqler() *sqler.Sqler {
 
 	sqler.AppendSql(`select tma.* from t_mgr_admin as tma join t_mgr_user as tmu on tma.user_id = tmu.id where 1 = 1`)
 	sqler.SetAlias("tma")
-	if this.Invalid != models.ValidAll {
+	if this.Invalid == 1 || this.Invalid == 2 {
 		sqler.AppendSql(" and tmu.invalid = ?")
 		sqler.AppendArg(this.Invalid)
 	}
@@ -205,7 +205,7 @@ func PageAdminVo(key *AdminVoKey) *pager.Pager {
 }
 
 func InsertAdminVo(admin *AdminVo) error {
-	exist, err := userser.IsExistOfUser(&models.User{Username: admin.User.Username})
+	exist, err := userser.IsExistOfUser(&userser.User{Username: admin.User.Username})
 	if err != nil {
 		return errors.Wrap(err, conf.MsgInsert)
 	} else if exist {
@@ -243,7 +243,7 @@ func UpdateAdminVo(adminVo *AdminVo) error {
 		return service.ErrArgument
 	}
 
-	user := &models.User{
+	user := &userser.User{
 		Id:       adminVo.UserId,
 		Username: adminVo.Username,
 	}

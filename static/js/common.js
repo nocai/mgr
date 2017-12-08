@@ -44,6 +44,31 @@ $.extend({
 });
 
 
+$.extend($.fn.combobox.defaults, {
+    loader: function (param, success, error) {
+        console.info('aaaaaaaa');
+        var opts = $(this).combobox("options");
+        if (!opts.url) {
+            return false;
+        }
+        $.ajax({
+            type: opts.method,
+            url: opts.url,
+            data: param,
+            dataType: "json",
+            success: function (data) {
+                if (data.code === 0) {
+                    success(data.data)
+                } else {
+                    $.showMsg(data.msg);
+                    success([])
+                }
+            }, error: function () {
+                error.apply(this, arguments);
+            }
+        });
+    }
+});
 $.extend($.fn.datagrid.defaults, {
     loader: function (param, success, error) {
         var opts = $(this).datagrid("options");

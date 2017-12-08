@@ -7,6 +7,7 @@ import (
 	"mgr/util/key"
 
 	"github.com/astaxie/beego"
+	"mgr/models/service/userser"
 )
 
 type AdminController struct {
@@ -25,7 +26,7 @@ func (ctr *AdminController) Get() {
 
 	key := key.New(page, rows, []string{sort}, []string{order})
 	admin := &models.Admin{AdminName: "%" + adminName + "%"}
-	pager := adminser.PageAdminVo(&adminser.AdminVoKey{Key: key, Admin: admin, Invalid: models.ValidEnum(invalid)})
+	pager := adminser.PageAdminVo(&adminser.AdminVoKey{Key: key, Admin: admin, Invalid: userser.ValidEnum(invalid)})
 	ctr.PrintJson(pager)
 }
 
@@ -42,10 +43,10 @@ func (ctr *AdminController) Post() {
 			Admin: &models.Admin{
 				AdminName: adminName,
 			},
-			User: &models.User{
+			User: &userser.User{
 				Username: adminName,
 				Password: password,
-				Invalid:  models.Invalid,
+				Invalid:  userser.Invalid,
 			},
 		}
 		ctr.PrintJson(adminser.InsertAdminVo(adminVo))

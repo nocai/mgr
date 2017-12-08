@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"mgr/models"
 	"mgr/models/service/adminser"
 	"mgr/models/service/userser"
 )
@@ -29,7 +28,7 @@ func (aic *AdminInvalidController) Put() {
 		aic.PrintJson(err)
 		return
 	}
-	user.Invalid = models.ValidEnum(invalid)
+	user.Invalid = userser.ValidEnum(invalid)
 	err = userser.UpdateUser(user)
 	aic.PrintJson(err)
 }

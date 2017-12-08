@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/astaxie/beego"
-	"mgr/models"
+	"mgr/models/service/userser"
 )
 
 type MainController struct {
@@ -18,7 +18,7 @@ func (c *MainController) Get() {
 
 func (c *MainController) T() {
 	beego.Info("tttttttttttt")
-	user := models.User{Username: "username", Password: "password"}
+	user := userser.User{Username: "username", Password: "password"}
 	c.Data["json"] = user
 	c.ServeJSON()
 }
